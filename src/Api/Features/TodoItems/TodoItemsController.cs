@@ -1,5 +1,6 @@
 using Api.Domain.Todos;
 using Api.Infrastructure;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,7 +26,7 @@ public class TodoItemsController : ControllerBase
 
         return todoItem;
     }
-    
+
     [HttpGet("/api/todo-items")]
     public IEnumerable<TodoItem> GetAll()
     {

@@ -1,4 +1,5 @@
 using Api.Domain.Todos;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Infrastructure;
@@ -9,6 +10,6 @@ public sealed class MealPlannerContext : DbContext
         : base(options)
     {
     }
-    
+
     public DbSet<TodoItem> TodoItems => Set<TodoItem>();
 }
