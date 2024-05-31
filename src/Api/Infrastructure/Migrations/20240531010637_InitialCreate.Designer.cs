@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Infrastructure.Migrations
 {
     [DbContext(typeof(MealPlannerContext))]
-    [Migration("20240520201140_InitialCreate")]
+    [Migration("20240531010637_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
