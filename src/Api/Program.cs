@@ -1,5 +1,6 @@
 using System.Reflection;
 
+using Api.Features.Identity;
 using Api.Infrastructure;
 
 using Microsoft.EntityFrameworkCore;
@@ -10,8 +11,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddAuthorization();
 builder.Services.AddDbContext<MealPlannerContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
+    .AddEntityFrameworkStores<MealPlannerContext>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -37,7 +41,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapIdentityApi<ApplicationUser>();
 
 app.MapControllers();
 
