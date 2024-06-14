@@ -4,5 +4,5 @@ namespace Api.Features.Identity;
 
 public class ApplicationUser : IdentityUser
 {
-    
+
 }
