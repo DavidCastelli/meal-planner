@@ -1,0 +1,27 @@
+<div class="form-container">
+  <form [formGroup]="registrationForm">
+    <h1>Register</h1>
+
+    <section>
+      <p>
+        <label for="email">Email: </label>
+        <input id="email" type="email" formControlName="email" required />
+      </p>
+      <p>
+        <label for="password">Password: </label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          required
+        />
+      </p>
+    </section>
+
+    <section>
+      <p>
+        <button type="submit">Register</button>
+      </p>
+    </section>
+  </form>
+</div>
