@@ -3,10 +3,14 @@ const eslint = require("@eslint/js");
 const tseslint = require("typescript-eslint");
 const angular = require("angular-eslint");
 const eslintConfigPrettier = require("eslint-config-prettier");
+const tsdoc = require("eslint-plugin-tsdoc");
 
 module.exports = tseslint.config(
   {
     files: ["**/*.ts"],
+    plugins: {
+      tsdoc,
+    },
     extends: [
       eslint.configs.recommended,
       ...tseslint.configs.recommended,
@@ -32,6 +36,7 @@ module.exports = tseslint.config(
           style: "kebab-case",
         },
       ],
+      "tsdoc/syntax": "warn",
     },
   },
   {
