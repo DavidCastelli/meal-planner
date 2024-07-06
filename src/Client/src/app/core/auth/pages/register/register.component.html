@@ -5,7 +5,13 @@
     <section>
       <p>
         <label for="email">Email: </label>
-        <input id="email" type="email" formControlName="email" required />
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          required
+          [class.invalid]="email.invalid && email.touched"
+        />
       </p>
       <p>
         <label for="password">Password: </label>
@@ -14,14 +20,40 @@
           type="password"
           formControlName="password"
           required
+          [class.invalid]="password.invalid && password.touched"
         />
       </p>
     </section>
 
     <section>
       <p>
-        <button type="submit">Register</button>
+        <button type="submit" [disabled]="isSubmitting">Register</button>
       </p>
     </section>
+
+    @if (email.hasError("email") && email.touched) {
+      <section class="error">
+        <p class="error-message">Please enter a valid email address.</p>
+      </section>
+    } @else if (password.hasError("minlength") && password.touched) {
+      <section class="error">
+        <p class="error-message">
+          Password must be at least 6 characters long.
+        </p>
+      </section>
+    } @else if (password.hasError("strong") && password.touched) {
+      <section class="error">
+        <p class="error-message">
+          Password must contain at least one uppercase letter, one lowercase
+          letter, one numeric digit, and one nonalphanumeric character.
+        </p>
+      </section>
+    } @else if (errorMessage) {
+      <section class="error">
+        <p class="error-message">
+          {{ errorMessage }}
+        </p>
+      </section>
+    }
   </form>
 </div>

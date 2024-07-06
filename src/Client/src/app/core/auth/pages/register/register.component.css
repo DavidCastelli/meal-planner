@@ -44,3 +44,17 @@ button:active {
   transform: scale(1);
   background-color: rgb(136, 156, 181);
 }
+
+.error {
+  width: 66%;
+  text-align: center;
+}
+
+.error-message {
+  font-size: 0.8em;
+  color: rgb(255, 15, 35);
+}
+
+.invalid {
+  border-left: 3px solid rgb(227, 39, 39);
+}

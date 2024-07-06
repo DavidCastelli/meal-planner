@@ -7,6 +7,8 @@ import {
 } from '@angular/forms';
 import { AuthService } from '../../auth.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { PasswordValidator } from '../../password.validator';
+import { catchError, EMPTY } from 'rxjs';
 
 @Component({
   selector: 'app-register',
@@ -19,22 +21,54 @@ export class RegisterComponent {
   private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 
+  errorMessage: string | null = null;
+  isSubmitting = false;
+
   registrationForm = new FormGroup({
     email: new FormControl('', {
       validators: [Validators.required, Validators.email],
       nonNullable: true,
     }),
     password: new FormControl('', {
-      validators: [Validators.required],
+      validators: [
+        Validators.required,
+        Validators.minLength(6),
+        PasswordValidator.strong,
+      ],
       nonNullable: true,
     }),
   });
 
+  get email() {
+    return this.registrationForm.controls.email;
+  }
+
+  get password() {
+    return this.registrationForm.controls.password;
+  }
+
   onSubmit() {
-    const credentials = this.registrationForm.getRawValue(); // Assumes controls are never disabled
+    this.isSubmitting = true;
+
+    if (this.registrationForm.invalid) {
+      // Mark all as touched to handle the case where the user submits without interacting with the inputs.
+      this.registrationForm.markAllAsTouched();
+      this.isSubmitting = false;
+      return;
+    }
+
+    const credentials = this.registrationForm.getRawValue(); // Assumes controls are never disabled.
     this.authService
       .register(credentials)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((response) => console.log(response));
+      .pipe(
+        catchError((err) => {
+          this.errorMessage = err;
+          return EMPTY;
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({ next: () => console.log('success') });
+    this.registrationForm.reset();
+    this.isSubmitting = false;
   }
 }

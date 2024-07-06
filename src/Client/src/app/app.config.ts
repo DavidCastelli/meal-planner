@@ -3,7 +3,7 @@ import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideHttpClient, withFetch } from '@angular/common/http';
-import { API_CONFIG, DEFAULT_API_CONFIG } from './shared/api-config';
+import { API_CONFIG, DEFAULT_API_CONFIG } from './shared/api.config';
 
 export const appConfig: ApplicationConfig = {
   providers: [
