@@ -9,6 +9,7 @@ import { AuthService } from '../../auth.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PasswordValidator } from '../../password.validator';
 import { catchError, EMPTY } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-register',
@@ -20,6 +21,7 @@ import { catchError, EMPTY } from 'rxjs';
 export class RegisterComponent {
   private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router: Router = inject(Router);
 
   errorMessage: string | null = null;
   isSubmitting = false;
@@ -63,12 +65,12 @@ export class RegisterComponent {
       .pipe(
         catchError((err) => {
           this.errorMessage = err;
+          this.registrationForm.reset();
+          this.isSubmitting = false;
           return EMPTY;
         }),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe({ next: () => console.log('success') });
-    this.registrationForm.reset();
-    this.isSubmitting = false;
+      .subscribe({ next: () => void this.router.navigate(['/login']) });
   }
 }

@@ -1,6 +1,8 @@
 export interface ProblemDetails {
-  type: string;
-  title: string;
-  status: number;
-  errors: Record<string, string[]>;
+  extensions: Record<string, object>;
+  instance?: string;
+  detail?: string;
+  status?: number;
+  title?: string;
+  type?: string;
 }

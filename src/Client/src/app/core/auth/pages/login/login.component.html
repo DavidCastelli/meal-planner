@@ -1,0 +1,35 @@
+<div class="form-container">
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    <h1>Login</h1>
+
+    <section>
+      <p>
+        <label for="email">Email: </label>
+        <input id="email" type="email" formControlName="email" required />
+      </p>
+      <p>
+        <label for="password">Password: </label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          required
+        />
+      </p>
+    </section>
+
+    <section>
+      <p>
+        <button type="submit" [disabled]="isSubmitting">Login</button>
+      </p>
+    </section>
+
+    @if (errorMessage) {
+      <section class="error">
+        <p class="error-message">
+          {{ errorMessage }}
+        </p>
+      </section>
+    }
+  </form>
+</div>
