@@ -1,0 +1,12 @@
+.container {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  height: 100svh;
+  margin: 0;
+}
+
+h1 {
+  font-size: 2em;
+}
