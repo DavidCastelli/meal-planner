@@ -1,8 +1,9 @@
 import { Inject, inject, Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { API_CONFIG, ApiConfig } from '../../shared/api.config';
-import { Observable, catchError, throwError } from 'rxjs';
+import {Observable, catchError, throwError, of} from 'rxjs';
 import { ValidationProblemDetails } from '../../shared/validation-problem-details.model';
+import {User} from "./user.model";
 
 @Injectable({
   providedIn: 'root',
@@ -31,6 +32,14 @@ export class AuthService {
         withCredentials: true,
       })
       .pipe(catchError(this.handleError));
+  }
+
+  getUserInfo(): Observable<User> {
+    // TODO handle errors
+    return this.http
+      .get<User>(`${this.ENDPOINT}/manage/info`, {
+        withCredentials: true,
+      });
   }
 
   private handleError(err: HttpErrorResponse): Observable<never> {
