@@ -1,0 +1,95 @@
+.background-container {
+  position: relative; /* Needed for background image */
+  background-color: rgb(3, 252, 186);
+  height: 65svh;
+}
+
+.background-img {
+  object-fit: cover;
+  opacity: 0.2;
+}
+
+.content-container {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  height: 45svh;
+  overflow: hidden;
+}
+
+.get-started {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  background: rgb(108, 107, 134);
+  background: linear-gradient(
+    59deg,
+    rgba(108, 107, 134, 1) 0%,
+    rgba(59, 93, 159, 1) 38%,
+    rgba(53, 103, 116, 1) 100%
+  );
+  border: solid 5px;
+  border-radius: 15px;
+  height: 35svh;
+  min-height: 250px;
+  width: 35svw;
+  min-width: 350px;
+  left: 50%;
+  bottom: 10%;
+  transform: translate(-50%, 0);
+}
+
+h1 {
+  font-size: 5em;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+h2 {
+  text-align: center;
+}
+
+nav h2 {
+  color: rgb(255, 255, 255);
+  margin-bottom: 50px;
+}
+
+span {
+  color: rgb(255, 255, 255);
+  margin: 10px;
+}
+
+.welcome {
+  text-align: center;
+}
+
+.features {
+  margin: 20px;
+}
+
+li {
+  font-size: 1.2em;
+  line-height: 2;
+  list-style-type: square;
+}
+
+a {
+  text-decoration: none;
+}
+
+.button {
+  background-color: rgb(49, 178, 204);
+  color: rgb(255, 255, 255);
+  border: 1px solid;
+  border-radius: 15px;
+  font-size: 1.2em;
+  padding: 5px 20px;
+  text-align: center;
+}
+
+.button:hover {
+  background-color: rgb(136, 156, 181);
+  opacity: 0.8;
+}

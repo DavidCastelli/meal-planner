@@ -2,11 +2,17 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: fixed;
+  position: sticky;
   top: 0;
-  background-color: rgb(136, 156, 181);
+  background: rgb(136, 156, 181);
+  background: linear-gradient(
+    260deg,
+    rgba(136, 156, 181, 1) 0%,
+    rgba(91, 111, 137, 1) 50%,
+    rgba(136, 156, 181, 1) 100%
+  );
   padding: 10px;
-  width: 100%;
-  height: 5%;
+  height: 5svh;
   min-height: 50px;
+  z-index: 1;
 }

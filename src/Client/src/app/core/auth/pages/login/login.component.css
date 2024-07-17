@@ -54,7 +54,3 @@ button:active {
   font-size: 0.8em;
   color: rgb(255, 15, 35);
 }
-
-.invalid {
-  border-left: 3px solid rgb(227, 39, 39);
-}
