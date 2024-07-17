@@ -1,0 +1,19 @@
+@if (isOpen$ | async) {
+  <nav class="menu" @openClose>
+    <h1>Menu</h1>
+    <ul>
+      <li>
+        <a routerLink="/home" routerLinkActive="is-active" ariaCurrentWhenActive="page">Home</a>
+      </li>
+      <li>
+        <a>Share</a>
+      </li>
+      <li>
+        <a>Manage</a>
+      </li>
+      <li>
+        <a>Shopping List</a>
+      </li>
+    </ul>
+  </nav>
+}

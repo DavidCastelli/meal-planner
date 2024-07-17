@@ -5,9 +5,10 @@ import {
   FormControl,
   Validators,
 } from '@angular/forms';
-import { AuthService } from '../../auth.service';
+import { AuthService } from '../../services/auth.service';
 import { catchError, EMPTY } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-login',
@@ -19,6 +20,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export class LoginComponent {
   private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
 
   errorMessage: string | null = null;
   isSubmitting = false;
@@ -53,6 +55,6 @@ export class LoginComponent {
         }),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe({ next: () => console.log('success') });
+      .subscribe({ next: () => void this.router.navigate(['/home']) });
   }
 }

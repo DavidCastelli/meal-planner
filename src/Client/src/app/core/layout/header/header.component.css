@@ -1,0 +1,57 @@
+header {
+  display: flex;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  background-color: rgb(8, 96, 95);
+  padding: 0 20px;
+  height: 5svh;
+  width: 100%;
+  min-height: 50px;
+  box-sizing: border-box;
+}
+
+img {
+  object-fit: contain;
+}
+
+.sidebar-button {
+  position: relative;
+  height: 90%;
+  width: 3%;
+  min-width: 50px;
+  background-color: rgb(8, 96, 95);
+  border: rgb(8, 96, 95);
+  cursor: pointer;
+}
+
+.sidebar-button:hover {
+  background-color: rgb(219, 211, 216, 0.2);
+}
+
+.is-active {
+  background-color: rgb(219, 211, 216, 0.2);
+}
+
+.user-info {
+  margin-left: auto;
+}
+
+.logout-button {
+  height: 60%;
+  width: 5%;
+  background: rgb(3, 252, 186);
+  background: linear-gradient(135deg, rgba(3, 252, 186, 1) 0%, rgba(250, 121, 33, 1) 100%);
+  color: rgb(252, 247, 255);
+  border: none;
+  border-radius: 15px;
+  font-size: 1.2em;
+  text-align: center;
+  margin-left: 20px;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  background: rgb(3, 252,   186);
+  background: linear-gradient(135deg, rgba(3, 252, 186, 0.8) 0%, rgba(250, 121, 33, 0.8) 100%);
+}

@@ -1,8 +1,8 @@
 import { Inject, inject, Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { API_CONFIG, ApiConfig } from '../../shared/api.config';
-import { Observable, catchError, throwError } from 'rxjs';
-import { ValidationProblemDetails } from '../../shared/validation-problem-details.model';
+import { API_CONFIG, ApiConfig } from '../../../shared/api.config';
+import {Observable, catchError, throwError} from 'rxjs';
+import { ValidationProblemDetails } from '../../../shared/validation-problem-details.model';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +13,7 @@ export class AuthService {
   private readonly ENDPOINT: string;
 
   constructor(@Inject(API_CONFIG) private readonly apiConfig: ApiConfig) {
-    this.ENDPOINT = `${apiConfig.baseUrl}/${apiConfig.prefix}`;
+    this.ENDPOINT = `${this.apiConfig.baseUrl}/${this.apiConfig.prefix}`;
   }
 
   register(credentials: { email: string; password: string }): Observable<void> {
