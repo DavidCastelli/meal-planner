@@ -3,6 +3,8 @@ using System.Reflection;
 using Api.Features.Identity;
 using Api.Infrastructure;
 
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -61,6 +63,18 @@ app.UseAuthorization();
 app.MapGroup("/api")
     .WithTags("Identity")
     .MapIdentityApi<ApplicationUser>();
+
+app.MapPost("/api/logout", async (SignInManager<ApplicationUser> signInManager,
+        [FromBody] object? empty) =>
+    {
+        if (empty != null)
+        {
+            await signInManager.SignOutAsync();
+            return Results.Ok();
+        }
+        return Results.Unauthorized();
+    })
+    .RequireAuthorization();
 
 app.MapControllers();
 
