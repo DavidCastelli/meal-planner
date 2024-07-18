@@ -39,7 +39,6 @@ img {
 
 .logout-button {
   height: 60%;
-  width: 5%;
   background: rgb(3, 252, 186);
   background: linear-gradient(135deg, rgba(3, 252, 186, 1) 0%, rgba(250, 121, 33, 1) 100%);
   color: rgb(252, 247, 255);
@@ -48,6 +47,7 @@ img {
   font-size: 1.2em;
   text-align: center;
   margin-left: 20px;
+  padding: 5px 20px;
   cursor: pointer;
 }
 
