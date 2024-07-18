@@ -1,11 +1,16 @@
 <header>
-  <button class="sidebar-button" type="button" (click)="toggleSidebar()" [class.is-active]="sidebarIsOpen">
-    <img ngSrc="/menu-grid-r-svgrepo-com.svg" alt="Menu icon." fill>
+  <button
+    class="sidebar-button"
+    type="button"
+    (click)="toggleSidebar()"
+    [class.is-active]="sidebarIsOpen"
+  >
+    <img ngSrc="/menu-grid-r-svgrepo-com.svg" alt="Menu icon." fill />
   </button>
-    @if (curUserInfo$ | async; as user) {
-      <div class="user-info">
-        {{ user.email }}
-      </div>
-    }
+  @if (curUserInfo$ | async; as user) {
+    <div class="user-info">
+      {{ user.email }}
+    </div>
+  }
   <button class="logout-button" type="button">Logout</button>
 </header>

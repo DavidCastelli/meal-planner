@@ -1,11 +1,11 @@
-import {Inject, inject, Injectable} from '@angular/core';
-import {HttpClient} from "@angular/common/http";
-import {API_CONFIG, ApiConfig} from "../../../shared/api.config";
-import {Observable} from "rxjs";
-import {User} from "../user.model";
+import { Inject, inject, Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { API_CONFIG, ApiConfig } from '../../../shared/api.config';
+import { Observable } from 'rxjs';
+import { User } from '../user.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UserService {
   private readonly http = inject(HttpClient);
@@ -18,10 +18,8 @@ export class UserService {
 
   getUserInfo(): Observable<User> {
     // TODO handle errors
-    return this.http
-      .get<User>(`${this.ENDPOINT}/manage/info`, {
-        withCredentials: true,
-      });
+    return this.http.get<User>(`${this.ENDPOINT}/manage/info`, {
+      withCredentials: true,
+    });
   }
-
 }

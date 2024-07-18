@@ -1,7 +1,7 @@
 import { Inject, inject, Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { API_CONFIG, ApiConfig } from '../../../shared/api.config';
-import {Observable, catchError, throwError} from 'rxjs';
+import { Observable, catchError, throwError } from 'rxjs';
 import { ValidationProblemDetails } from '../../../shared/validation-problem-details.model';
 
 @Injectable({
@@ -36,10 +36,13 @@ export class AuthService {
   logout() {
     // Expects a type of void because the logout endpoint of the API returns 200 OK with no response on success.
     // TODO hande error
-    return this.http
-      .post<void>(`${this.ENDPOINT}/logout`, {}, {
+    return this.http.post<void>(
+      `${this.ENDPOINT}/logout`,
+      {},
+      {
         withCredentials: true,
-      });
+      },
+    );
   }
 
   private handleError(err: HttpErrorResponse): Observable<never> {
