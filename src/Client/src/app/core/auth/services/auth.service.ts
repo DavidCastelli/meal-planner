@@ -33,6 +33,15 @@ export class AuthService {
       .pipe(catchError(this.handleError));
   }
 
+  logout() {
+    // Expects a type of void because the logout endpoint of the API returns 200 OK with no response on success.
+    // TODO hande error
+    return this.http
+      .post<void>(`${this.ENDPOINT}/logout`, {}, {
+        withCredentials: true,
+      });
+  }
+
   private handleError(err: HttpErrorResponse): Observable<never> {
     let errorMessage = '';
     if (err.status === 0) {
