@@ -25,7 +25,7 @@ import { Observable } from 'rxjs';
 })
 export class SidebarComponent implements OnInit {
   private readonly communicationService = inject(CommunicationService);
-  isOpen$!: Observable<boolean>;
+  public isOpen$!: Observable<boolean>;
 
   ngOnInit() {
     this.isOpen$ = this.communicationService.toggleNotification$;

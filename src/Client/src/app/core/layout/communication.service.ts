@@ -6,7 +6,8 @@ import { Subject } from 'rxjs';
 })
 export class CommunicationService {
   private readonly toggleNotificationSource = new Subject<boolean>();
-  readonly toggleNotification$ = this.toggleNotificationSource.asObservable();
+  public readonly toggleNotification$ =
+    this.toggleNotificationSource.asObservable();
 
   sendToggleNotification(isOpen: boolean) {
     this.toggleNotificationSource.next(isOpen);
