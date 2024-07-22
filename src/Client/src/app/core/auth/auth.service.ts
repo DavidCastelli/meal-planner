@@ -1,9 +1,23 @@
-import { Inject, inject, Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { API_CONFIG, ApiConfig } from '../../shared/api.config';
-import {Observable, catchError, throwError, tap, BehaviorSubject, distinctUntilChanged, map} from 'rxjs';
+import { inject, Injectable } from '@angular/core';
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpResponse,
+} from '@angular/common/http';
+import {
+  Observable,
+  catchError,
+  throwError,
+  tap,
+  BehaviorSubject,
+  distinctUntilChanged,
+  map,
+  EMPTY,
+  of,
+  switchMap,
+} from 'rxjs';
 import { ValidationProblemDetails } from '../../shared/validation-problem-details.model';
-import {User} from "./user.model";
+import { UserInfo } from './user-info.model';
 
 @Injectable({
   providedIn: 'root',
@@ -11,86 +25,134 @@ import {User} from "./user.model";
 export class AuthService {
   private readonly http = inject(HttpClient);
 
-  private readonly ENDPOINT: string;
+  private readonly curUserInfoSource = new BehaviorSubject<UserInfo | null>(
+    JSON.parse(localStorage.getItem('currentUser') as string),
+  );
+  public curUserInfo$ = this.curUserInfoSource
+    .asObservable()
+    .pipe(distinctUntilChanged());
 
-  private readonly curUserSource = new BehaviorSubject<User | null>(null);
-  public curUser$ = this.curUserSource.asObservable().pipe(distinctUntilChanged());
+  public isAuthenticated = this.curUserInfo$.pipe(
+    map((userInfo) => !!userInfo),
+  );
 
-  public isAuthenticated = this.curUser$.pipe(map((user) => !!user));
+  register(credentials: {
+    email: string;
+    password: string;
+  }): Observable<HttpResponse<string>> {
+    return this.http
+      .post('/register', credentials, {
+        observe: 'response',
+        responseType: 'text',
+      })
+      .pipe(
+        catchError((err: HttpErrorResponse) => {
+          this.logError(err);
+          if (err.status === 0) {
+            return throwError(
+              () => 'Something went wrong, please try again later.',
+            );
+          } else if (err.status === 400) {
+            // Expects the API to return an error of type ValidationProblemDetails.
+            const validationProblemDetails =
+              err.error as ValidationProblemDetails;
 
-  constructor(@Inject(API_CONFIG) private readonly apiConfig: ApiConfig) {
-    this.ENDPOINT = `${this.apiConfig.baseUrl}/${this.apiConfig.prefix}`;
+            // Each inner array is expected to only have a single value.
+            const errors = Object.values(validationProblemDetails.errors);
+
+            // Iterates over the outer array and builds a single message in the case of multiple errors.
+            let result = '';
+            for (const error of errors) {
+              result += error[0] + '\n';
+            }
+            return throwError(() => result);
+          } else {
+            return throwError(() => 'An unknown error occured.');
+          }
+        }),
+      );
   }
 
-  register(credentials: { email: string; password: string }): Observable<void> {
-    // Expects a type of void because the register endpoint of the API returns 200 OK with no response on success.
+  login(credentials: {
+    email: string;
+    password: string;
+  }): Observable<UserInfo> {
     return this.http
-      .post<void>(`${this.ENDPOINT}/register`, credentials)
-      .pipe(catchError(this.handleError));
-  }
-
-  login(credentials: { email: string; password: string }): Observable<void> {
-    // Expects a type of void because the login endpoint of the API returns 200 OK with no response on success.
-    return this.http
-      .post<void>(`${this.ENDPOINT}/login`, credentials, {
+      .post('/login', credentials, {
         params: { useCookies: true },
         withCredentials: true,
+        observe: 'response',
+        responseType: 'text',
       })
-      .pipe(catchError(this.handleError), tap(() => this.curUserSource.next({email: credentials.email})));
+      .pipe(
+        catchError((err: HttpErrorResponse) => {
+          this.logError(err);
+          if (err.status === 0) {
+            return throwError(
+              () => 'Something went wrong, please try again later.',
+            );
+          } else if (err.status === 401) {
+            return throwError(() => 'The email or password is incorrect.');
+          } else {
+            return throwError(() => 'An unknown error occured.');
+          }
+        }),
+        switchMap(() => this.getUserInfo()),
+      );
   }
 
-  logout() {
-    // Expects a type of void because the logout endpoint of the API returns 200 OK with no response on success.
-    // TODO handle error
-    return this.http.post<void>(
-      `${this.ENDPOINT}/logout`,
-      {},
-      {
+  logout(): Observable<HttpResponse<string>> {
+    return this.http
+      .post(
+        '/logout',
+        {},
+        {
+          withCredentials: true,
+          observe: 'response',
+          responseType: 'text',
+        },
+      )
+      .pipe(
+        catchError((err: HttpErrorResponse) => {
+          this.logError(err);
+          return EMPTY;
+        }),
+        tap(() => {
+          localStorage.removeItem('currentUser');
+          this.curUserInfoSource.next(null);
+        }),
+      );
+  }
+
+  getUserInfo(): Observable<UserInfo> {
+    return this.http
+      .get<UserInfo>('/manage/info', {
         withCredentials: true,
-      },
-    ).pipe(catchError(this.handleError), tap(() => this.curUserSource.next(null)));
+      })
+      .pipe(
+        catchError((err: HttpErrorResponse) => {
+          this.logError(err);
+          return of({} as UserInfo);
+        }),
+        tap((userInfo) => {
+          const currentUser =
+            Object.keys(userInfo).length === 0 ? null : userInfo;
+          localStorage.setItem('currentUser', JSON.stringify(currentUser));
+          this.curUserInfoSource.next(currentUser);
+        }),
+      );
   }
 
-  getUserInfo(): Observable<User> {
-    // TODO handle errors
-    return this.http.get<User>(`${this.ENDPOINT}/manage/info`, {
-      withCredentials: true,
-    }).pipe(catchError(this.handleError), tap((user) => this.curUserSource.next(user)));
-  }
-
-  private handleError(err: HttpErrorResponse): Observable<never> {
-    let errorMessage = '';
+  private logError(err: HttpErrorResponse) {
     if (err.status === 0) {
       // A client or network error occured.
       console.error('An error occured: ', err.error);
-      errorMessage = 'Something went wrong, please try again later.';
     } else {
       // A server error occured and returned an unsuccessful response code.
       console.error(
         `Server returned code: ${err.status}, error message is: `,
         err.message,
       );
-
-      if (err.status === 400) {
-        // Expects the API to return an error of type ValidationProblemDetails.
-        const validationProblemDetails = err.error as ValidationProblemDetails;
-
-        // Each inner array is expected to only have a single value.
-        const errors = Object.values(validationProblemDetails.errors);
-
-        // Iterates over the outer array and builds a single message in the case of multiple errors.
-        let result = '';
-        for (const error of errors) {
-          result += error[0] + '\n';
-        }
-        errorMessage = result;
-      } else if (err.status === 401) {
-        errorMessage = 'The email or password is incorrect.';
-      } else {
-        errorMessage = 'An unexpected error occured.';
-      }
     }
-    // User facing message.
-    return throwError(() => errorMessage);
   }
 }
