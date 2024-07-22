@@ -1,11 +1,12 @@
-import { Component, DestroyRef, inject } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import {
   ReactiveFormsModule,
   FormGroup,
   FormControl,
   Validators,
+  FormBuilder,
 } from '@angular/forms';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../auth.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PasswordValidator } from '../../password.validator';
 import { catchError, EMPTY } from 'rxjs';
@@ -18,28 +19,35 @@ import { Router } from '@angular/router';
   templateUrl: './register.component.html',
   styleUrl: './register.component.css',
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router: Router = inject(Router);
+  private readonly formBuilder = inject(FormBuilder);
+
+  registrationForm!: FormGroup<{
+    email: FormControl<string>;
+    password: FormControl<string>;
+  }>;
 
   errorMessage: string | null = null;
   isSubmitting = false;
 
-  registrationForm = new FormGroup({
-    email: new FormControl('', {
-      validators: [Validators.required, Validators.email],
-      nonNullable: true,
-    }),
-    password: new FormControl('', {
-      validators: [
-        Validators.required,
-        Validators.minLength(6),
-        PasswordValidator.strong,
+  ngOnInit() {
+    this.registrationForm = this.formBuilder.nonNullable.group({
+      email: ['', { validators: [Validators.required, Validators.email] }],
+      password: [
+        '',
+        {
+          validators: [
+            Validators.required,
+            Validators.minLength(6),
+            PasswordValidator.strong,
+          ],
+        },
       ],
-      nonNullable: true,
-    }),
-  });
+    });
+  }
 
   get email() {
     return this.registrationForm.controls.email;
@@ -51,6 +59,7 @@ export class RegisterComponent {
 
   onSubmit() {
     this.isSubmitting = true;
+    this.errorMessage = null;
 
     if (this.registrationForm.invalid) {
       // Mark all as touched to handle the case where the user submits without interacting with the inputs.

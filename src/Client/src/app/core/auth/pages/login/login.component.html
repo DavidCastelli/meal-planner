@@ -30,6 +30,13 @@
           {{ errorMessage }}
         </p>
       </section>
+    } @else if (
+      (email.hasError("required") && email.touched) ||
+      (password.hasError("required") && password.touched)
+    ) {
+      <section class="error">
+        <p class="error-message">Please enter both username and password.</p>
+      </section>
     }
   </form>
 </div>

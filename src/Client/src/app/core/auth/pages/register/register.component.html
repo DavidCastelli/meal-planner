@@ -31,7 +31,20 @@
       </p>
     </section>
 
-    @if (email.hasError("email") && email.touched) {
+    @if (errorMessage) {
+      <section class="error">
+        <p class="error-message">
+          {{ errorMessage }}
+        </p>
+      </section>
+    } @else if (
+      (email.hasError("required") && email.touched) ||
+      (password.hasError("required") && password.touched)
+    ) {
+      <section class="error">
+        <p class="error-message">Please enter both username and password.</p>
+      </section>
+    } @else if (email.hasError("email") && email.touched) {
       <section class="error">
         <p class="error-message">Please enter a valid email address.</p>
       </section>
@@ -46,12 +59,6 @@
         <p class="error-message">
           Password must contain at least one uppercase letter, one lowercase
           letter, one numeric digit, and one nonalphanumeric character.
-        </p>
-      </section>
-    } @else if (errorMessage) {
-      <section class="error">
-        <p class="error-message">
-          {{ errorMessage }}
         </p>
       </section>
     }

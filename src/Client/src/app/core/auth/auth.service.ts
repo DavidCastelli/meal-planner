@@ -1,8 +1,9 @@
 import { Inject, inject, Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { API_CONFIG, ApiConfig } from '../../../shared/api.config';
-import { Observable, catchError, throwError } from 'rxjs';
-import { ValidationProblemDetails } from '../../../shared/validation-problem-details.model';
+import { API_CONFIG, ApiConfig } from '../../shared/api.config';
+import {Observable, catchError, throwError, tap, BehaviorSubject, distinctUntilChanged, map} from 'rxjs';
+import { ValidationProblemDetails } from '../../shared/validation-problem-details.model';
+import {User} from "./user.model";
 
 @Injectable({
   providedIn: 'root',
@@ -11,6 +12,11 @@ export class AuthService {
   private readonly http = inject(HttpClient);
 
   private readonly ENDPOINT: string;
+
+  private readonly curUserSource = new BehaviorSubject<User | null>(null);
+  public curUser$ = this.curUserSource.asObservable().pipe(distinctUntilChanged());
+
+  public isAuthenticated = this.curUser$.pipe(map((user) => !!user));
 
   constructor(@Inject(API_CONFIG) private readonly apiConfig: ApiConfig) {
     this.ENDPOINT = `${this.apiConfig.baseUrl}/${this.apiConfig.prefix}`;
@@ -30,19 +36,26 @@ export class AuthService {
         params: { useCookies: true },
         withCredentials: true,
       })
-      .pipe(catchError(this.handleError));
+      .pipe(catchError(this.handleError), tap(() => this.curUserSource.next({email: credentials.email})));
   }
 
   logout() {
     // Expects a type of void because the logout endpoint of the API returns 200 OK with no response on success.
-    // TODO hande error
+    // TODO handle error
     return this.http.post<void>(
       `${this.ENDPOINT}/logout`,
       {},
       {
         withCredentials: true,
       },
-    );
+    ).pipe(catchError(this.handleError), tap(() => this.curUserSource.next(null)));
+  }
+
+  getUserInfo(): Observable<User> {
+    // TODO handle errors
+    return this.http.get<User>(`${this.ENDPOINT}/manage/info`, {
+      withCredentials: true,
+    }).pipe(catchError(this.handleError), tap((user) => this.curUserSource.next(user)));
   }
 
   private handleError(err: HttpErrorResponse): Observable<never> {

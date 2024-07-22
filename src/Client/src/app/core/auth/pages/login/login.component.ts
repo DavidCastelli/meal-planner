@@ -1,11 +1,12 @@
-import { Component, DestroyRef, inject } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import {
   ReactiveFormsModule,
   FormGroup,
   FormControl,
   Validators,
+  FormBuilder,
 } from '@angular/forms';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../auth.service';
 import { catchError, EMPTY } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
@@ -17,29 +18,42 @@ import { Router } from '@angular/router';
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
+  private readonly formBuilder = inject(FormBuilder);
+
+  loginForm!: FormGroup<{
+    email: FormControl<string>;
+    password: FormControl<string>;
+  }>;
 
   errorMessage: string | null = null;
   isSubmitting = false;
 
-  loginForm = new FormGroup({
-    email: new FormControl('', {
-      validators: [Validators.required],
-      nonNullable: true,
-    }),
-    password: new FormControl('', {
-      validators: [Validators.required],
-      nonNullable: true,
-    }),
-  });
+  ngOnInit() {
+    this.loginForm = this.formBuilder.nonNullable.group({
+      email: ['', { validators: [Validators.required] }],
+      password: ['', { validators: [Validators.required] }],
+    });
+  }
+
+  get email() {
+    return this.loginForm.controls.email;
+  }
+
+  get password() {
+    return this.loginForm.controls.password;
+  }
 
   onSubmit() {
     this.isSubmitting = true;
+    this.errorMessage = null;
 
     if (this.loginForm.invalid) {
+      // Mark all as touched to handle the case where the user submits without interacting with the inputs.
+      this.loginForm.markAllAsTouched();
       this.isSubmitting = false;
       return;
     }

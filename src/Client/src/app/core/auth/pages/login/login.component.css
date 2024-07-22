@@ -1,20 +1,19 @@
 .form-container {
   display: flex;
-  flex-flow: row;
-  align-content: center;
+  align-items: center;
   justify-content: center;
-  margin-top: 30svh;
+  height: 100svh;
 }
 
 form {
   display: flex;
   flex-flow: column;
   align-items: center;
-  justify-content: center;
   background-color: rgb(3, 252, 186);
   border: 5px solid rgb(23, 126, 137);
   border-radius: 10px;
-  width: 33%;
+  height: 40%;
+  width: 40%;
   min-width: 300px;
 }
 
