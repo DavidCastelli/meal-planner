@@ -4,6 +4,8 @@ import { LoginComponent } from './core/auth/pages/login/login.component';
 import { PageNotFoundComponent } from './core/errors/pages/page-not-found/page-not-found.component';
 import { LandingComponent } from './core/layout/pages/landing/landing.component';
 import { HomeComponent } from './core/layout/pages/home/home.component';
+import {authGuard} from "./core/auth/auth.guard";
+import {loginGuard} from "./core/auth/login.guard";
 
 export const routes: Routes = [
   {
@@ -20,11 +22,13 @@ export const routes: Routes = [
     path: 'login',
     component: LoginComponent,
     title: 'Login',
+    canActivate: [loginGuard],
   },
   {
     path: 'home',
     component: HomeComponent,
     title: 'Home',
+    canActivate: [authGuard],
   },
   {
     path: '',

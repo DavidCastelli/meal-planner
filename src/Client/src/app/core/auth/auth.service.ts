@@ -1,23 +1,24 @@
 import { inject, Injectable } from '@angular/core';
 import {
-  HttpClient,
+  HttpClient, HttpContext,
   HttpErrorResponse,
   HttpResponse,
 } from '@angular/common/http';
 import {
-  Observable,
-  catchError,
-  throwError,
-  tap,
   BehaviorSubject,
+  catchError,
   distinctUntilChanged,
-  map,
   EMPTY,
+  map,
+  Observable,
   of,
   switchMap,
+  tap,
+  throwError,
 } from 'rxjs';
 import { ValidationProblemDetails } from '../../shared/validation-problem-details.model';
 import { UserInfo } from './user-info.model';
+import {SKIP_AUTH_INTERCEPTOR} from "../interceptors/auth.interceptor";
 
 @Injectable({
   providedIn: 'root',
@@ -31,10 +32,6 @@ export class AuthService {
   public curUserInfo$ = this.curUserInfoSource
     .asObservable()
     .pipe(distinctUntilChanged());
-
-  public isAuthenticated = this.curUserInfo$.pipe(
-    map((userInfo) => !!userInfo),
-  );
 
   register(credentials: {
     email: string;
@@ -83,6 +80,7 @@ export class AuthService {
         withCredentials: true,
         observe: 'response',
         responseType: 'text',
+        context: new HttpContext().set(SKIP_AUTH_INTERCEPTOR, true),
       })
       .pipe(
         catchError((err: HttpErrorResponse) => {
@@ -128,6 +126,7 @@ export class AuthService {
     return this.http
       .get<UserInfo>('/manage/info', {
         withCredentials: true,
+        context: new HttpContext().set(SKIP_AUTH_INTERCEPTOR, true),
       })
       .pipe(
         catchError((err: HttpErrorResponse) => {
@@ -141,6 +140,18 @@ export class AuthService {
           this.curUserInfoSource.next(currentUser);
         }),
       );
+  }
+
+  isAuthenticated(): Observable<boolean> {
+    return this.getUserInfo().pipe(
+      map((userInfo) => {
+        return userInfo && Object.keys(userInfo).length > 0;
+      }),
+      catchError((err: HttpErrorResponse) => {
+        this.logError(err);
+        return of(false);
+      }),
+    );
   }
 
   private logError(err: HttpErrorResponse) {
