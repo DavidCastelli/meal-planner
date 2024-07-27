@@ -4,8 +4,8 @@ import { LoginComponent } from './core/auth/pages/login/login.component';
 import { PageNotFoundComponent } from './core/errors/pages/page-not-found/page-not-found.component';
 import { LandingComponent } from './core/layout/pages/landing/landing.component';
 import { HomeComponent } from './core/layout/pages/home/home.component';
-import {authGuard} from "./core/auth/guards/auth.guard";
-import {loginGuard} from "./core/auth/guards/login.guard";
+import { authGuard } from './core/auth/guards/auth.guard';
+import { loginGuard } from './core/auth/guards/login.guard';
 
 export const routes: Routes = [
   {

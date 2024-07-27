@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import {
-  HttpClient, HttpContext,
+  HttpClient,
+  HttpContext,
   HttpErrorResponse,
   HttpResponse,
 } from '@angular/common/http';
@@ -18,7 +19,7 @@ import {
 } from 'rxjs';
 import { ValidationProblemDetails } from '../../shared/validation-problem-details.model';
 import { UserInfo } from './user-info.model';
-import {SKIP_AUTH_INTERCEPTOR} from "../interceptors/auth.interceptor";
+import { SKIP_AUTH_INTERCEPTOR } from '../interceptors/auth.interceptor';
 
 @Injectable({
   providedIn: 'root',
