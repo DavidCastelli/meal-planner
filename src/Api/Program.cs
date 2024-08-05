@@ -1,6 +1,6 @@
 using System.Reflection;
 
-using Api.Features.Identity;
+using Api.Domain.Identity;
 using Api.Infrastructure;
 
 using Microsoft.AspNetCore.Identity;
