@@ -1,13 +1,14 @@
 ﻿services:
   api:
     image: api
+    container_name: api
     build:
       context: .
       dockerfile: Dockerfile
 
   database:
     image: postgres:latest
-    restart: always
+    container_name: mealplannerdb
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
