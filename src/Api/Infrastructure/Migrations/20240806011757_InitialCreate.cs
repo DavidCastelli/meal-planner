@@ -295,33 +295,6 @@ namespace Api.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Ingredients",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
-                    FoodGroupId = table.Column<int>(type: "integer", nullable: false),
-                    RecipeId = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Ingredients", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Ingredients_FoodGroups_FoodGroupId",
-                        column: x => x.FoodGroupId,
-                        principalTable: "FoodGroups",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Ingredients_Recipes_RecipeId",
-                        column: x => x.RecipeId,
-                        principalTable: "Recipes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "MealRecipe",
                 columns: table => new
                 {
@@ -340,6 +313,33 @@ namespace Api.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_MealRecipe_Recipes_RecipesId",
                         column: x => x.RecipesId,
+                        principalTable: "Recipes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SubIngredients",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    FoodGroupId = table.Column<int>(type: "integer", nullable: false),
+                    RecipeId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SubIngredients", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SubIngredients_FoodGroups_FoodGroupId",
+                        column: x => x.FoodGroupId,
+                        principalTable: "FoodGroups",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SubIngredients_Recipes_RecipeId",
+                        column: x => x.RecipeId,
                         principalTable: "Recipes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -379,9 +379,9 @@ namespace Api.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Ingredient", x => new { x.SubIngredientId, x.Id });
                     table.ForeignKey(
-                        name: "FK_Ingredient_Ingredients_SubIngredientId",
+                        name: "FK_Ingredient_SubIngredients_SubIngredientId",
                         column: x => x.SubIngredientId,
-                        principalTable: "Ingredients",
+                        principalTable: "SubIngredients",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -424,16 +424,6 @@ namespace Api.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Ingredients_FoodGroupId",
-                table: "Ingredients",
-                column: "FoodGroupId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Ingredients_RecipeId",
-                table: "Ingredients",
-                column: "RecipeId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_MealRecipe_RecipesId",
                 table: "MealRecipe",
                 column: "RecipesId");
@@ -452,6 +442,16 @@ namespace Api.Infrastructure.Migrations
                 name: "IX_Recipes_ApplicationUserId",
                 table: "Recipes",
                 column: "ApplicationUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SubIngredients_FoodGroupId",
+                table: "SubIngredients",
+                column: "FoodGroupId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SubIngredients_RecipeId",
+                table: "SubIngredients",
+                column: "RecipeId");
         }
 
         /// <inheritdoc />
@@ -494,7 +494,7 @@ namespace Api.Infrastructure.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "Ingredients");
+                name: "SubIngredients");
 
             migrationBuilder.DropTable(
                 name: "Meals");

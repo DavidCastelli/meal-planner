@@ -129,7 +129,7 @@ namespace Api.Infrastructure.Migrations
 
                     b.HasIndex("RecipeId");
 
-                    b.ToTable("Ingredients");
+                    b.ToTable("SubIngredients");
                 });
 
             modelBuilder.Entity("Api.Domain.Meals.Meal", b =>

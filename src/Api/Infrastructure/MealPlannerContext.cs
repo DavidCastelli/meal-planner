@@ -22,7 +22,7 @@ public sealed class MealPlannerContext : IdentityDbContext<ApplicationUser, Iden
     public DbSet<Meal> Meals => Set<Meal>();
     public DbSet<Tag> Tags => Set<Tag>();
     public DbSet<Recipe> Recipes => Set<Recipe>();
-    public DbSet<SubIngredient> Ingredients => Set<SubIngredient>();
+    public DbSet<SubIngredient> SubIngredients => Set<SubIngredient>();
     public DbSet<FoodGroup> FoodGroups => Set<FoodGroup>();
 
     protected override void OnModelCreating(ModelBuilder builder)
