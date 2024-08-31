@@ -1,6 +1,6 @@
 @Api_HostAddress = https://localhost:7256
 
-GET {{Api_HostAddress}}/api/todo-items/
+GET {{Api_HostAddress}}/api/manage/meals
 Accept: application/json
 
 ###

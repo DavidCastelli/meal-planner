@@ -1,18 +1,33 @@
 using System.Reflection;
 
-using Api.Domain.Identity;
-using Api.Infrastructure;
+using Api;
+using Api.Common.Exceptions;
+using Api.Infrastructure.Authorization;
+using Api.Infrastructure.Identity;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.SuppressAsyncSuffixInActionNames = false;
+
+    var policy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+    options.Filters.Add(new AuthorizeFilter(policy));
+});
+
+builder.Services.AddExceptionHandler<ExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: "AngularClient",
@@ -24,11 +39,18 @@ builder.Services.AddCors(options =>
                 .AllowCredentials();
         });
 });
-builder.Services.AddAuthorization();
-builder.Services.AddDbContext<MealPlannerContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
-    .AddEntityFrameworkStores<MealPlannerContext>();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("SameUserPolicy", policy =>
+        policy.Requirements.Add(new SameUserRequirement()));
+});
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure(builder.Configuration);
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -40,6 +62,8 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -74,6 +98,8 @@ app.MapPost("/api/logout", async (SignInManager<ApplicationUser> signInManager,
         }
         return Results.Unauthorized();
     })
+    .Produces(StatusCodes.Status401Unauthorized)
+    .WithTags("Identity")
     .RequireAuthorization();
 
 app.MapControllers();
