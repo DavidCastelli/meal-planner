@@ -1,15 +1,30 @@
-using Api.Domain.FoodGroups;
-using Api.Domain.Recipes;
-
 namespace Api.Domain.Ingredients;
 
+/// <summary>
+/// Entity which represents a sub ingredient.
+/// </summary>
+/// <remarks>
+/// A sub ingredient is used to provides a name to a list of ingredients.
+/// A recipe should have only one sub ingredient with no name,
+/// or multiple sub ingredients each with a name specified in the case a recipe consists
+/// of multiple components.
+/// </remarks>
 public sealed class SubIngredient
 {
-    public int Id { get; set; }
+    /// <summary>
+    /// Gets or sets the name of a sub ingredient.
+    /// </summary>
+    /// <value>
+    /// A string specifying the name of a sub ingredient or possibly null.
+    /// </value>
     public string? Name { get; set; }
-    public int FoodGroupId { get; set; }
-    public FoodGroup? FoodGroup { get; set; }
+
+    /// <summary>
+    /// Gets the list of ingredients belonging to the sub ingredient.
+    /// </summary>
+    /// <value>
+    /// A collection of individual ingredients.
+    /// </value>
+    /// <see cref="Ingredient"/>
     public ICollection<Ingredient> Ingredients { get; } = new List<Ingredient>();
-    public int RecipeId { get; set; }
-    public required Recipe Recipe { get; set; }
 }

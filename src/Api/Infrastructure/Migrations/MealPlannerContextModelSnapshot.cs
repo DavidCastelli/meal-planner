@@ -17,120 +17,10 @@ namespace Api.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.7")
+                .HasAnnotation("ProductVersion", "8.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("Api.Domain.FoodGroups.FoodGroup", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("FoodGroups");
-                });
-
-            modelBuilder.Entity("Api.Domain.Identity.ApplicationUser", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("text");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
-
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex");
-
-                    b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("Api.Domain.Ingredients.SubIngredient", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("FoodGroupId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<int>("RecipeId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FoodGroupId");
-
-                    b.HasIndex("RecipeId");
-
-                    b.ToTable("SubIngredients");
-                });
 
             modelBuilder.Entity("Api.Domain.Meals.Meal", b =>
                 {
@@ -206,23 +96,71 @@ namespace Api.Infrastructure.Migrations
                     b.ToTable("Tags");
                 });
 
-            modelBuilder.Entity("Api.Domain.Todos.TodoItem", b =>
+            modelBuilder.Entity("Api.Infrastructure.Identity.ApplicationUser", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("IsComplete")
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("Name")
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("PasswordHash")
                         .HasColumnType("text");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("TodoItems");
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex");
+
+                    b.ToTable("AspNetUsers", (string)null);
                 });
 
             modelBuilder.Entity("MealRecipe", b =>
@@ -387,23 +325,26 @@ namespace Api.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Api.Domain.Ingredients.SubIngredient", b =>
+            modelBuilder.Entity("Api.Domain.Meals.Meal", b =>
                 {
-                    b.HasOne("Api.Domain.FoodGroups.FoodGroup", "FoodGroup")
-                        .WithMany("Ingredients")
-                        .HasForeignKey("FoodGroupId")
+                    b.HasOne("Api.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Api.Domain.Recipes.Recipe", b =>
+                {
+                    b.HasOne("Api.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Api.Domain.Recipes.Recipe", "Recipe")
-                        .WithMany("SubIngredients")
-                        .HasForeignKey("RecipeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.OwnsMany("Api.Domain.Ingredients.Ingredient", "Ingredients", b1 =>
+                    b.OwnsMany("Api.Domain.Ingredients.SubIngredient", "SubIngredients", b1 =>
                         {
-                            b1.Property<int>("SubIngredientId")
+                            b1.Property<int>("RecipeId")
                                 .HasColumnType("integer");
 
                             b1.Property<int>("Id")
@@ -412,49 +353,51 @@ namespace Api.Infrastructure.Migrations
 
                             NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
 
-                            b1.Property<string>("Measurement")
-                                .IsRequired()
-                                .HasMaxLength(20)
-                                .HasColumnType("character varying(20)");
-
                             b1.Property<string>("Name")
-                                .IsRequired()
                                 .HasMaxLength(20)
                                 .HasColumnType("character varying(20)");
 
-                            b1.HasKey("SubIngredientId", "Id");
+                            b1.HasKey("RecipeId", "Id");
 
-                            b1.ToTable("Ingredient");
+                            b1.ToTable("SubIngredient");
 
                             b1.WithOwner()
-                                .HasForeignKey("SubIngredientId");
+                                .HasForeignKey("RecipeId");
+
+                            b1.OwnsMany("Api.Domain.Ingredients.Ingredient", "Ingredients", b2 =>
+                                {
+                                    b2.Property<int>("SubIngredientRecipeId")
+                                        .HasColumnType("integer");
+
+                                    b2.Property<int>("SubIngredientId")
+                                        .HasColumnType("integer");
+
+                                    b2.Property<int>("Id")
+                                        .ValueGeneratedOnAdd()
+                                        .HasColumnType("integer");
+
+                                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b2.Property<int>("Id"));
+
+                                    b2.Property<string>("Measurement")
+                                        .IsRequired()
+                                        .HasMaxLength(20)
+                                        .HasColumnType("character varying(20)");
+
+                                    b2.Property<string>("Name")
+                                        .IsRequired()
+                                        .HasMaxLength(20)
+                                        .HasColumnType("character varying(20)");
+
+                                    b2.HasKey("SubIngredientRecipeId", "SubIngredientId", "Id");
+
+                                    b2.ToTable("Ingredient");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("SubIngredientRecipeId", "SubIngredientId");
+                                });
+
+                            b1.Navigation("Ingredients");
                         });
-
-                    b.Navigation("FoodGroup");
-
-                    b.Navigation("Ingredients");
-
-                    b.Navigation("Recipe");
-                });
-
-            modelBuilder.Entity("Api.Domain.Meals.Meal", b =>
-                {
-                    b.HasOne("Api.Domain.Identity.ApplicationUser", "User")
-                        .WithMany("Meals")
-                        .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Api.Domain.Recipes.Recipe", b =>
-                {
-                    b.HasOne("Api.Domain.Identity.ApplicationUser", "User")
-                        .WithMany("Recipes")
-                        .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.OwnsMany("Api.Domain.Recipes.Direction", "Directions", b1 =>
                         {
@@ -562,9 +505,9 @@ namespace Api.Infrastructure.Migrations
                     b.Navigation("RecipeNutrition")
                         .IsRequired();
 
-                    b.Navigation("Tips");
+                    b.Navigation("SubIngredients");
 
-                    b.Navigation("User");
+                    b.Navigation("Tips");
                 });
 
             modelBuilder.Entity("MealRecipe", b =>
@@ -608,7 +551,7 @@ namespace Api.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
                 {
-                    b.HasOne("Api.Domain.Identity.ApplicationUser", null)
+                    b.HasOne("Api.Infrastructure.Identity.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -617,7 +560,7 @@ namespace Api.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
                 {
-                    b.HasOne("Api.Domain.Identity.ApplicationUser", null)
+                    b.HasOne("Api.Infrastructure.Identity.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -632,7 +575,7 @@ namespace Api.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Api.Domain.Identity.ApplicationUser", null)
+                    b.HasOne("Api.Infrastructure.Identity.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -641,28 +584,11 @@ namespace Api.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
                 {
-                    b.HasOne("Api.Domain.Identity.ApplicationUser", null)
+                    b.HasOne("Api.Infrastructure.Identity.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Api.Domain.FoodGroups.FoodGroup", b =>
-                {
-                    b.Navigation("Ingredients");
-                });
-
-            modelBuilder.Entity("Api.Domain.Identity.ApplicationUser", b =>
-                {
-                    b.Navigation("Meals");
-
-                    b.Navigation("Recipes");
-                });
-
-            modelBuilder.Entity("Api.Domain.Recipes.Recipe", b =>
-                {
-                    b.Navigation("SubIngredients");
                 });
 #pragma warning restore 612, 618
         }
