@@ -12,7 +12,7 @@ public interface IImageProcessingInfo
     /// A 64-bit integer specifying the maximum image size in bytes supported by the application.
     /// </value>
     public long ImageSizeLimit { get; }
-    
+
     /// <summary>
     /// Gets the permitted file extensions of the application.
     /// </summary>
@@ -20,7 +20,7 @@ public interface IImageProcessingInfo
     /// A string array of supported file extensions.
     /// </value>
     public string[] PermittedExtensions { get; }
-    
+
     /// <summary>
     /// Gets the temporary image storage path of the application.
     /// </summary>
@@ -32,7 +32,7 @@ public interface IImageProcessingInfo
     /// The absolute path where images are temporarily stored.
     /// </value>
     public string TempImageStoragePath { get; }
-    
+
     /// <summary>
     /// Gets the image storage path of the application.
     /// </summary>

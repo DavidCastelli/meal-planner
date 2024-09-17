@@ -53,7 +53,7 @@ public sealed class CreateMealController : ApiControllerBase
             var validationProblemDetails = new ValidationProblemDetails(ModelState);
             return TypedResults.BadRequest(validationProblemDetails);
         }
-        
+
         var result = validator.Validate(request);
 
         if (!result.IsValid)
@@ -111,7 +111,7 @@ public sealed class CreateMealHandler
     {
         _dbContext = dbContext;
         _userContext = userContext;
-       _imageProcessingInfo = imageProcessingInfo;
+        _imageProcessingInfo = imageProcessingInfo;
     }
 
     /// <summary>
@@ -170,7 +170,7 @@ public sealed class CreateMealHandler
             var tempFilePath = Path.Combine(_imageProcessingInfo.TempImageStoragePath, randomFileName);
             var filePath = Path.Combine(_imageProcessingInfo.ImageStoragePath, randomFileName);
             meal.ImagePath = filePath;
-            
+
             var imageProcessingErrors = await FileHelpers.ProcessFormFileAsync(image, tempFilePath, filePath,
                 _imageProcessingInfo.PermittedExtensions, _imageProcessingInfo.ImageSizeLimit);
 
@@ -178,7 +178,7 @@ public sealed class CreateMealHandler
             {
                 throw new ImageProcessingException(imageProcessingErrors);
             }
-            
+
             isCancellable = false;
         }
 

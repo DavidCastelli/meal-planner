@@ -15,7 +15,6 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Api.Features.RecipeManagement;
 
@@ -55,7 +54,7 @@ public sealed class UpdateRecipeController : ApiControllerBase
             var validationProblemDetails = new ValidationProblemDetails(ModelState);
             return TypedResults.BadRequest(validationProblemDetails);
         }
-        
+
         if (id != request.Id)
         {
             ModelState.AddModelError("Request.InvalidId", "The request id must match the route id.");
@@ -340,7 +339,7 @@ public sealed class UpdateRecipeHandler
                 {
                     var tempFilePath = Path.Combine(_imageProcessingInfo.TempImageStoragePath,
                         Path.GetFileName(recipe.ImagePath));
-                    
+
                     var imageProcessingErrors = await FileHelpers.ProcessFormFileAsync(image, tempFilePath, recipe.ImagePath,
                         _imageProcessingInfo.PermittedExtensions, _imageProcessingInfo.ImageSizeLimit, true);
 
@@ -348,7 +347,7 @@ public sealed class UpdateRecipeHandler
                     {
                         throw new ImageProcessingException(imageProcessingErrors);
                     }
-                    
+
                     isCancellable = false;
                 }
                 else
@@ -365,7 +364,7 @@ public sealed class UpdateRecipeHandler
                     {
                         throw new ImageProcessingException(imageProcessingErrors);
                     }
-                    
+
                     isCancellable = false;
                 }
             }

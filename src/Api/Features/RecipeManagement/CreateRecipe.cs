@@ -53,7 +53,7 @@ public sealed class CreateRecipeController : ApiControllerBase
             var validationProblemDetails = new ValidationProblemDetails(ModelState);
             return TypedResults.BadRequest(validationProblemDetails);
         }
-        
+
         var result = validator.Validate(request);
 
         if (!result.IsValid)
@@ -298,7 +298,7 @@ public sealed class CreateRecipeHandler
             {
                 throw new ImageProcessingException(imageProcessingErrors);
             }
-            
+
             isCancellable = false;
         }
 

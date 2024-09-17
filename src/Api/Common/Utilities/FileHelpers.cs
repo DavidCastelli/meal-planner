@@ -50,13 +50,13 @@ public static class FileHelpers
     public static async Task<Error[]> ProcessFormFileAsync(IFormFile formFile, string tempStoragePath, string storagePath, string[] permittedExtensions, long sizeLimit, bool overwrite = false)
     {
         List<Error> errors = [];
-        
+
         var trustedFileNameForDisplay = WebUtility.HtmlEncode(formFile.FileName);
-        
+
         if (formFile.Length == 0)
         {
             errors.Add(FileErrors.Empty(trustedFileNameForDisplay));
-            
+
             return [.. errors];
         }
 
@@ -64,7 +64,7 @@ public static class FileHelpers
         {
             var megabyteSizeLimit = sizeLimit / 1048576;
             errors.Add(FileErrors.ExceededMaximumSize(trustedFileNameForDisplay, megabyteSizeLimit));
-            
+
             return [.. errors];
         }
 
@@ -100,7 +100,7 @@ public static class FileHelpers
         {
             File.Delete(tempStoragePath);
         }
-        
+
         return [.. errors];
     }
 
@@ -110,7 +110,7 @@ public static class FileHelpers
         {
             return false;
         }
-        
+
         var ext = Path.GetExtension(fileName).ToLowerInvariant();
 
         if (string.IsNullOrEmpty(ext) || !permittedExtensions.Contains(ext))
@@ -123,8 +123,8 @@ public static class FileHelpers
         using var reader = new BinaryReader(data);
         var signatures = FileSignature[ext];
         var headerBytes = reader.ReadBytes(signatures.Max(m => m.Length));
-            
-        return signatures.Any(signature => 
+
+        return signatures.Any(signature =>
             headerBytes.Take(signature.Length).SequenceEqual(signature));
     }
 }

@@ -57,7 +57,7 @@ public sealed class UpdateMealController : ApiControllerBase
             var validationProblemDetails = new ValidationProblemDetails(ModelState);
             return TypedResults.BadRequest(validationProblemDetails);
         }
-        
+
         if (id != request.Id)
         {
             ModelState.AddModelError("Request.InvalidId", "The request id must match the route id.");
@@ -209,7 +209,7 @@ public sealed class UpdateMealHandler
                     {
                         throw new ImageProcessingException(imageProcessingErrors);
                     }
-                    
+
                     isCancellable = false;
                 }
                 else
@@ -226,7 +226,7 @@ public sealed class UpdateMealHandler
                     {
                         throw new ImageProcessingException(imageProcessingErrors);
                     }
-                    
+
                     isCancellable = false;
                 }
             }

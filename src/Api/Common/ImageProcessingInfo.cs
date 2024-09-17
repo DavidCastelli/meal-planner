@@ -13,13 +13,13 @@ public sealed class ImageProcessingInfo : IImageProcessingInfo
 {
     /// <inheritdoc/>
     public long ImageSizeLimit { get; }
-    
+
     /// <inheritdoc/>
     public string[] PermittedExtensions { get; }
-    
+
     /// <inheritdoc/>
     public string TempImageStoragePath { get; }
-    
+
     /// <inheritdoc/>
     public string ImageStoragePath { get; }
 
