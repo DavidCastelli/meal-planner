@@ -31,10 +31,9 @@ public sealed class GetRecipeByIdController : ApiControllerBase
     /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3}"/> object.
     /// </returns>
     [HttpGet("/api/manage/recipes/{id:int}")]
-    [Consumes(MediaTypeNames.Application.Json)]
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(GetByIdRecipeDto), StatusCodes.Status200OK, "application/json")]
+    [ProducesResponseType(typeof(GetByIdRecipeDto), StatusCodes.Status200OK, MediaTypeNames.Application.Json)]
     [Tags("Manage Recipes")]
     public async Task<Results<UnauthorizedHttpResult, NotFound, Ok<GetByIdRecipeDto>>> GetByIdAsync(int id, GetRecipeByIdHandler handler, CancellationToken cancellationToken)
     {
@@ -151,7 +150,7 @@ public sealed class GetRecipeByIdHandler
             subIngredientDtos.Add(subIngredientDto);
         }
 
-        return new GetByIdRecipeDto(recipe.Id, recipe.Title, recipe.Description, recipe.Image, recipeDetailsDto, recipeNutritionDto, directionDtos, tipDtos, mealDtos, subIngredientDtos, recipe.ApplicationUserId);
+        return new GetByIdRecipeDto(recipe.Id, recipe.Title, recipe.Description, recipeDetailsDto, recipeNutritionDto, directionDtos, tipDtos, mealDtos, subIngredientDtos, recipe.ApplicationUserId);
     }
 }
 
@@ -161,7 +160,6 @@ public sealed class GetRecipeByIdHandler
 /// <param name="Id">The id of the recipe.</param>
 /// <param name="Title">The title of the recipe.</param>
 /// <param name="Description">The description of the recipe.</param>
-/// <param name="Image">An url to the image of the recipe</param>
 /// <param name="Details">The recipe details.</param>
 /// <param name="Nutrition">The recipe nutrition.</param>
 /// <param name="Directions">A list of directions belonging to the recipe.</param>
@@ -169,7 +167,7 @@ public sealed class GetRecipeByIdHandler
 /// <param name="Meals">A collections of meals which the recipe belongs to.</param>
 /// <param name="SubIngredients">A collection of sub ingredients belonging to the recipe.</param>
 /// <param name="ApplicationUserId">The id of the user who the meal belongs to.</param>
-public sealed record GetByIdRecipeDto(int Id, String Title, String? Description, String? Image, GetByIdRecipeDetailsDto Details, GetByIdRecipeNutritionDto Nutrition, IList<GetByIdDirectionDto> Directions, ICollection<GetByIdTipDto> Tips, ICollection<GetByIdRecipeMealDto> Meals, ICollection<GetByIdSubIngredientDto> SubIngredients, int ApplicationUserId);
+public sealed record GetByIdRecipeDto(int Id, String Title, String? Description, GetByIdRecipeDetailsDto Details, GetByIdRecipeNutritionDto Nutrition, IList<GetByIdDirectionDto> Directions, ICollection<GetByIdTipDto> Tips, ICollection<GetByIdRecipeMealDto> Meals, ICollection<GetByIdSubIngredientDto> SubIngredients, int ApplicationUserId);
 
 /// <summary>
 /// The DTO for recipe details to return to the client.

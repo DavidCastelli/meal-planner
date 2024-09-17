@@ -33,7 +33,7 @@ namespace Api.Infrastructure.Migrations
                     b.Property<int>("ApplicationUserId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Image")
+                    b.Property<string>("ImagePath")
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
@@ -64,7 +64,7 @@ namespace Api.Infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<string>("Image")
+                    b.Property<string>("ImagePath")
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 

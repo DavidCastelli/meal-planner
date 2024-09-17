@@ -1,3 +1,4 @@
+using Api.Common;
 using Api.Common.Interfaces;
 using Api.Infrastructure;
 using Api.Infrastructure.Authorization;
@@ -30,6 +31,8 @@ public static class ConfigureServiceCollectionExtensions
         }
 
         services.AddValidatorsFromAssembly(typeof(Program).Assembly, includeInternalTypes: true);
+
+        services.AddSingleton<IImageProcessingInfo, ImageProcessingInfo>();
 
         return services;
     }

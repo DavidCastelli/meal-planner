@@ -25,9 +25,8 @@ public sealed class GetRecipesController : ApiControllerBase
     /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2}"/> object.
     /// </returns>
     [HttpGet("/api/manage/recipes")]
-    [Consumes(MediaTypeNames.Application.Json)]
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(IEnumerable<GetRecipesDto>), StatusCodes.Status200OK, "application/json")]
+    [ProducesResponseType(typeof(IEnumerable<GetRecipesDto>), StatusCodes.Status200OK, MediaTypeNames.Application.Json)]
     [Tags("Manage Recipes")]
     public async Task<Results<UnauthorizedHttpResult, Ok<IEnumerable<GetRecipesDto>>>> GetAsync(GetRecipesHandler handler, CancellationToken cancellationToken)
     {
@@ -69,7 +68,7 @@ public sealed class GetRecipesHandler
         var recipes = await _dbContext.Recipes
             .AsNoTracking()
             .Where(r => r.ApplicationUserId == _userContext.UserId)
-            .Select(r => new GetRecipesDto(r.Id, r.Title, r.Image))
+            .Select(r => new GetRecipesDto(r.Id, r.Title))
             .ToListAsync(cancellationToken);
 
         return recipes;
@@ -81,5 +80,4 @@ public sealed class GetRecipesHandler
 /// </summary>
 /// <param name="Id">The id of the recipe.</param>
 /// <param name="Title">The title of the recipe.</param>
-/// <param name="Image">An url to the image of the recipe.</param>
-public sealed record GetRecipesDto(int Id, string Title, string? Image);
+public sealed record GetRecipesDto(int Id, string Title);

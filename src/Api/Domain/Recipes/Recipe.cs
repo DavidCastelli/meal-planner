@@ -33,12 +33,17 @@ public sealed class Recipe
     public string? Description { get; set; }
 
     /// <summary>
-    /// Gets or sets the image of the recipe.
+    /// Gets or sets the image path of the recipe.
     /// </summary>
+    /// <remarks>
+    /// The image path is the location in which the image is stored on the server.
+    /// The path consists of a storage location which is set in the application configuration
+    /// and a file name which is randomly generated.
+    /// </remarks>
     /// <value>
-    /// A string specifying a valid url to an image of the recipe or possibly null.
+    /// A string specifying the path to the image of the recipe or possibly null.
     /// </value>
-    public string? Image { get; set; }
+    public string? ImagePath { get; set; }
 
     /// <summary>
     /// Gets or sets the <see cref="Api.Domain.Recipes.RecipeDetails"/> of the recipe.

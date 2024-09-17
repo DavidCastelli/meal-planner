@@ -1,8 +1,10 @@
 using System.Net.Mime;
+using System.Text.Json;
 
 using Api.Common;
 using Api.Common.Exceptions;
 using Api.Common.Interfaces;
+using Api.Common.Utilities;
 using Api.Domain;
 using Api.Domain.Ingredients;
 using Api.Domain.Recipes;
@@ -25,22 +27,33 @@ public sealed class CreateRecipeController : ApiControllerBase
     /// </summary>
     /// <param name="validator">The validator for the request.</param>
     /// <param name="handler">The handler for the request.</param>
-    /// <param name="request">The request.</param>
+    /// <param name="data">The data for the request.</param>
+    /// <param name="image">The image for the request.</param>
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <returns>
     /// A task which represents the asynchronous write operation.
     /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3, TResult4}"/> object.
     /// </returns>
     [HttpPost("/api/manage/recipes")]
-    [Consumes(MediaTypeNames.Application.Json)]
+    [Consumes(MediaTypeNames.Multipart.FormData)]
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, "application/problem+json")]
-    [ProducesResponseType(typeof(CreateRecipeDto), StatusCodes.Status201Created, "application/json")]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(CreateRecipeDto), StatusCodes.Status201Created, MediaTypeNames.Application.Json)]
     [Tags("Manage Recipes")]
-    public async Task<Results<UnauthorizedHttpResult, ValidationProblem, BadRequest, Created<CreateRecipeDto>>> CreateAsync(
-        IValidator<CreateRecipeRequest> validator, CreateRecipeHandler handler, CreateRecipeRequest request,
+    public async Task<Results<UnauthorizedHttpResult, ValidationProblem, BadRequest<ValidationProblemDetails>, Created<CreateRecipeDto>>> CreateAsync(
+        IValidator<CreateRecipeRequest> validator, CreateRecipeHandler handler, IFormFile data, IFormFile? image,
         CancellationToken cancellationToken)
     {
+        var request = await JsonSerializer.DeserializeAsync<CreateRecipeRequest>(
+            data.OpenReadStream(), cancellationToken: cancellationToken);
+
+        if (request == null)
+        {
+            ModelState.AddModelError("Request.InvalidData", "The request data cannot be null.");
+            var validationProblemDetails = new ValidationProblemDetails(ModelState);
+            return TypedResults.BadRequest(validationProblemDetails);
+        }
+        
         var result = validator.Validate(request);
 
         if (!result.IsValid)
@@ -48,7 +61,7 @@ public sealed class CreateRecipeController : ApiControllerBase
             return TypedResults.ValidationProblem(result.ToDictionary());
         }
 
-        var createRecipeDto = await handler.HandleAsync(request, cancellationToken);
+        var createRecipeDto = await handler.HandleAsync(request, image, cancellationToken);
 
         var location = Url.Action(nameof(CreateAsync), new { id = createRecipeDto.Id }) ?? $"/{createRecipeDto.Id}";
         return TypedResults.Created(location, createRecipeDto);
@@ -60,13 +73,12 @@ public sealed class CreateRecipeController : ApiControllerBase
 /// </summary>
 /// <param name="Title">The title of the recipe.</param>
 /// <param name="Description">The description of the recipe.</param>
-/// <param name="Image">An url to the image of the recipe.</param>
 /// <param name="Details">The details of the recipe.</param>
 /// <param name="Nutrition">The nutrition of the recipe.</param>
 /// <param name="Directions">A list of directions belonging to the recipe.</param>
 /// <param name="Tips">A list of tips belonging to the recipe.</param>
 /// <param name="SubIngredients">A list of sub ingredients belonging to the recipe.</param>
-public sealed record CreateRecipeRequest(string Title, string? Description, string? Image, CreateRecipeRequestRecipeDetails Details, CreateRecipeRequestRecipeNutrition Nutrition, IList<CreateRecipeRequestDirection> Directions, ICollection<CreateRecipeRequestTip> Tips, ICollection<CreateRecipeRequestSubIngredient> SubIngredients);
+public sealed record CreateRecipeRequest(string Title, string? Description, CreateRecipeRequestRecipeDetails Details, CreateRecipeRequestRecipeNutrition Nutrition, IList<CreateRecipeRequestDirection> Directions, ICollection<CreateRecipeRequestTip> Tips, ICollection<CreateRecipeRequestSubIngredient> SubIngredients);
 
 /// <summary>
 /// The DTO for the recipe details in a create recipe request.
@@ -119,11 +131,11 @@ internal sealed class CreateRecipeRequestRecipeDetailsValidator : AbstractValida
         RuleFor(rd => rd.PrepTime)
             .GreaterThanOrEqualTo(1)
             .When(rd => rd.PrepTime != null);
-        
+
         RuleFor(rd => rd.CookTime)
             .GreaterThanOrEqualTo(1)
             .When(rd => rd.CookTime != null);
-        
+
         RuleFor(rd => rd.Servings)
             .GreaterThanOrEqualTo(1)
             .When(rd => rd.Servings != null);
@@ -137,7 +149,7 @@ internal sealed class CreateRecipeRequestRecipeNutritionValidator : AbstractVali
         RuleFor(rn => rn.Calories)
             .GreaterThanOrEqualTo(1)
             .When(rn => rn.Calories != null);
-        
+
         RuleFor(rn => rn.Fat)
             .GreaterThanOrEqualTo(1)
             .When(rn => rn.Fat != null);
@@ -188,10 +200,6 @@ internal sealed class CreateRecipeRequestValidator : AbstractValidator<CreateRec
             .MaximumLength(255)
             .When(request => request.Description != null);
 
-        RuleFor(request => request.Image)
-            .MaximumLength(255)
-            .When(request => request.Image != null);
-
         RuleFor(request => request.Details)
             .NotNull()
             .SetValidator(new CreateRecipeRequestRecipeDetailsValidator());
@@ -238,42 +246,64 @@ public sealed class CreateRecipeHandler
 {
     private readonly MealPlannerContext _dbContext;
     private readonly IUserContext _userContext;
+    private readonly IImageProcessingInfo _imageProcessingInfo;
 
     /// <summary>
     /// Creates a <see cref="CreateRecipeHandler"/>.
     /// </summary>
     /// <param name="dbContext">The database context.</param>
     /// <param name="userContext">The user context.</param>
-    public CreateRecipeHandler(MealPlannerContext dbContext, IUserContext userContext)
+    /// <param name="imageProcessingInfo">The image processing configuration of the application.</param>
+    public CreateRecipeHandler(MealPlannerContext dbContext, IUserContext userContext, IImageProcessingInfo imageProcessingInfo)
     {
         _dbContext = dbContext;
         _userContext = userContext;
+        _imageProcessingInfo = imageProcessingInfo;
     }
 
     /// <summary>
     /// Handles the database operations necessary to create a recipe.
     /// </summary>
     /// <param name="request">The request.</param>
+    /// <param name="image">The image for the request.</param>
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <returns>
     /// A task which represents the asynchronous write operation.
     /// The result of the task upon completion returns a <see cref="CreateRecipeDto"/>.
     /// </returns>
     /// <exception cref="RecipeValidationException">Is thrown if validation fails on the <paramref name="request"/>.</exception>
-    public async Task<CreateRecipeDto> HandleAsync(CreateRecipeRequest request, CancellationToken cancellationToken)
+    public async Task<CreateRecipeDto> HandleAsync(CreateRecipeRequest request, IFormFile? image, CancellationToken cancellationToken)
     {
-        var errors = ValidateRecipe(request);
+        var validationErrors = ValidateRecipe(request);
 
-        if (errors.Length != 0)
+        if (validationErrors.Length != 0)
         {
-            throw new RecipeValidationException(errors);
+            throw new RecipeValidationException(validationErrors);
         }
 
         var recipe = FromDto(request, _userContext.UserId);
 
-        _dbContext.Recipes.Add(recipe);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        bool isCancellable = true;
+        if (image != null)
+        {
+            var randomFileName = Path.GetRandomFileName();
+            var tempFilePath = Path.Combine(_imageProcessingInfo.TempImageStoragePath, randomFileName);
+            var filePath = Path.Combine(_imageProcessingInfo.ImageStoragePath, randomFileName);
+            recipe.ImagePath = filePath;
 
+            var imageProcessingErrors = await FileHelpers.ProcessFormFileAsync(image, tempFilePath, filePath,
+                _imageProcessingInfo.PermittedExtensions, _imageProcessingInfo.ImageSizeLimit);
+
+            if (imageProcessingErrors.Length != 0)
+            {
+                throw new ImageProcessingException(imageProcessingErrors);
+            }
+            
+            isCancellable = false;
+        }
+
+        _dbContext.Recipes.Add(recipe);
+        await _dbContext.SaveChangesAsync(isCancellable ? cancellationToken : CancellationToken.None);
         return ToDto(recipe);
     }
 
@@ -321,7 +351,6 @@ public sealed class CreateRecipeHandler
         {
             Title = request.Title,
             Description = request.Description,
-            Image = request.Image,
             RecipeDetails = recipeDetails,
             RecipeNutrition = recipeNutrition,
             ApplicationUserId = userId
@@ -359,7 +388,7 @@ public sealed class CreateRecipeHandler
     }
 
     private static CreateRecipeDto ToDto(Recipe recipe) =>
-        new(recipe.Id, recipe.Title, recipe.Image);
+        new(recipe.Id, recipe.Title);
 }
 
 /// <summary>
@@ -367,5 +396,4 @@ public sealed class CreateRecipeHandler
 /// </summary>
 /// <param name="Id">The id of the recipe.</param>
 /// <param name="Title">The title of the recipe.</param>
-/// <param name="Image">An url to the image of the recipe.</param>
-public sealed record CreateRecipeDto(int Id, string Title, string? Image);
+public sealed record CreateRecipeDto(int Id, string Title);

@@ -1,3 +1,5 @@
+using System.Net.Mime;
+
 using Api.Common;
 using Api.Common.Exceptions;
 using Api.Common.Interfaces;
@@ -6,53 +8,54 @@ using Api.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Api.Features.MealManagement;
 
 /// <summary>
-/// Controller that handles requests to delete a meal.
+/// Controller that handles requests to get the image belonging to a meal.
 /// </summary>
-public sealed class DeleteMealController : ApiControllerBase
+public sealed class GetMealImageByIdController : ApiControllerBase
 {
     /// <summary>
-    /// Action method responsible for meal deletion.
+    /// Action method responsible for getting the image of a meal.
     /// </summary>
-    /// <param name="id">The id of the meal to be deleted.</param>
+    /// <param name="id">The id of the meal whose image to get.</param>
     /// <param name="handler">The handler for the request.</param>
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <returns>
-    /// A task which represents the asynchronous write operation.
+    /// A task which represents the asynchronous read operation.
     /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3}"/> object.
     /// </returns>
-    [HttpDelete("/api/manage/meals{id:int}")]
+    [HttpGet("/api/manage/meals/{id:int}/image")]
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PhysicalFileHttpResult), StatusCodes.Status200OK, MediaTypeNames.Image.Jpeg)]
     [Tags("Manage Meals")]
-    public async Task<Results<UnauthorizedHttpResult, NotFound, Ok>> DeleteAsync(int id, DeleteMealHandler handler, CancellationToken cancellationToken)
+    public async Task<Results<UnauthorizedHttpResult, NotFound, PhysicalFileHttpResult>> GetByIdAsync(int id, GetMealImageByIdHandler handler, CancellationToken cancellationToken)
     {
-        await handler.HandleAsync(id, cancellationToken);
-
-        return TypedResults.Ok();
+        var imagePath = await handler.HandleAsync(id, cancellationToken);
+        return TypedResults.PhysicalFile(imagePath, MediaTypeNames.Image.Jpeg);
     }
 }
 
 /// <summary>
-/// The handler that handles a meal deletion request.
+/// The handler that handles getting a meals image path.
 /// </summary>
-public sealed class DeleteMealHandler
+public sealed class GetMealImageByIdHandler
 {
     private readonly MealPlannerContext _dbContext;
     private readonly IUserContext _userContext;
     private readonly IAuthorizationService _authorizationService;
 
     /// <summary>
-    /// Creates a <see cref="DeleteMealHandler"/>.
+    /// Creates a <see cref="GetMealImageByIdHandler"/>.
     /// </summary>
     /// <param name="dbContext">The database context.</param>
     /// <param name="userContext">The user context.</param>
     /// <param name="authorizationService">The authorization service.</param>
-    public DeleteMealHandler(MealPlannerContext dbContext, IUserContext userContext, IAuthorizationService authorizationService)
+    public GetMealImageByIdHandler(MealPlannerContext dbContext, IUserContext userContext,
+        IAuthorizationService authorizationService)
     {
         _dbContext = dbContext;
         _userContext = userContext;
@@ -60,35 +63,39 @@ public sealed class DeleteMealHandler
     }
 
     /// <summary>
-    /// Handles the database operations necessary to delete a meal.
+    /// Handles the database operation necessary to get the image path of a meal by id.
     /// </summary>
-    /// <param name="id">The id of the meal to be deleted.</param>
+    /// <param name="id">The id of the meal whose image path to get.</param>
     /// <param name="cancellationToken">The cancellation token for the request.</param>
+    /// <returns>
+    /// A task which represents the asynchronous read operation.
+    /// The result of the task upon completion returns the image path of the meal.
+    /// </returns>
     /// <exception cref="MealNotFoundException">Is thrown if the meal could not be found in the data store.</exception>
+    /// <exception cref="MealImageNotFoundException">Is thrown if the meals image path is null.</exception>
     /// <exception cref="ForbiddenException">Is thrown if the user is authenticated but lacks permission to access the resource.</exception>
     /// <exception cref="UnauthorizedException">Is thrown if the user lacks the necessary authentication credentials.</exception>
-    public async Task HandleAsync(int id, CancellationToken cancellationToken)
+    public async Task<string> HandleAsync(int id, CancellationToken cancellationToken)
     {
-        var meal = await _dbContext.Meals.FindAsync([id], cancellationToken);
+        var meal = await _dbContext.Meals
+            .AsNoTracking()
+            .SingleOrDefaultAsync(m => m.Id == id, cancellationToken);
 
         if (meal == null)
         {
             throw new MealNotFoundException(id);
         }
 
+        if (meal.ImagePath == null)
+        {
+            throw new MealImageNotFoundException(id);
+        }
+
         var authorizationResult = await _authorizationService.AuthorizeAsync(_userContext.User, meal, "SameUserPolicy");
 
         if (authorizationResult.Succeeded)
         {
-            bool isCancellable = true;
-            if (meal.ImagePath != null)
-            {
-                File.Delete(meal.ImagePath);
-                isCancellable = false;
-            }
-
-            _dbContext.Meals.Remove(meal);
-            await _dbContext.SaveChangesAsync(isCancellable ? cancellationToken : CancellationToken.None);
+            return meal.ImagePath;
         }
         else if (_userContext.IsAuthenticated)
         {

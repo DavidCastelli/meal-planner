@@ -1,8 +1,10 @@
 using System.Net.Mime;
+using System.Text.Json;
 
 using Api.Common;
 using Api.Common.Exceptions;
 using Api.Common.Interfaces;
+using Api.Common.Utilities;
 using Api.Domain;
 using Api.Domain.Meals;
 using Api.Domain.Recipes;
@@ -27,20 +29,31 @@ public sealed class CreateMealController : ApiControllerBase
     /// </summary>
     /// <param name="validator">The validator for the request.</param>
     /// <param name="handler">The handler for the request.</param>
-    /// <param name="request">The request.</param>
+    /// <param name="data">The data for the request.</param>
+    /// <param name="image">The image for the request.</param>
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <returns>
     /// A task which represents the asynchronous write operation.
     /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3, TResult4}"/> object.
     /// </returns>
     [HttpPost("/api/manage/meals")]
-    [Consumes(MediaTypeNames.Application.Json)]
+    [Consumes(MediaTypeNames.Multipart.FormData)]
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, "application/problem+json")]
-    [ProducesResponseType(typeof(CreateMealDto), StatusCodes.Status201Created, "application/json")]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(CreateMealDto), StatusCodes.Status201Created, MediaTypeNames.Application.Json)]
     [Tags("Manage Meals")]
-    public async Task<Results<UnauthorizedHttpResult, ValidationProblem, BadRequest, Created<CreateMealDto>>> CreateAsync(IValidator<CreateMealRequest> validator, CreateMealHandler handler, CreateMealRequest request, CancellationToken cancellationToken)
+    public async Task<Results<UnauthorizedHttpResult, ValidationProblem, BadRequest<ValidationProblemDetails>, Created<CreateMealDto>>> CreateAsync(IValidator<CreateMealRequest> validator, CreateMealHandler handler, IFormFile data, IFormFile? image, CancellationToken cancellationToken)
     {
+        var request = await JsonSerializer.DeserializeAsync<CreateMealRequest>(
+            data.OpenReadStream(), cancellationToken: cancellationToken);
+
+        if (request == null)
+        {
+            ModelState.AddModelError("Request.InvalidData", "The request data cannot be null.");
+            var validationProblemDetails = new ValidationProblemDetails(ModelState);
+            return TypedResults.BadRequest(validationProblemDetails);
+        }
+        
         var result = validator.Validate(request);
 
         if (!result.IsValid)
@@ -48,7 +61,7 @@ public sealed class CreateMealController : ApiControllerBase
             return TypedResults.ValidationProblem(result.ToDictionary());
         }
 
-        var createMealDto = await handler.HandleAsync(request, cancellationToken);
+        var createMealDto = await handler.HandleAsync(request, image, cancellationToken);
 
         var location = Url.Action(nameof(CreateAsync), new { id = createMealDto.Id }) ?? $"/{createMealDto.Id}";
         return TypedResults.Created(location, createMealDto);
@@ -59,10 +72,9 @@ public sealed class CreateMealController : ApiControllerBase
 /// The request for meal creation.
 /// </summary>
 /// <param name="Title">The title of the meal.</param>
-/// <param name="Image">An url to the image of the meal.</param>
 /// <param name="TagIds">A collection of tag ids to be included in the meal.</param>
 /// <param name="RecipeIds">A collection of recipe ids to be included in the meal.</param>
-public sealed record CreateMealRequest(string Title, string? Image, ICollection<int> TagIds, ICollection<int> RecipeIds);
+public sealed record CreateMealRequest(string Title, ICollection<int> TagIds, ICollection<int> RecipeIds);
 
 internal sealed class CreateMealRequestValidator : AbstractValidator<CreateMealRequest>
 {
@@ -71,10 +83,6 @@ internal sealed class CreateMealRequestValidator : AbstractValidator<CreateMealR
         RuleFor(request => request.Title)
             .NotEmpty()
             .MaximumLength(20);
-
-        RuleFor(request => request.Image)
-            .MaximumLength(255)
-            .When(request => request.Image != null);
 
         RuleFor(request => request.TagIds)
             .NotNull();
@@ -91,29 +99,33 @@ public sealed class CreateMealHandler
 {
     private readonly MealPlannerContext _dbContext;
     private readonly IUserContext _userContext;
+    private readonly IImageProcessingInfo _imageProcessingInfo;
 
     /// <summary>
     /// Creates a <see cref="CreateMealHandler"/>.
     /// </summary>
     /// <param name="dbContext">The database context.</param>
     /// <param name="userContext">The user context.</param>
-    public CreateMealHandler(MealPlannerContext dbContext, IUserContext userContext)
+    /// <param name="imageProcessingInfo">The image processing configuration of the application.</param>
+    public CreateMealHandler(MealPlannerContext dbContext, IUserContext userContext, IImageProcessingInfo imageProcessingInfo)
     {
         _dbContext = dbContext;
         _userContext = userContext;
+       _imageProcessingInfo = imageProcessingInfo;
     }
 
     /// <summary>
     /// Handles the database operations necessary to create a meal.
     /// </summary>
     /// <param name="request">The request.</param>
+    /// <param name="image">The image for the request.</param>
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <returns>
     /// A task which represents the asynchronous write operation.
     /// The result of the task upon completion returns a <see cref="CreateMealDto"/>.
     /// </returns>
     /// <exception cref="CreateMealValidationException">Is thrown if validation fails on the <paramref name="request"/>.</exception>
-    public async Task<CreateMealDto> HandleAsync(CreateMealRequest request, CancellationToken cancellationToken)
+    public async Task<CreateMealDto> HandleAsync(CreateMealRequest request, IFormFile? image, CancellationToken cancellationToken)
     {
         var tags = await _dbContext.Tags
             .ToListAsync(cancellationToken);
@@ -125,11 +137,11 @@ public sealed class CreateMealHandler
         var validRecipeIds = userRecipes.Select(r => r.Id);
         var validTagIds = tags.Select(t => t.Id);
 
-        var errors = ValidateIds(request, validTagIds, validRecipeIds, _userContext.UserId);
+        var validationErrors = ValidateIds(request, validTagIds, validRecipeIds, _userContext.UserId);
 
-        if (errors.Length != 0)
+        if (validationErrors.Length != 0)
         {
-            throw new CreateMealValidationException(errors);
+            throw new CreateMealValidationException(validationErrors);
         }
 
         var recipesToAdd = userRecipes.Where(r => request.RecipeIds.Contains(r.Id));
@@ -138,7 +150,6 @@ public sealed class CreateMealHandler
         var meal = new Meal
         {
             Title = request.Title,
-            Image = request.Image,
             ApplicationUserId = _userContext.UserId
         };
 
@@ -152,8 +163,27 @@ public sealed class CreateMealHandler
             meal.Tags.Add(tag);
         }
 
+        bool isCancellable = true;
+        if (image != null)
+        {
+            var randomFileName = Path.GetRandomFileName();
+            var tempFilePath = Path.Combine(_imageProcessingInfo.TempImageStoragePath, randomFileName);
+            var filePath = Path.Combine(_imageProcessingInfo.ImageStoragePath, randomFileName);
+            meal.ImagePath = filePath;
+            
+            var imageProcessingErrors = await FileHelpers.ProcessFormFileAsync(image, tempFilePath, filePath,
+                _imageProcessingInfo.PermittedExtensions, _imageProcessingInfo.ImageSizeLimit);
+
+            if (imageProcessingErrors.Length != 0)
+            {
+                throw new ImageProcessingException(imageProcessingErrors);
+            }
+            
+            isCancellable = false;
+        }
+
         _dbContext.Meals.Add(meal);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _dbContext.SaveChangesAsync(isCancellable ? cancellationToken : CancellationToken.None);
 
         return ToDto(meal);
     }
@@ -176,7 +206,7 @@ public sealed class CreateMealHandler
     }
 
     private static CreateMealDto ToDto(Meal meal) =>
-        new(meal.Id, meal.Title, meal.Image);
+        new(meal.Id, meal.Title);
 }
 
 /// <summary>
@@ -184,5 +214,4 @@ public sealed class CreateMealHandler
 /// </summary>
 /// <param name="Id">The id of the meal.</param>
 /// <param name="Title">The title of the meal.</param>
-/// <param name="Image">An url to the image of the meal.</param>
-public sealed record CreateMealDto(int Id, string Title, string? Image);
+public sealed record CreateMealDto(int Id, string Title);

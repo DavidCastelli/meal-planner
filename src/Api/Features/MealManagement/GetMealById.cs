@@ -30,10 +30,9 @@ public sealed class GetMealByIdController : ApiControllerBase
     /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3}"/> object.
     /// </returns>
     [HttpGet("/api/manage/meals/{id:int}")]
-    [Consumes(MediaTypeNames.Application.Json)]
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(GetByIdMealDto), StatusCodes.Status200OK, "application/json")]
+    [ProducesResponseType(typeof(GetByIdMealDto), StatusCodes.Status200OK, MediaTypeNames.Application.Json)]
     [Tags("Manage Meals")]
     public async Task<Results<UnauthorizedHttpResult, NotFound, Ok<GetByIdMealDto>>> GetByIdAsync(int id, GetMealByIdHandler handler, CancellationToken cancellationToken)
     {
@@ -114,20 +113,20 @@ public sealed class GetMealByIdHandler
         foreach (var tag in meal.Tags)
         {
             var tagDto = new GetByIdTagDto(tag.Id, tag.Type);
-            
+
             tagDtos.Add(tagDto);
         }
-        
+
         var recipeDtos = new List<GetByIdMealRecipeDto>();
 
         foreach (var recipe in meal.Recipes)
         {
-            var recipeDto = new GetByIdMealRecipeDto(recipe.Id, recipe.Title, recipe.Description, recipe.Image);
-            
+            var recipeDto = new GetByIdMealRecipeDto(recipe.Id, recipe.Title, recipe.Description);
+
             recipeDtos.Add(recipeDto);
         }
-        
-        return new GetByIdMealDto(meal.Id, meal.Title, meal.Image, tagDtos, recipeDtos, meal.ApplicationUserId);
+
+        return new GetByIdMealDto(meal.Id, meal.Title, tagDtos, recipeDtos, meal.ApplicationUserId);
     }
 }
 
@@ -136,11 +135,10 @@ public sealed class GetMealByIdHandler
 /// </summary>
 /// <param name="Id">The id of the meal.</param>
 /// <param name="Title">The title of the meal.</param>
-/// <param name="Image">An url to the image of the meal.</param>
 /// <param name="Tags">A collection of tags belonging to the meal.</param>
 /// <param name="Recipes">A collection of recipes belonging to the meal.</param>
 /// <param name="ApplicationUserId">The id of the user who the meal belongs to.</param>
-public sealed record GetByIdMealDto(int Id, string Title, string? Image, ICollection<GetByIdTagDto> Tags, ICollection<GetByIdMealRecipeDto> Recipes, int ApplicationUserId);
+public sealed record GetByIdMealDto(int Id, string Title, ICollection<GetByIdTagDto> Tags, ICollection<GetByIdMealRecipeDto> Recipes, int ApplicationUserId);
 
 /// <summary>
 /// The DTO for a tag to return to the client.
@@ -155,5 +153,4 @@ public sealed record GetByIdTagDto(int Id, TagType TagType);
 /// <param name="Id">The id of the recipe.</param>
 /// <param name="Title">The title of the recipe.</param>
 /// <param name="Description">The description of the recipe.</param>
-/// <param name="Image">An url to the image of the recipe.</param>
-public sealed record GetByIdMealRecipeDto(int Id, string Title, string? Description, string? Image);
+public sealed record GetByIdMealRecipeDto(int Id, string Title, string? Description);

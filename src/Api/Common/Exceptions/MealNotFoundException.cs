@@ -6,7 +6,7 @@ namespace Api.Common.Exceptions;
 public sealed class MealNotFoundException : NotFoundException
 {
     /// <summary>
-    /// Create a <see cref="MealNotFoundException"/> given a <paramref name="mealId"/>.
+    /// Creates a <see cref="MealNotFoundException"/> given a <paramref name="mealId"/>.
     /// </summary>
     /// <param name="mealId">The id of the meal that could not be found.</param>
     public MealNotFoundException(int mealId)

@@ -1,8 +1,10 @@
 using System.Net.Mime;
+using System.Text.Json;
 
 using Api.Common;
 using Api.Common.Exceptions;
 using Api.Common.Interfaces;
+using Api.Common.Utilities;
 using Api.Domain;
 using Api.Domain.Ingredients;
 using Api.Domain.Recipes;
@@ -13,6 +15,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Api.Features.RecipeManagement;
 
@@ -27,24 +30,37 @@ public sealed class UpdateRecipeController : ApiControllerBase
     /// <param name="id">The id of the recipe to update.</param>
     /// <param name="validator">The validator for the request.</param>
     /// <param name="handler">The handler for the request.</param>
-    /// <param name="request">The request.</param>
+    /// <param name="data">The data for the request.</param>
+    /// <param name="image">The image for the request.</param>
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <returns>
     /// A task which represents the asynchronous write operation.
     /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3, TReuslt4, TResult5}"/> object.
     /// </returns>
     [HttpPut("/api/manage/recipes/{id:int}")]
-    [Consumes(MediaTypeNames.Application.Json)]
+    [Consumes(MediaTypeNames.Multipart.FormData)]
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
     [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(UpdateRecipeDto), StatusCodes.Status200OK, "application/json")]
+    [ProducesResponseType(typeof(UpdateRecipeDto), StatusCodes.Status200OK, MediaTypeNames.Application.Json)]
     [Tags("Manage Recipes")]
-    public async Task<Results<UnauthorizedHttpResult, BadRequest, ValidationProblem, NotFound, Ok<UpdateRecipeDto>>> UpdateAsync(int id, IValidator<UpdateRecipeRequest> validator, UpdateRecipeHandler handler, UpdateRecipeRequest request, CancellationToken cancellationToken)
+    public async Task<Results<UnauthorizedHttpResult, BadRequest<ValidationProblemDetails>, ValidationProblem, NotFound, Ok<UpdateRecipeDto>>> UpdateAsync(int id, IValidator<UpdateRecipeRequest> validator, UpdateRecipeHandler handler, IFormFile data, IFormFile? image, CancellationToken cancellationToken)
     {
+        var request = await JsonSerializer.DeserializeAsync<UpdateRecipeRequest>(
+            data.OpenReadStream(), cancellationToken: cancellationToken);
+
+        if (request == null)
+        {
+            ModelState.AddModelError("Request.InvalidData", "The request data cannot be null.");
+            var validationProblemDetails = new ValidationProblemDetails(ModelState);
+            return TypedResults.BadRequest(validationProblemDetails);
+        }
+        
         if (id != request.Id)
         {
-            return TypedResults.BadRequest();
+            ModelState.AddModelError("Request.InvalidId", "The request id must match the route id.");
+            var validationProblemDetails = new ValidationProblemDetails(ModelState);
+            return TypedResults.BadRequest(validationProblemDetails);
         }
 
         var result = validator.Validate(request);
@@ -54,7 +70,7 @@ public sealed class UpdateRecipeController : ApiControllerBase
             return TypedResults.ValidationProblem(result.ToDictionary());
         }
 
-        var updateRecipeDto = await handler.HandleAsync(request, cancellationToken);
+        var updateRecipeDto = await handler.HandleAsync(request, image, cancellationToken);
 
         return TypedResults.Ok(updateRecipeDto);
     }
@@ -66,13 +82,12 @@ public sealed class UpdateRecipeController : ApiControllerBase
 /// <param name="Id">The id of the recipe to update.</param>
 /// <param name="Title">The title of the recipe.</param>
 /// <param name="Description">The description of the recipe.</param>
-/// <param name="Image">An url to the image of the recipe.</param>
 /// <param name="Details">The details of the recipe.</param>
 /// <param name="Nutrition">The nutrition of the recipe.</param>
 /// <param name="Directions">A list of directions belonging to the recipe.</param>
 /// <param name="Tips">A list of tips belonging to the recipe.</param>
 /// <param name="SubIngredients">A list of sub ingredients belonging to the recipe.</param>
-public sealed record UpdateRecipeRequest(int Id, string Title, string? Description, string? Image, UpdateRecipeRequestRecipeDetails Details, UpdateRecipeRequestRecipeNutrition Nutrition, IList<UpdateRecipeRequestDirection> Directions, ICollection<UpdateRecipeRequestTip> Tips, ICollection<UpdateRecipeRequestSubIngredient> SubIngredients);
+public sealed record UpdateRecipeRequest(int Id, string Title, string? Description, UpdateRecipeRequestRecipeDetails Details, UpdateRecipeRequestRecipeNutrition Nutrition, IList<UpdateRecipeRequestDirection> Directions, ICollection<UpdateRecipeRequestTip> Tips, ICollection<UpdateRecipeRequestSubIngredient> SubIngredients);
 
 /// <summary>
 /// The DTO for the recipe details in an update recipe request.
@@ -125,11 +140,11 @@ internal sealed class UpdateRecipeRequestRecipeDetailsValidator : AbstractValida
         RuleFor(rd => rd.PrepTime)
             .GreaterThanOrEqualTo(1)
             .When(rd => rd.PrepTime != null);
-        
+
         RuleFor(rd => rd.CookTime)
             .GreaterThanOrEqualTo(1)
             .When(rd => rd.CookTime != null);
-        
+
         RuleFor(rd => rd.Servings)
             .GreaterThanOrEqualTo(1)
             .When(rd => rd.Servings != null);
@@ -143,7 +158,7 @@ internal sealed class UpdateRecipeRequestRecipeNutritionValidator : AbstractVali
         RuleFor(rn => rn.Calories)
             .GreaterThanOrEqualTo(1)
             .When(rn => rn.Calories != null);
-        
+
         RuleFor(rn => rn.Fat)
             .GreaterThanOrEqualTo(1)
             .When(rn => rn.Fat != null);
@@ -194,10 +209,6 @@ internal sealed class UpdateRecipeRequestValidator : AbstractValidator<UpdateRec
             .MaximumLength(255)
             .When(request => request.Description != null);
 
-        RuleFor(request => request.Image)
-            .MaximumLength(255)
-            .When(request => request.Image != null);
-
         RuleFor(request => request.Details)
             .NotNull()
             .SetValidator(new UpdateRecipeRequestRecipeDetailsValidator());
@@ -245,6 +256,7 @@ public sealed class UpdateRecipeHandler
     private readonly MealPlannerContext _dbContext;
     private readonly IUserContext _userContext;
     private readonly IAuthorizationService _authorizationService;
+    private readonly IImageProcessingInfo _imageProcessingInfo;
 
     /// <summary>
     /// Creates a <see cref="UpdateRecipeHandler"/>.
@@ -252,17 +264,20 @@ public sealed class UpdateRecipeHandler
     /// <param name="dbContext">The database context.</param>
     /// <param name="userContext">The user context.</param>
     /// <param name="authorizationService">The authorization service.</param>
-    public UpdateRecipeHandler(MealPlannerContext dbContext, IUserContext userContext, IAuthorizationService authorizationService)
+    /// <param name="imageProcessingInfo">The image processing configuration of the application.</param>
+    public UpdateRecipeHandler(MealPlannerContext dbContext, IUserContext userContext, IAuthorizationService authorizationService, IImageProcessingInfo imageProcessingInfo)
     {
         _dbContext = dbContext;
         _userContext = userContext;
         _authorizationService = authorizationService;
+        _imageProcessingInfo = imageProcessingInfo;
     }
 
     /// <summary>
     /// Handles the database operations necessary to update a recipe.
     /// </summary>
     /// <param name="request">The request.</param>
+    /// <param name="image">The image for the request.</param>
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <returns>
     /// A task which represents the asynchronous write operation.
@@ -272,13 +287,13 @@ public sealed class UpdateRecipeHandler
     /// <exception cref="RecipeValidationException">Is thrown if validation fails on the <paramref name="request"/>.</exception>
     /// <exception cref="ForbiddenException">Is thrown if the user is authenticated but lacks permission to access the resource.</exception>
     /// <exception cref="UnauthorizedException">Is thrown if the user lacks the necessary authentication credentials.</exception>
-    public async Task<UpdateRecipeDto> HandleAsync(UpdateRecipeRequest request, CancellationToken cancellationToken)
+    public async Task<UpdateRecipeDto> HandleAsync(UpdateRecipeRequest request, IFormFile? image, CancellationToken cancellationToken)
     {
-        var errors = ValidateRecipe(request);
+        var validationErrors = ValidateRecipe(request);
 
-        if (errors.Length != 0)
+        if (validationErrors.Length != 0)
         {
-            throw new RecipeValidationException(errors);
+            throw new RecipeValidationException(validationErrors);
         }
 
         var recipeUpdate = FromDto(request, _userContext.UserId);
@@ -296,7 +311,6 @@ public sealed class UpdateRecipeHandler
         {
             recipe.Title = request.Title;
             recipe.Description = request.Description;
-            recipe.Image = request.Image;
             recipe.RecipeDetails = recipeUpdate.RecipeDetails;
             recipe.RecipeNutrition = recipeUpdate.RecipeNutrition;
 
@@ -318,9 +332,54 @@ public sealed class UpdateRecipeHandler
             {
                 recipe.SubIngredients.Add(subIngredientUpdate);
             }
-            
-            await _dbContext.SaveChangesAsync(cancellationToken);
 
+            bool isCancellable = true;
+            if (image != null)
+            {
+                if (recipe.ImagePath != null)
+                {
+                    var tempFilePath = Path.Combine(_imageProcessingInfo.TempImageStoragePath,
+                        Path.GetFileName(recipe.ImagePath));
+                    
+                    var imageProcessingErrors = await FileHelpers.ProcessFormFileAsync(image, tempFilePath, recipe.ImagePath,
+                        _imageProcessingInfo.PermittedExtensions, _imageProcessingInfo.ImageSizeLimit, true);
+
+                    if (imageProcessingErrors.Length != 0)
+                    {
+                        throw new ImageProcessingException(imageProcessingErrors);
+                    }
+                    
+                    isCancellable = false;
+                }
+                else
+                {
+                    var randomFileName = Path.GetRandomFileName();
+                    var tempFilePath = Path.Combine(_imageProcessingInfo.TempImageStoragePath, randomFileName);
+                    var filePath = Path.Combine(_imageProcessingInfo.ImageStoragePath, randomFileName);
+                    recipe.ImagePath = filePath;
+
+                    var imageProcessingErrors = await FileHelpers.ProcessFormFileAsync(image, randomFileName, filePath,
+                        _imageProcessingInfo.PermittedExtensions, _imageProcessingInfo.ImageSizeLimit);
+
+                    if (imageProcessingErrors.Length != 0)
+                    {
+                        throw new ImageProcessingException(imageProcessingErrors);
+                    }
+                    
+                    isCancellable = false;
+                }
+            }
+            else
+            {
+                if (recipe.ImagePath != null)
+                {
+                    File.Delete(recipe.ImagePath);
+                    recipe.ImagePath = null;
+                    isCancellable = false;
+                }
+            }
+
+            await _dbContext.SaveChangesAsync(isCancellable ? cancellationToken : CancellationToken.None);
             return ToDto(recipe);
         }
         else if (_userContext.IsAuthenticated)
@@ -378,7 +437,6 @@ public sealed class UpdateRecipeHandler
             Id = request.Id,
             Title = request.Title,
             Description = request.Description,
-            Image = request.Image,
             RecipeDetails = recipeDetails,
             RecipeNutrition = recipeNutrition,
             ApplicationUserId = userId
@@ -452,7 +510,7 @@ public sealed class UpdateRecipeHandler
             subIngredientDtos.Add(subIngredientDto);
         }
 
-        return new UpdateRecipeDto(recipe.Id, recipe.Title, recipe.Description, recipe.Image, recipeDetailsDto, recipeNutritionDto, directionDtos, tipDtos, subIngredientDtos);
+        return new UpdateRecipeDto(recipe.Id, recipe.Title, recipe.Description, recipeDetailsDto, recipeNutritionDto, directionDtos, tipDtos, subIngredientDtos);
     }
 }
 
@@ -462,13 +520,12 @@ public sealed class UpdateRecipeHandler
 /// <param name="Id">The id of the recipe.</param>
 /// <param name="Title">The title of the recipe.</param>
 /// <param name="Description">The description of the recipe.</param>
-/// <param name="Image">An url to the image of the recipe.</param>
 /// <param name="Details">The recipe details.</param>
 /// <param name="Nutrition">The recipe nutrition.</param>
 /// <param name="Directions">A list of directions belonging to the recipe</param>
 /// <param name="Tips">A collection of tips belonging to the recipe.</param>
 /// <param name="SubIngredients">A collection of sub ingredients belonging to the recipe.</param>
-public sealed record UpdateRecipeDto(int Id, string Title, string? Description, string? Image, UpdateRecipeDetailsDto Details, UpdateRecipeNutritionDto Nutrition, IList<UpdateDirectionDto> Directions, ICollection<UpdateTipDto> Tips, ICollection<UpdateSubIngredientDto> SubIngredients);
+public sealed record UpdateRecipeDto(int Id, string Title, string? Description, UpdateRecipeDetailsDto Details, UpdateRecipeNutritionDto Nutrition, IList<UpdateDirectionDto> Directions, ICollection<UpdateTipDto> Tips, ICollection<UpdateSubIngredientDto> SubIngredients);
 
 /// <summary>
 /// The DTO for recipe details to return to the client.

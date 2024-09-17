@@ -65,7 +65,7 @@ public sealed class MealPlannerContext : IdentityDbContext<ApplicationUser, Iden
         {
             b.Property(m => m.Title)
                 .HasMaxLength(20);
-            b.Property(m => m.Image)
+            b.Property(m => m.ImagePath)
                 .HasMaxLength(255);
         });
 
@@ -75,7 +75,7 @@ public sealed class MealPlannerContext : IdentityDbContext<ApplicationUser, Iden
                 .HasMaxLength(20);
             b.Property(r => r.Description)
                 .HasMaxLength(255);
-            b.Property(r => r.Image)
+            b.Property(r => r.ImagePath)
                 .HasMaxLength(255);
 
             b.OwnsOne(r => r.RecipeDetails);
