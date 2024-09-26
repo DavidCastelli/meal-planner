@@ -34,14 +34,14 @@ public static class FileHelpers
     /// </summary>
     /// <remarks>
     /// The file validation checks against empty files, files larger than the maximum allowed size, files whose file extension is not permitted,
-    /// and files whose signature does not match the file extension.
+    /// and files whose signature does not match the file extension. Overwrite should be set to true when updating existing files, false otherwise.
     /// </remarks>
     /// <param name="formFile">The file to process.</param>
     /// <param name="tempStoragePath">The path to temporarily store the file before validation is complete.</param>
     /// <param name="storagePath">The path to store the file.</param>
     /// <param name="permittedExtensions">The permitted file extensions.</param>
     /// <param name="sizeLimit">The maximum allowed file size.</param>
-    /// <param name="overwrite"></param>
+    /// <param name="overwrite">true to overwrite files in storage path, false otherwise.</param>
     /// <returns>
     /// A task which represents the asynchronous write operation.
     /// The result of the task upon completion returns a list of <see cref="Error"/> messages on failure,
