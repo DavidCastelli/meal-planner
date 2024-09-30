@@ -9,6 +9,7 @@ header {
   width: 100%;
   min-height: 50px;
   box-sizing: border-box;
+  z-index: 2;
 }
 
 img {

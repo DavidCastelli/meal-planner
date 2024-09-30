@@ -1,0 +1,304 @@
+.form-container {
+  background-color: rgb(23, 126, 137);
+  padding: 5px;
+}
+
+form {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(75px, 1fr));
+  grid-auto-rows: minmax(100px, auto);
+}
+
+h1 {
+  color: rgb(250, 121, 33);
+  text-shadow: 1px 1px 1px rgb(19, 27, 35);
+  text-align: center;
+  grid-column: 1 / 13;
+  grid-row: 1;
+}
+
+.info {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  grid-column: 4 / 10;
+  grid-row: 2;
+}
+
+.info p {
+  width: 66%;
+}
+
+.info p + p {
+  display: flex;
+  flex-flow: column;
+}
+
+.info p + p + p {
+  display: grid;
+  grid-template-columns: auto;
+  grid-template-rows: auto auto;
+}
+
+.info label {
+  font-size: 1.2em;
+}
+
+.info textarea {
+  border: 1px solid;
+  font-size: 1.3em;
+  min-height: 100px;
+  max-height: 200px;
+  margin-top: 5px;
+  resize: vertical;
+}
+
+#file-picker {
+  font-family: system-ui;
+}
+
+.image-preview-container {
+  position: relative;
+  border: 3px solid rgb(61, 59, 142);
+  margin-top: 15px;
+  padding: 20%;
+  place-self: center;
+}
+
+img {
+  object-fit: cover;
+}
+
+.image-preview-name {
+  margin-left: 5px;
+  place-self: center;
+}
+
+.extra-info {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  background-color: rgb(3, 252, 186);
+  border: 3px solid rgb(61, 59, 142);
+  border-radius: 10px;
+  box-shadow: inset 0 0 10px 1px rgb(23, 126, 137);
+}
+
+.extra-info h2 {
+  text-align: center;
+  text-shadow: 1px 1px 1px rgb(23, 126, 137);
+  border-bottom: 3px solid black;
+  width: 66%;
+  padding-bottom: 15px;
+}
+
+.extra-info p {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  grid-auto-rows: minmax(30px, auto);
+  width: 88%;
+}
+
+.extra-info label,
+.extra-info span {
+  text-shadow: 1px 1px 1px rgb(23, 126, 137);
+  font-size: 1.2em;
+}
+
+.extra-info button {
+  box-shadow: 2px 2px 2px rgb(23, 126, 137);
+}
+
+.extra-info button:hover {
+  box-shadow: 2px 2px 2px rgb(23, 126, 137, 0.8);
+}
+
+.details-position {
+  grid-column: 4 / 7;
+  grid-row: 3;
+  margin-right: 5px;
+}
+
+.nutrition-position {
+  grid-column: 7 / 10;
+  grid-row: 3;
+  margin-left: 5px;
+}
+
+.directions {
+  background-color: rgb(34, 116, 165);
+  border: 3px solid rgb(61, 59, 142);
+  border-radius: 10px;
+  grid-column: 1 / 8;
+  grid-row: 4;
+  margin-top: 10px;
+  margin-right: 5px;
+  padding: 5px;
+}
+
+.directions-container {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 60px;
+}
+
+.directions p,
+.tips p {
+  display: grid;
+  grid-template-rows: minmax(50px, auto) 1fr;
+  grid-auto-columns: minmax(100px, auto);
+}
+
+.directions textarea,
+.tips textarea {
+  border: 1px solid;
+  font-size: 1.3em;
+  min-width: 300px;
+  min-height: 50px;
+  max-height: 200px;
+  resize: vertical;
+}
+
+.tips {
+  background-color: rgb(129, 108, 97);
+  border: 3px solid rgb(61, 59, 142);
+  border-radius: 10px;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  grid-column: 8 / 13;
+  grid-row: 4;
+  margin-top: 10px;
+  margin-left: 5px;
+}
+
+.sub-ingredients {
+  grid-column: 1 / 13;
+  grid-row: 5;
+  margin-top: 10px;
+}
+
+.sub-ingredients p {
+  display: grid;
+  grid-template-columns: auto auto;
+}
+
+.sub-ingredients input[type="text"] {
+  width: 80%;
+}
+
+.sub-ingredients-container {
+  display: flex;
+  gap: 7px;
+}
+
+.sub-ingredients-container h3 {
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.ingredients {
+  background-color: rgb(179, 181, 187);
+  border: 3px solid rgb(61, 59, 142);
+  padding: 5px;
+}
+
+.ingredients p {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+}
+
+.submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  grid-column: 1 / 13;
+  grid-row: 6;
+}
+
+.submit-button {
+  background-color: rgb(61, 59, 142);
+  border: 2px solid;
+  color: rgb(252, 247, 255);
+  border-radius: 15px;
+  font-size: 1.2em;
+  padding: 10px 30px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.submit-button:hover {
+  background-color: rgb(61, 59, 142, 0.8);
+}
+
+.errors {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+}
+
+.errors h2 {
+  color: rgb(255, 15, 35);
+  text-shadow: 1px 1px 1px rgb(19, 27, 35);
+}
+
+input[type="file"] {
+  display: none;
+}
+
+input[type="text"] {
+  border: 1px solid;
+  text-align: center;
+  font-size: 1.2em;
+}
+
+input[type="number"] {
+  background-color: rgb(23, 126, 137);
+  border: 1px solid rgb(0, 0, 0);
+  color: rgb(252, 247, 255);
+  text-shadow: 1px 1px 1px rgb(8, 96, 95);
+  -moz-appearance: textfield;
+  text-align: center;
+  font-size: 1.2em;
+  width: 15%;
+}
+
+.span-label {
+  font-size: 1.2em;
+}
+
+.add-button {
+  background-color: rgb(61, 59, 142);
+  border: 2px solid rgb(61, 59, 142);
+  border-radius: 3px;
+  color: rgb(252, 247, 255);
+  box-shadow: 2px 2px 2px rgb(8, 96, 95);
+  padding: 2px 7px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.add-button:hover {
+  background-color: rgb(61, 59, 142, 0.8);
+  border: 2px solid rgb(61, 59, 142, 0.2);
+  box-shadow: 2px 2px 2px rgb(8, 96, 95, 0.8);
+}
+
+.remove-button {
+  background-color: rgb(250, 121, 33);
+  border: 2px solid rgb(250, 121, 33);
+  border-radius: 3px;
+  color: rgb(252, 247, 255);
+  box-shadow: 2px 2px 2px rgb(8, 96, 95);
+  padding: 2px 9px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.remove-button:hover {
+  background-color: rgb(250, 121, 33, 0.8);
+  border: 2px solid rgb(250, 121, 33, 0.2);
+  box-shadow: 2px 2px 2px rgb(8, 96, 95, 0.8);
+}

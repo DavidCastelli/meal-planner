@@ -47,10 +47,15 @@ export class RecipeService {
       .pipe(catchError(this.handleError<Blob>()));
   }
 
-  CreateRecipe(request: CreateRecipeRequest, image?: File | null): Observable<CreateRecipeDto> {
+  CreateRecipe(
+    request: CreateRecipeRequest,
+    image: File | null,
+  ): Observable<CreateRecipeDto> {
     const formData = new FormData();
 
-    const data = new Blob([JSON.stringify(request)], {type: 'application/json'});
+    const data = new Blob([JSON.stringify(request)], {
+      type: 'application/json',
+    });
     formData.append('data', data, 'data.json');
 
     if (image) {

@@ -15,7 +15,7 @@ import { CreateRecipeRequestTip } from '../../models/create/create-recipe-reques
 import { CreateRecipeRequestIngredient } from '../../models/create/create-recipe-request-ingredient.model';
 import { CreateRecipeRequestSubIngredient } from '../../models/create/create-recipe-request-subingredient.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import {NgOptimizedImage} from "@angular/common";
+import { NgOptimizedImage } from '@angular/common';
 
 interface RecipeDetailsForm {
   prepTime?: FormControl<number>;
@@ -42,8 +42,8 @@ interface SubIngredientForm {
 
 interface CreateRecipeForm {
   title: FormControl<string>;
+  image: FormControl<File | null>;
   description?: FormControl<string>;
-  image?: FormControl<File | null>;
   details: FormGroup<RecipeDetailsForm>;
   nutrition: FormGroup<RecipeNutritionForm>;
   directions: FormArray<
@@ -73,11 +73,13 @@ export class CreateRecipeComponent {
 
   private directionCount = 1;
 
-  isSubmitting  = false;
-  previewSrc = '';
+  isSubmitting = false;
+  previewSrc = '/27002.jpg';
+  previewFileName = 'No Image Selected.';
 
   createRecipeForm = this.formBuilder.nonNullable.group<CreateRecipeForm>({
     title: this.formBuilder.nonNullable.control(''),
+    image: this.formBuilder.control<File | null>(null),
     details: this.formBuilder.nonNullable.group({}),
     nutrition: this.formBuilder.nonNullable.group({}),
     directions: this.formBuilder.nonNullable.array([
@@ -103,12 +105,12 @@ export class CreateRecipeComponent {
     return this.createRecipeForm.controls.title;
   }
 
-  get description() {
-    return this.createRecipeForm.controls.description;
-  }
-
   get image() {
     return this.createRecipeForm.controls.image;
+  }
+
+  get description() {
+    return this.createRecipeForm.controls.description;
   }
 
   get details() {
@@ -134,11 +136,6 @@ export class CreateRecipeComponent {
   addDescription() {
     const description = this.formBuilder.nonNullable.control('');
     this.createRecipeForm.addControl('description', description);
-  }
-
-  addImage() {
-    const image = this.formBuilder.control<File | null>(null);
-    this.createRecipeForm.addControl('image', image);
   }
 
   addPrepTime() {
@@ -215,12 +212,14 @@ export class CreateRecipeComponent {
     this.subIngredients.at(index).controls.ingredients.push(ingredient);
   }
 
-  removeDescription() {
-    this.createRecipeForm.removeControl('description');
+  removeImage() {
+    this.previewSrc = '/27002.jpg';
+    this.previewFileName = 'No Image Selected.';
+    this.createRecipeForm.patchValue({ image: null });
   }
 
-  removeImage() {
-    this.createRecipeForm.removeControl('image');
+  removeDescription() {
+    this.createRecipeForm.removeControl('description');
   }
 
   removePrepTime() {
@@ -281,9 +280,10 @@ export class CreateRecipeComponent {
       const image = fileList[0];
 
       const fileReader = new FileReader();
-      fileReader.onload = () => this.previewSrc = fileReader.result as string;
+      fileReader.onload = () => (this.previewSrc = fileReader.result as string);
 
       fileReader.readAsDataURL(image);
+      this.previewFileName = image.name;
 
       this.createRecipeForm.patchValue({ image: image });
     }
@@ -294,7 +294,7 @@ export class CreateRecipeComponent {
     this.errorService.clear();
 
     const request = this.fromForm();
-    const image = this.image?.value;
+    const image = this.image.value;
     this.recipeService
       .CreateRecipe(request, image)
       .pipe(takeUntilDestroyed(this.destroyRef))

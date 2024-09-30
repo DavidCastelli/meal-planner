@@ -1,153 +1,253 @@
-<div>
+<div class="form-container">
   <form [formGroup]="createRecipeForm" (ngSubmit)="submit()">
     <h1>Create Recipe</h1>
 
-    <section>
+    <section class="info">
       <h2>Info</h2>
       <p>
         <label for="title">Title: </label>
         <input id="title" type="text" formControlName="title" required />
       </p>
       <p>
-        @if (description) {
-          <label for="description">Description: </label>
-          <textarea id="description" formControlName="description"></textarea>
-          <button type="button" (click)="removeDescription()">-</button>
+        @if (image.value) {
+          <span>
+            <span class="span-label">Image: </span>
+            <button class="remove-button" type="button" (click)="removeImage()">
+              -
+            </button>
+          </span>
         } @else {
-          <span>Description: </span
-          ><button type="button" (click)="addDescription()">+</button>
+          <span>
+            <span class="span-label">Image: </span>
+            <label id="file-picker" class="add-button" for="image" tabindex="0"
+              >+</label
+            >
+            <input
+              id="image"
+              type="file"
+              formControlName="image"
+              (change)="onImagePicked($event)"
+            />
+          </span>
         }
+        <span class="image-preview-container">
+          <img [ngSrc]="previewSrc" alt="Recipe image preview." fill priority />
+        </span>
+        <span class="image-preview-name">{{ previewFileName }}</span>
       </p>
       <p>
-        @if (image) {
-          <div>
-            <img [ngSrc]="previewSrc" alt="Recipe image preview." width="200" height="200" priority>
-          </div>
-          <label for="image">Image: </label>
-          <input id="image" type="file" formControlName="image" (change)="onImagePicked($event)"/>
-          <button type="button" (click)="removeImage()">-</button>
+        @if (description) {
+          <span>
+            <label for="description">Description: </label>
+            <button
+              class="remove-button"
+              type="button"
+              (click)="removeDescription()"
+            >
+              -
+            </button>
+          </span>
+          <textarea id="description" formControlName="description"></textarea>
         } @else {
-          <span>Image: </span
-          ><button type="button" (click)="addImage()">+</button>
+          <span>
+            <span class="span-label">Description: </span
+            ><button
+              class="add-button"
+              type="button"
+              (click)="addDescription()"
+            >
+              +
+            </button>
+          </span>
         }
       </p>
     </section>
 
-    <section class="details">
+    <section class="extra-info details-position">
       <h2>Details</h2>
       <p>
         @if (details.get("prepTime")) {
           <label for="prep-time">Prep Time: </label>
           <input id="prep-time" type="number" formControlName="prepTime" />
-          <button class="remove-button" type="button" (click)="removePrepTime()">-</button>
+          <button
+            class="remove-button"
+            type="button"
+            (click)="removePrepTime()"
+          >
+            -
+          </button>
         } @else {
-          <span>Prep Time: </span
-          ><button class="add-button" type="button" (click)="addPrepTime()">+</button>
+          <span class="span-label">Prep Time: </span
+          ><button class="add-button" type="button" (click)="addPrepTime()">
+            +
+          </button>
         }
       </p>
       <p>
         @if (details.get("cookTime")) {
           <label for="cook-time">Cook Time: </label>
           <input id="cook-time" type="number" formControlName="cookTime" />
-          <button class="remove-button" type="button" (click)="removeCookTime()">-</button>
+          <button
+            class="remove-button"
+            type="button"
+            (click)="removeCookTime()"
+          >
+            -
+          </button>
         } @else {
-          <span>Cook Time: </span
-          ><button class="add-button" type="button" (click)="addCookTime()">+</button>
+          <span class="span-label">Cook Time: </span
+          ><button class="add-button" type="button" (click)="addCookTime()">
+            +
+          </button>
         }
       </p>
       <p>
         @if (details.get("servings")) {
           <label for="servings">Servings: </label>
           <input id="servings" type="number" formControlName="servings" />
-          <button class="remove-button" type="button" (click)="removeServings()">-</button>
+          <button
+            class="remove-button"
+            type="button"
+            (click)="removeServings()"
+          >
+            -
+          </button>
         } @else {
-          <span>Servings: </span
-          ><button class="add-button" type="button" (click)="addServings()">+</button>
+          <span class="span-label">Servings: </span
+          ><button class="add-button" type="button" (click)="addServings()">
+            +
+          </button>
         }
       </p>
     </section>
 
-    <section>
+    <section class="extra-info nutrition-position">
       <h2>Nutrition</h2>
       <p>
         @if (nutrition.get("calories")) {
           <label for="calories">Calories: </label>
           <input id="calories" type="number" formControlName="calories" />
-          <button type="button" (click)="removeCalories()">-</button>
+          <button
+            class="remove-button"
+            type="button"
+            (click)="removeCalories()"
+          >
+            -
+          </button>
         } @else {
-          <span>Calories: </span
-          ><button type="button" (click)="addCalories()">+</button>
+          <span class="span-label">Calories: </span
+          ><button class="add-button" type="button" (click)="addCalories()">
+            +
+          </button>
         }
       </p>
       <p>
         @if (nutrition.get("fat")) {
           <label for="fat">Fat: </label>
           <input id="fat" type="number" formControlName="fat" />
-          <button type="button" (click)="removeFat()">-</button>
+          <button class="remove-button" type="button" (click)="removeFat()">
+            -
+          </button>
         } @else {
-          <span>Fat: </span><button type="button" (click)="addFat()">+</button>
+          <span class="span-label">Fat: </span
+          ><button class="add-button" type="button" (click)="addFat()">
+            +
+          </button>
         }
       </p>
       <p>
         @if (nutrition.get("carbs")) {
           <label for="carbs">Carbs: </label>
           <input id="carbs" type="number" formControlName="carbs" />
-          <button type="button" (click)="removeCarbs()">-</button>
+          <button class="remove-button" type="button" (click)="removeCarbs()">
+            -
+          </button>
         } @else {
-          <span>Carbs: </span
-          ><button type="button" (click)="addCarbs()">+</button>
+          <span class="span-label">Carbs: </span
+          ><button class="add-button" type="button" (click)="addCarbs()">
+            +
+          </button>
         }
       </p>
       <p>
         @if (nutrition.get("protein")) {
           <label for="protein">Protein: </label>
           <input id="protein" type="number" formControlName="protein" />
-          <button type="button" (click)="removeProtein()">-</button>
+          <button class="remove-button" type="button" (click)="removeProtein()">
+            -
+          </button>
         } @else {
-          <span>Protein: </span
-          ><button type="button" (click)="addProtein()">+</button>
+          <span class="span-label">Protein: </span
+          ><button class="add-button" type="button" (click)="addProtein()">
+            +
+          </button>
         }
       </p>
     </section>
 
-    <section formArrayName="directions">
+    <section class="directions" formArrayName="directions">
       <h2>Directions</h2>
-      <button type="button" (click)="addDirection()">+</button>
-
-      @for (direction of directions.controls; track direction; let i = $index) {
-        <div [formGroupName]="i">
-          <h3>Direction {{ i + 1 }}</h3>
-          <section>
-            <p>
-              <label for="description-{{ i }}">Description: </label>
-              <textarea
-                id="description-{{ i }}"
-                formControlName="description"
-                required
-              ></textarea>
-            </p>
-          </section>
-          <section>
-            <p>
-              @if (i !== 0) {
-                <button type="button" (click)="removeDirection(i)">-</button>
-              }
-            </p>
-          </section>
-        </div>
+      @if (directions.length < 6) {
+        <button class="add-button" type="button" (click)="addDirection()">
+          +
+        </button>
       }
+
+      <div class="directions-container">
+        @for (
+          direction of directions.controls;
+          track direction;
+          let i = $index
+        ) {
+          <div [formGroupName]="i">
+            <section>
+              <h3>Direction {{ i + 1 }}</h3>
+              <p>
+                <span>
+                  <label for="description-{{ i }}">Description: </label>
+                  @if (i !== 0) {
+                    <button
+                      class="remove-button"
+                      type="button"
+                      (click)="removeDirection(i)"
+                    >
+                      -
+                    </button>
+                  }
+                </span>
+                <textarea
+                  id="description-{{ i }}"
+                  formControlName="description"
+                  required
+                ></textarea>
+              </p>
+            </section>
+          </div>
+        }
+      </div>
     </section>
 
-    <section formArrayName="tips">
+    <section class="tips" formArrayName="tips">
       <h2>Tips</h2>
-      <button type="button" (click)="addTip()">+</button>
+      @if (tips.length < 3) {
+        <button class="add-button" type="button" (click)="addTip()">+</button>
+      }
 
       @for (tip of tips.controls; track tip; let i = $index) {
         <div>
-          <h3>Tip</h3>
           <section>
+            <h3>Tip</h3>
             <p>
-              <label for="description-{{ i }}">Description: </label>
+              <span>
+                <label for="description-{{ i }}">Description: </label>
+                <button
+                  class="remove-button"
+                  type="button"
+                  (click)="removeTip(i)"
+                >
+                  -
+                </button>
+              </span>
               <textarea
                 id="description-{{ i }}"
                 formControlName="description"
@@ -155,106 +255,132 @@
               ></textarea>
             </p>
           </section>
-          <section>
-            <p>
-              <button type="button" (click)="removeTip(i)">-</button>
-            </p>
-          </section>
         </div>
       }
     </section>
 
-    <section formArrayName="subIngredients">
+    <section class="sub-ingredients" formArrayName="subIngredients">
       <h2>SubIngredients</h2>
-      <button type="button" (click)="addSubIngredient()">+</button>
+      @if (subIngredients.length < 5) {
+        <button class="add-button" type="button" (click)="addSubIngredient()">
+          +
+        </button>
+      }
 
-      @for (
-        subIngredient of subIngredients.controls;
-        track subIngredient;
-        let i = $index
-      ) {
-        <div [formGroupName]="i">
-          <h3>SubIngredient</h3>
-          <section>
-            <p>
-              @if (subIngredient.controls.name) {
-                <label for="name">Name: </label>
-                <input id="name" type="text" formControlName="name" />
-                <button type="button" (click)="removeSubIngredientName(i)">
-                  -
-                </button>
-              } @else {
-                <span>Name: </span
-                ><button type="button" (click)="addSubIngredientName(i)">
+      <div class="sub-ingredients-container">
+        @for (
+          subIngredient of subIngredients.controls;
+          track subIngredient;
+          let i = $index
+        ) {
+          <div [formGroupName]="i">
+            <section>
+              <div>
+                <h3>SubIngredient</h3>
+                @if (i !== 0) {
+                  <button
+                    class="remove-button"
+                    type="button"
+                    (click)="removeSubIngredient(i)"
+                  >
+                    -
+                  </button>
+                }
+              </div>
+              <p>
+                @if (subIngredient.controls.name) {
+                  <span>
+                    <label for="name">Name: </label>
+                    <button
+                      class="remove-button"
+                      type="button"
+                      (click)="removeSubIngredientName(i)"
+                    >
+                      -
+                    </button>
+                  </span>
+                  <input id="name" type="text" formControlName="name" />
+                } @else {
+                  <span>
+                    <span>Name: </span
+                    ><button
+                      class="add-button"
+                      type="button"
+                      (click)="addSubIngredientName(i)"
+                    >
+                      +
+                    </button>
+                  </span>
+                }
+              </p>
+            </section>
+            <section class="ingredients" formArrayName="ingredients">
+              <h2>Ingredients</h2>
+              @if (subIngredient.controls.ingredients.length < 10) {
+                <button
+                  class="add-button"
+                  type="button"
+                  (click)="addIngredient(i)"
+                >
                   +
                 </button>
               }
-            </p>
-          </section>
-          <section formArrayName="ingredients">
-            <h2>Ingredients</h2>
-            <button type="button" (click)="addIngredient(i)">+</button>
-
-            @for (
-              ingredient of subIngredient.controls.ingredients.controls;
-              track ingredient;
-              let j = $index
-            ) {
-              <div [formGroupName]="j">
-                <h3>Ingredient</h3>
-                <section>
-                  <p>
-                    <label for="name-{{ j }}">Name: </label>
-                    <input
-                      id="name-{{ j }}"
-                      type="text"
-                      formControlName="name"
-                      required
-                    />
-                  </p>
-                  <p>
-                    <label for="measurement-{{ j }}">Measurement: </label>
-                    <input
-                      id="measurement-{{ j }}"
-                      type="text"
-                      formControlName="measurement"
-                      required
-                    />
-                  </p>
-                </section>
-                <section>
-                  <p>
+              @for (
+                ingredient of subIngredient.controls.ingredients.controls;
+                track ingredient;
+                let j = $index
+              ) {
+                <div [formGroupName]="j">
+                  <div>
+                    <h3>Ingredient</h3>
                     @if (j !== 0) {
-                      <button type="button" (click)="removeIngredient(i, j)">
+                      <button
+                        class="remove-button"
+                        type="button"
+                        (click)="removeIngredient(i, j)"
+                      >
                         -
                       </button>
                     }
-                  </p>
-                </section>
-              </div>
-            }
-          </section>
-          <section>
-            <p>
-              @if (i !== 0) {
-                <button type="button" (click)="removeSubIngredient(i)">
-                  -
-                </button>
+                  </div>
+                  <section>
+                    <p>
+                      <label for="name-{{ j }}">Name: </label>
+                      <input
+                        id="name-{{ j }}"
+                        type="text"
+                        formControlName="name"
+                        required
+                      />
+                    </p>
+                    <p>
+                      <label for="measurement-{{ j }}">Measurement: </label>
+                      <input
+                        id="measurement-{{ j }}"
+                        type="text"
+                        formControlName="measurement"
+                        required
+                      />
+                    </p>
+                  </section>
+                </div>
               }
-            </p>
-          </section>
-        </div>
-      }
+            </section>
+          </div>
+        }
+      </div>
     </section>
 
-    <section>
+    <section class="submit">
       <p>
-        <button type="submit" [disabled]="isSubmitting">Create</button>
+        <button class="submit-button" type="submit" [disabled]="isSubmitting">
+          Create
+        </button>
       </p>
     </section>
   </form>
   @if (errorService.messages.length > 0) {
-    <section>
+    <section class="errors">
       <h2>Errors</h2>
 
       @for (error of errorService.messages; track error) {
