@@ -7,6 +7,7 @@
       <p>
         <label for="title">Title: </label>
         <input id="title" type="text" formControlName="title" required />
+        <app-control-error controlPath="title" />
       </p>
       <p>
         @if (image.value) {
@@ -47,7 +48,12 @@
               -
             </button>
           </span>
-          <textarea id="description" formControlName="description"></textarea>
+          <textarea
+            id="description"
+            formControlName="description"
+            required
+          ></textarea>
+          <app-control-error controlPath="description" />
         } @else {
           <span>
             <span class="span-label">Description: </span
@@ -63,12 +69,17 @@
       </p>
     </section>
 
-    <section class="extra-info details-position">
+    <section class="extra-info details-position" formGroupName="details">
       <h2>Details</h2>
       <p>
-        @if (details.get("prepTime")) {
+        @if (details.controls.prepTime) {
           <label for="prep-time">Prep Time: </label>
-          <input id="prep-time" type="number" formControlName="prepTime" />
+          <input
+            id="prep-time"
+            type="number"
+            formControlName="prepTime"
+            required
+          />
           <button
             class="remove-button"
             type="button"
@@ -76,6 +87,7 @@
           >
             -
           </button>
+          <app-control-error controlPath="details.prepTime" />
         } @else {
           <span class="span-label">Prep Time: </span
           ><button class="add-button" type="button" (click)="addPrepTime()">
@@ -84,9 +96,14 @@
         }
       </p>
       <p>
-        @if (details.get("cookTime")) {
+        @if (details.controls.cookTime) {
           <label for="cook-time">Cook Time: </label>
-          <input id="cook-time" type="number" formControlName="cookTime" />
+          <input
+            id="cook-time"
+            type="number"
+            formControlName="cookTime"
+            required
+          />
           <button
             class="remove-button"
             type="button"
@@ -94,6 +111,7 @@
           >
             -
           </button>
+          <app-control-error controlPath="details.cookTime" />
         } @else {
           <span class="span-label">Cook Time: </span
           ><button class="add-button" type="button" (click)="addCookTime()">
@@ -102,9 +120,14 @@
         }
       </p>
       <p>
-        @if (details.get("servings")) {
+        @if (details.controls.servings) {
           <label for="servings">Servings: </label>
-          <input id="servings" type="number" formControlName="servings" />
+          <input
+            id="servings"
+            type="number"
+            formControlName="servings"
+            required
+          />
           <button
             class="remove-button"
             type="button"
@@ -112,6 +135,7 @@
           >
             -
           </button>
+          <app-control-error controlPath="details.servings" />
         } @else {
           <span class="span-label">Servings: </span
           ><button class="add-button" type="button" (click)="addServings()">
@@ -121,12 +145,17 @@
       </p>
     </section>
 
-    <section class="extra-info nutrition-position">
+    <section class="extra-info nutrition-position" formGroupName="nutrition">
       <h2>Nutrition</h2>
       <p>
-        @if (nutrition.get("calories")) {
+        @if (nutrition.controls.calories) {
           <label for="calories">Calories: </label>
-          <input id="calories" type="number" formControlName="calories" />
+          <input
+            id="calories"
+            type="number"
+            formControlName="calories"
+            required
+          />
           <button
             class="remove-button"
             type="button"
@@ -134,6 +163,7 @@
           >
             -
           </button>
+          <app-control-error controlPath="nutrition.calories" />
         } @else {
           <span class="span-label">Calories: </span
           ><button class="add-button" type="button" (click)="addCalories()">
@@ -142,12 +172,13 @@
         }
       </p>
       <p>
-        @if (nutrition.get("fat")) {
+        @if (nutrition.controls.fat) {
           <label for="fat">Fat: </label>
-          <input id="fat" type="number" formControlName="fat" />
+          <input id="fat" type="number" formControlName="fat" required />
           <button class="remove-button" type="button" (click)="removeFat()">
             -
           </button>
+          <app-control-error controlPath="nutrition.fat" />
         } @else {
           <span class="span-label">Fat: </span
           ><button class="add-button" type="button" (click)="addFat()">
@@ -156,12 +187,13 @@
         }
       </p>
       <p>
-        @if (nutrition.get("carbs")) {
+        @if (nutrition.controls.carbs) {
           <label for="carbs">Carbs: </label>
-          <input id="carbs" type="number" formControlName="carbs" />
+          <input id="carbs" type="number" formControlName="carbs" required />
           <button class="remove-button" type="button" (click)="removeCarbs()">
             -
           </button>
+          <app-control-error controlPath="nutrition.carbs"></app-control-error>
         } @else {
           <span class="span-label">Carbs: </span
           ><button class="add-button" type="button" (click)="addCarbs()">
@@ -170,12 +202,18 @@
         }
       </p>
       <p>
-        @if (nutrition.get("protein")) {
+        @if (nutrition.controls.protein) {
           <label for="protein">Protein: </label>
-          <input id="protein" type="number" formControlName="protein" />
+          <input
+            id="protein"
+            type="number"
+            formControlName="protein"
+            required
+          />
           <button class="remove-button" type="button" (click)="removeProtein()">
             -
           </button>
+          <app-control-error controlPath="nutrition.protein" />
         } @else {
           <span class="span-label">Protein: </span
           ><button class="add-button" type="button" (click)="addProtein()">
@@ -220,6 +258,9 @@
                   formControlName="description"
                   required
                 ></textarea>
+                <app-control-error
+                  controlPath="directions.{{ i }}.description"
+                />
               </p>
             </section>
           </div>
@@ -250,9 +291,10 @@
               </span>
               <textarea
                 id="description-{{ i }}"
-                formControlName="description"
+                [formControlName]="i"
                 required
               ></textarea>
+              <app-control-error controlPath="tips.{{ i }}" />
             </p>
           </section>
         </div>
@@ -273,7 +315,7 @@
           track subIngredient;
           let i = $index
         ) {
-          <div [formGroupName]="i">
+          <div class="sub-ingredients-content-container" [formGroupName]="i">
             <section>
               <div>
                 <h3>SubIngredient</h3>
@@ -299,7 +341,15 @@
                       -
                     </button>
                   </span>
-                  <input id="name" type="text" formControlName="name" />
+                  <input
+                    id="name"
+                    type="text"
+                    formControlName="name"
+                    required
+                  />
+                  <app-control-error
+                    controlPath="subIngredients.{{ i }}.name"
+                  />
                 } @else {
                   <span>
                     <span>Name: </span
@@ -352,6 +402,11 @@
                         formControlName="name"
                         required
                       />
+                      <app-control-error
+                        controlPath="subIngredients.{{ i }}.ingredients.{{
+                          j
+                        }}.name"
+                      />
                     </p>
                     <p>
                       <label for="measurement-{{ j }}">Measurement: </label>
@@ -360,6 +415,11 @@
                         type="text"
                         formControlName="measurement"
                         required
+                      />
+                      <app-control-error
+                        controlPath="subIngredients.{{ i }}.ingredients.{{
+                          j
+                        }}.measurement"
                       />
                     </p>
                   </section>

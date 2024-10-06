@@ -70,8 +70,7 @@ img {
 }
 
 .image-preview-name {
-  margin-left: 5px;
-  place-self: center;
+  text-align: center;
 }
 
 .extra-info {
@@ -95,7 +94,6 @@ img {
 .extra-info p {
   display: grid;
   grid-template-columns: 1fr auto auto;
-  grid-auto-rows: minmax(30px, auto);
   width: 88%;
 }
 
@@ -111,6 +109,10 @@ img {
 
 .extra-info button:hover {
   box-shadow: 2px 2px 2px rgb(23, 126, 137, 0.8);
+}
+
+.extra-info app-control-error {
+  grid-column: 1 / 4;
 }
 
 .details-position {
@@ -187,6 +189,10 @@ img {
   width: 80%;
 }
 
+.sub-ingredients app-control-error {
+  grid-column: 2;
+}
+
 .sub-ingredients-container {
   display: flex;
   gap: 7px;
@@ -195,6 +201,11 @@ img {
 .sub-ingredients-container h3 {
   display: inline-block;
   margin-right: 10px;
+}
+
+.sub-ingredients-content-container {
+  display: grid;
+  grid-template-rows: 1fr;
 }
 
 .ingredients {
@@ -240,6 +251,10 @@ img {
 .errors h2 {
   color: rgb(255, 15, 35);
   text-shadow: 1px 1px 1px rgb(19, 27, 35);
+}
+
+.errors p {
+  margin-bottom: 0;
 }
 
 input[type="file"] {

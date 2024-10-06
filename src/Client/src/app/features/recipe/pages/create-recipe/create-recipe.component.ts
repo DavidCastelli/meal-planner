@@ -8,6 +8,7 @@ import {
   FormControl,
   FormGroup,
   ReactiveFormsModule,
+  Validators,
 } from '@angular/forms';
 import { CreateRecipeRequest } from '../../models/create/create-recipe-request.model';
 import { CreateRecipeRequestDirection } from '../../models/create/create-recipe-request-direction.model';
@@ -16,6 +17,7 @@ import { CreateRecipeRequestIngredient } from '../../models/create/create-recipe
 import { CreateRecipeRequestSubIngredient } from '../../models/create/create-recipe-request-subingredient.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgOptimizedImage } from '@angular/common';
+import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error.component';
 
 interface RecipeDetailsForm {
   prepTime?: FormControl<number>;
@@ -59,7 +61,7 @@ interface CreateRecipeForm {
 @Component({
   selector: 'app-create-recipe',
   standalone: true,
-  imports: [ReactiveFormsModule, NgOptimizedImage],
+  imports: [ReactiveFormsModule, NgOptimizedImage, ControlErrorComponent],
   templateUrl: './create-recipe.component.html',
   styleUrl: './create-recipe.component.css',
 })
@@ -78,14 +80,20 @@ export class CreateRecipeComponent {
   previewFileName = 'No Image Selected.';
 
   createRecipeForm = this.formBuilder.nonNullable.group<CreateRecipeForm>({
-    title: this.formBuilder.nonNullable.control(''),
+    title: this.formBuilder.nonNullable.control('', [
+      Validators.required,
+      Validators.maxLength(20),
+    ]),
     image: this.formBuilder.control<File | null>(null),
     details: this.formBuilder.nonNullable.group({}),
     nutrition: this.formBuilder.nonNullable.group({}),
     directions: this.formBuilder.nonNullable.array([
       this.formBuilder.nonNullable.group({
         number: [this.directionCount],
-        description: [''],
+        description: [
+          '',
+          { validators: [Validators.required, Validators.maxLength(255)] },
+        ],
       }),
     ]),
     tips: this.formBuilder.nonNullable.array<FormControl<string>>([]),
@@ -93,8 +101,14 @@ export class CreateRecipeComponent {
       this.formBuilder.nonNullable.group({
         ingredients: this.formBuilder.nonNullable.array([
           this.formBuilder.nonNullable.group({
-            name: [''],
-            measurement: [''],
+            name: [
+              '',
+              { validators: [Validators.required, Validators.maxLength(20)] },
+            ],
+            measurement: [
+              '',
+              { validators: [Validators.required, Validators.maxLength(20)] },
+            ],
           }),
         ]),
       }),
@@ -134,56 +148,100 @@ export class CreateRecipeComponent {
   }
 
   addDescription() {
-    const description = this.formBuilder.nonNullable.control('');
+    const description = this.formBuilder.nonNullable.control('', [
+      Validators.required,
+      Validators.maxLength(255),
+    ]);
     this.createRecipeForm.addControl('description', description);
   }
 
   addPrepTime() {
-    const prepTime = this.formBuilder.nonNullable.control(0);
+    const prepTime = this.formBuilder.nonNullable.control(0, [
+      Validators.required,
+      Validators.min(0),
+      Validators.max(2147483647),
+      Validators.pattern('[0-9]*'),
+    ]);
     this.details.addControl('prepTime', prepTime);
   }
 
   addCookTime() {
-    const cookTime = this.formBuilder.nonNullable.control(0);
+    const cookTime = this.formBuilder.nonNullable.control(0, [
+      Validators.required,
+      Validators.min(0),
+      Validators.max(2147483647),
+      Validators.pattern('[0-9]*'),
+    ]);
     this.details.addControl('cookTime', cookTime);
   }
 
   addServings() {
-    const servings = this.formBuilder.nonNullable.control(0);
+    const servings = this.formBuilder.nonNullable.control(0, [
+      Validators.required,
+      Validators.min(0),
+      Validators.max(2147483647),
+      Validators.pattern('[0-9]*'),
+    ]);
     this.details.addControl('servings', servings);
   }
 
   addCalories() {
-    const calories = this.formBuilder.nonNullable.control(0);
+    const calories = this.formBuilder.nonNullable.control(0, [
+      Validators.required,
+      Validators.min(0),
+      Validators.max(2147483647),
+      Validators.pattern('[0-9]*'),
+    ]);
     this.nutrition.addControl('calories', calories);
   }
 
   addFat() {
-    const fat = this.formBuilder.nonNullable.control(0);
+    const fat = this.formBuilder.nonNullable.control(0, [
+      Validators.required,
+      Validators.min(0),
+      Validators.max(2147483647),
+      Validators.pattern('[0-9]*'),
+    ]);
     this.nutrition.addControl('fat', fat);
   }
 
   addCarbs() {
-    const carbs = this.formBuilder.nonNullable.control(0);
+    const carbs = this.formBuilder.nonNullable.control(0, [
+      Validators.required,
+      Validators.min(0),
+      Validators.max(2147483647),
+      Validators.pattern('[0-9]*'),
+    ]);
     this.nutrition.addControl('carbs', carbs);
   }
 
   addProtein() {
-    const protein = this.formBuilder.nonNullable.control(0);
+    const protein = this.formBuilder.nonNullable.control(0, [
+      Validators.required,
+      Validators.min(0),
+      Validators.max(2147483647),
+      Validators.pattern('[0-9]*'),
+    ]);
     this.nutrition.addControl('protein', protein);
   }
 
   addDirection() {
     const direction = this.formBuilder.nonNullable.group({
       number: [this.directionCount],
-      description: [''],
+      description: [
+        '',
+        { validators: [Validators.required, Validators.maxLength(255)] },
+      ],
     });
     this.directionCount += 1;
     this.directions.push(direction);
   }
 
   addTip() {
-    const tip = this.formBuilder.nonNullable.control('');
+    const tip = this.formBuilder.nonNullable.control('', [
+      Validators.required,
+      Validators.maxLength(255),
+    ]);
     this.tips.push(tip);
   }
 
@@ -191,8 +249,14 @@ export class CreateRecipeComponent {
     const subIngredient = this.formBuilder.nonNullable.group({
       ingredients: this.formBuilder.nonNullable.array([
         this.formBuilder.nonNullable.group({
-          name: [''],
-          measurement: [''],
+          name: [
+            '',
+            { validators: [Validators.required, Validators.maxLength(20)] },
+          ],
+          measurement: [
+            '',
+            { validators: [Validators.required, Validators.maxLength(20)] },
+          ],
         }),
       ]),
     });
@@ -200,14 +264,23 @@ export class CreateRecipeComponent {
   }
 
   addSubIngredientName(index: number) {
-    const subIngredientName = this.formBuilder.nonNullable.control('');
+    const subIngredientName = this.formBuilder.nonNullable.control('', [
+      Validators.required,
+      Validators.maxLength(20),
+    ]);
     this.subIngredients.at(index).addControl('name', subIngredientName);
   }
 
   addIngredient(index: number) {
     const ingredient = this.formBuilder.nonNullable.group({
-      name: [''],
-      measurement: [''],
+      name: [
+        '',
+        { validators: [Validators.required, Validators.maxLength(20)] },
+      ],
+      measurement: [
+        '',
+        { validators: [Validators.required, Validators.maxLength(20)] },
+      ],
     });
     this.subIngredients.at(index).controls.ingredients.push(ingredient);
   }
@@ -292,6 +365,11 @@ export class CreateRecipeComponent {
   submit() {
     this.isSubmitting = true;
     this.errorService.clear();
+
+    if (this.createRecipeForm.invalid) {
+      this.isSubmitting = false;
+      return;
+    }
 
     const request = this.fromForm();
     const image = this.image.value;
