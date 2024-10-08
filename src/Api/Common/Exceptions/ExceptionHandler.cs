@@ -20,7 +20,7 @@ internal sealed class ExceptionHandler : IExceptionHandler
                 Status = StatusCodes.Status400BadRequest,
                 Extensions = new Dictionary<string, object?>
                 {
-                    { "errors", br.Errors }
+                    { "errors", br.ToDictionary() }
                 }
             },
             NotFoundException nf => new ProblemDetails
