@@ -129,15 +129,18 @@ internal sealed class CreateRecipeRequestRecipeDetailsValidator : AbstractValida
     public CreateRecipeRequestRecipeDetailsValidator()
     {
         RuleFor(rd => rd.PrepTime)
-            .GreaterThanOrEqualTo(1)
+            .GreaterThanOrEqualTo(0)
+            .LessThanOrEqualTo(int.MaxValue)
             .When(rd => rd.PrepTime != null);
 
         RuleFor(rd => rd.CookTime)
-            .GreaterThanOrEqualTo(1)
+            .GreaterThanOrEqualTo(0)
+            .LessThanOrEqualTo(int.MaxValue)
             .When(rd => rd.CookTime != null);
 
         RuleFor(rd => rd.Servings)
-            .GreaterThanOrEqualTo(1)
+            .GreaterThanOrEqualTo(0)
+            .LessThanOrEqualTo(int.MaxValue)
             .When(rd => rd.Servings != null);
     }
 }
@@ -147,19 +150,23 @@ internal sealed class CreateRecipeRequestRecipeNutritionValidator : AbstractVali
     public CreateRecipeRequestRecipeNutritionValidator()
     {
         RuleFor(rn => rn.Calories)
-            .GreaterThanOrEqualTo(1)
+            .GreaterThanOrEqualTo(0)
+            .LessThanOrEqualTo(int.MaxValue)
             .When(rn => rn.Calories != null);
 
         RuleFor(rn => rn.Fat)
-            .GreaterThanOrEqualTo(1)
+            .GreaterThanOrEqualTo(0)
+            .LessThanOrEqualTo(int.MaxValue)
             .When(rn => rn.Fat != null);
 
         RuleFor(rn => rn.Carbs)
-            .GreaterThanOrEqualTo(1)
+            .GreaterThanOrEqualTo(0)
+            .LessThanOrEqualTo(int.MaxValue)
             .When(rn => rn.Carbs != null);
 
         RuleFor(rn => rn.Protein)
-            .GreaterThanOrEqualTo(1)
+            .GreaterThanOrEqualTo(0)
+            .LessThanOrEqualTo(int.MaxValue)
             .When(rn => rn.Protein != null);
     }
 }
@@ -311,17 +318,49 @@ public sealed class CreateRecipeHandler
     {
         List<Error> errors = [];
 
-        var directions = request.Directions;
-
-        bool isUnique = directions.Select(d => d.Number).Distinct().Count() == directions.Count;
-
-        if (!isUnique)
+        if (request.Directions.Count > 6)
         {
-            errors.Add(RecipeErrors.DirectionNumberNotUnique());
+            errors.Add(RecipeErrors.MaxDirections());
+        }
+
+        if (request.Tips.Count > 3)
+        {
+            errors.Add(RecipeErrors.MaxTips());
+        }
+
+        if (request.SubIngredients.Count > 5)
+        {
+            errors.Add(RecipeErrors.MaxSubIngredients());
+        }
+
+        var maxIngredients = request.SubIngredients.Any(si => si.Ingredients.Count > 10);
+        if (maxIngredients)
+        {
+            errors.Add(RecipeErrors.MaxIngredients());
+        }
+
+        var directions = request.Directions.OrderBy(d => d.Number).ToList();
+
+        if (directions[0].Number != 1)
+        {
+            errors.Add(RecipeErrors.DirectionsStartAtOne());
+        }
+
+        var isSequential = true;
+        for (int i = 1; i < directions.Count; i++)
+        {
+            if (directions[i].Number != directions[i - 1].Number + 1)
+            {
+                isSequential = false;
+            }
+        }
+
+        if (!isSequential)
+        {
+            errors.Add(RecipeErrors.DirectionsNotSequential());
         }
 
         var subIngredients = request.SubIngredients;
-
         if (subIngredients.Count > 1 && subIngredients.Any(si => si.Name == null))
         {
             errors.Add(RecipeErrors.MultipleSubIngredientName());
