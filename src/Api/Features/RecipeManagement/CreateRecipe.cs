@@ -14,6 +14,7 @@ using FluentValidation;
 
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Api.Features.RecipeManagement;
 
@@ -29,6 +30,7 @@ public sealed class CreateRecipeController : ApiControllerBase
     /// <param name="handler">The handler for the request.</param>
     /// <param name="data">The data for the request.</param>
     /// <param name="image">The image for the request.</param>
+    /// <param name="jsonOptions">The json options used to deserialize the request data.</param>
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <returns>
     /// A task which represents the asynchronous write operation.
@@ -42,10 +44,20 @@ public sealed class CreateRecipeController : ApiControllerBase
     [Tags("Manage Recipes")]
     public async Task<Results<UnauthorizedHttpResult, ValidationProblem, BadRequest<ValidationProblemDetails>, Created<CreateRecipeDto>>> CreateAsync(
         IValidator<CreateRecipeRequest> validator, CreateRecipeHandler handler, IFormFile data, IFormFile? image,
-        CancellationToken cancellationToken)
+        IOptions<JsonOptions> jsonOptions, CancellationToken cancellationToken)
     {
-        var request = await JsonSerializer.DeserializeAsync<CreateRecipeRequest>(
-            data.OpenReadStream(), cancellationToken: cancellationToken);
+        CreateRecipeRequest? request;
+        try
+        {
+            request = await JsonSerializer.DeserializeAsync<CreateRecipeRequest>(
+                data.OpenReadStream(), jsonOptions.Value.JsonSerializerOptions, cancellationToken: cancellationToken);
+        }
+        catch (JsonException)
+        { 
+            ModelState.AddModelError("Request.InvalidJson", "Failed to deserialize the request, the request JSON is invalid.");
+            var validationProblemDetails = new ValidationProblemDetails(ModelState);
+            return TypedResults.BadRequest(validationProblemDetails);
+        }
 
         if (request == null)
         {

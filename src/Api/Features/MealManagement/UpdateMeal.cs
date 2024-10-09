@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Api.Features.MealManagement;
 
@@ -33,6 +34,7 @@ public sealed class UpdateMealController : ApiControllerBase
     /// <param name="handler">The handler for the request.</param>
     /// <param name="data">The data for the request.</param>
     /// <param name="image">The image for the request.</param>
+    /// <param name="jsonOptions">The json options used to deserialize the request data.</param>
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <returns>
     /// A task which represents the asynchronous write operation.
@@ -45,11 +47,22 @@ public sealed class UpdateMealController : ApiControllerBase
     [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(UpdateMealDto), StatusCodes.Status200OK, MediaTypeNames.Application.Json)]
     [Tags("Manage Meals")]
-    public async Task<Results<UnauthorizedHttpResult, BadRequest<ValidationProblemDetails>, ValidationProblem, NotFound, Ok<UpdateMealDto>>> UpdateAsync(int id, IValidator<UpdateMealRequest> validator,
-        IFormFile data, IFormFile? image, UpdateMealHandler handler, CancellationToken cancellationToken)
+    public async Task<Results<UnauthorizedHttpResult, BadRequest<ValidationProblemDetails>, ValidationProblem, NotFound, Ok<UpdateMealDto>>> UpdateAsync(
+        int id, IValidator<UpdateMealRequest> validator, IFormFile data, IFormFile? image, UpdateMealHandler handler,
+        IOptions<JsonOptions> jsonOptions, CancellationToken cancellationToken)
     {
-        var request = await JsonSerializer.DeserializeAsync<UpdateMealRequest>(
-            data.OpenReadStream(), cancellationToken: cancellationToken);
+        UpdateMealRequest? request;
+        try
+        {
+            request = await JsonSerializer.DeserializeAsync<UpdateMealRequest>(
+                data.OpenReadStream(), jsonOptions.Value.JsonSerializerOptions, cancellationToken: cancellationToken);
+        }
+        catch (JsonException)
+        {
+            ModelState.AddModelError("Request.InvalidJson", "Failed to deserialize the request, the request JSON is invalid.");
+            var validationProblemDetails = new ValidationProblemDetails(ModelState);
+            return TypedResults.BadRequest(validationProblemDetails);
+        }
 
         if (request == null)
         {
