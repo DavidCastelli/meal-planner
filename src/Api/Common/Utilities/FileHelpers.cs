@@ -92,7 +92,6 @@ public static class FileHelpers
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
             errors.Add(FileErrors.UploadFailed(trustedFileNameForDisplay, ex.HResult));
         }
 

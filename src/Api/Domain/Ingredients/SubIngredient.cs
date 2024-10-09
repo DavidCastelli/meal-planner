@@ -4,7 +4,7 @@ namespace Api.Domain.Ingredients;
 /// Entity which represents a sub ingredient.
 /// </summary>
 /// <remarks>
-/// A sub ingredient is used to provides a name to a list of ingredients.
+/// A sub ingredient is used to provide a name to a list of ingredients.
 /// A recipe should have only one sub ingredient with no name,
 /// or multiple sub ingredients each with a name specified in the case a recipe consists
 /// of multiple components.

@@ -55,7 +55,7 @@ public abstract class BadRequestException : Exception
                 dictionary.Add(error.Code, [error.Description]);
             }
         }
-        
+
         return dictionary;
     }
 }

@@ -1,5 +1,3 @@
-using Api.Domain.Recipes;
-
 namespace Api.Domain.Recipes;
 
 /// <summary>
@@ -11,7 +9,7 @@ public sealed class Direction
     /// Gets or sets the number of the direction.
     /// </summary>
     /// <remarks>
-    /// Direction numbers belonging to a recipe should be unique.
+    /// Direction numbers belonging to a recipe should be sequential starting from 1.
     /// </remarks>
     /// <value>
     /// An integer indicating the order the direction should be done.
