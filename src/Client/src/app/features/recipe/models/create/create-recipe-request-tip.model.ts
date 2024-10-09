@@ -1,3 +1,3 @@
 export interface CreateRecipeRequestTip {
-  Description: string;
+  description: string;
 }

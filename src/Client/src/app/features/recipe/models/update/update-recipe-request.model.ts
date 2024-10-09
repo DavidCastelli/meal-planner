@@ -5,12 +5,12 @@ import { UpdateRecipeRequestTip } from './update-recipe-request-tip.model';
 import { UpdateRecipeRequestSubIngredient } from './update-recipe-request-subingredient.model';
 
 export interface UpdateRecipeRequest {
-  Id: number;
-  Title: string;
-  Description?: string;
-  Details: UpdateRecipeRequestRecipeDetails;
-  Nutrition: UpdateRecipeRequestRecipeNutrition;
-  Directions: UpdateRecipeRequestDirection[];
-  Tips: UpdateRecipeRequestTip[];
-  SubIngredients: UpdateRecipeRequestSubIngredient[];
+  id: number;
+  title: string;
+  description?: string;
+  details: UpdateRecipeRequestRecipeDetails;
+  nutrition: UpdateRecipeRequestRecipeNutrition;
+  directions: UpdateRecipeRequestDirection[];
+  tips: UpdateRecipeRequestTip[];
+  subIngredients: UpdateRecipeRequestSubIngredient[];
 }

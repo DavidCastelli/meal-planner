@@ -1,4 +1,4 @@
 export interface UpdateRecipeRequestDirection {
-  Number: number;
-  Description: string;
+  number: number;
+  description: string;
 }

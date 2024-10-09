@@ -5,11 +5,11 @@ import { CreateRecipeRequestTip } from './create-recipe-request-tip.model';
 import { CreateRecipeRequestSubIngredient } from './create-recipe-request-subingredient.model';
 
 export interface CreateRecipeRequest {
-  Title: string;
-  Description?: string;
-  Details: CreateRecipeRequestRecipeDetails;
-  Nutrition: CreateRecipeRequestRecipeNutrition;
-  Directions: CreateRecipeRequestDirection[];
-  Tips: CreateRecipeRequestTip[];
-  SubIngredients: CreateRecipeRequestSubIngredient[];
+  title: string;
+  description?: string;
+  details: CreateRecipeRequestRecipeDetails;
+  nutrition: CreateRecipeRequestRecipeNutrition;
+  directions: CreateRecipeRequestDirection[];
+  tips: CreateRecipeRequestTip[];
+  subIngredients: CreateRecipeRequestSubIngredient[];
 }

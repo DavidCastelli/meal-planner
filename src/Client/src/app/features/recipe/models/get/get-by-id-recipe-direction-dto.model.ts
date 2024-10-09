@@ -1,4 +1,4 @@
 export interface GetByIdRecipeDirectionDto {
-  Number: number;
-  Description: string;
+  number: number;
+  description: string;
 }

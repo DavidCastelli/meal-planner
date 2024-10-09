@@ -6,14 +6,14 @@ import { GetByIdRecipeMealDto } from './get-by-id-recipe-meal-dto.model';
 import { GetByIdRecipeSubIngredientDto } from './get-by-id-recipe-subingredient-dto.model';
 
 export interface GetByIdRecipeDto {
-  Id: number;
-  Title: string;
-  Description?: string;
-  Details: GetByIdRecipeDetailsDto;
-  Nutrition: GetByIdRecipeNutritionDto;
-  Directions: GetByIdRecipeDirectionDto[];
-  Tips: GetByIdRecipeTipDto[];
-  Meals: GetByIdRecipeMealDto[];
-  SubIngredients: GetByIdRecipeSubIngredientDto[];
-  ApplicationUserId: number;
+  id: number;
+  title: string;
+  description?: string;
+  details: GetByIdRecipeDetailsDto;
+  nutrition: GetByIdRecipeNutritionDto;
+  directions: GetByIdRecipeDirectionDto[];
+  tips: GetByIdRecipeTipDto[];
+  meals: GetByIdRecipeMealDto[];
+  subIngredients: GetByIdRecipeSubIngredientDto[];
+  applicationUserId: number;
 }

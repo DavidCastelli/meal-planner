@@ -5,12 +5,12 @@ import { UpdateRecipeTipDto } from './update-recipe-tip-dto.model';
 import { UpdateRecipeSubIngredientDto } from './update-recipe-subingredient-dto.model';
 
 export interface UpdateRecipeDto {
-  Id: number;
-  Title: string;
-  Description?: string;
-  Details: UpdateRecipeDetailsDto;
-  Nutrition: UpdateRecipeNutritionDto;
-  Directions: UpdateRecipeDirectionDto[];
-  Tips: UpdateRecipeTipDto[];
-  SubIngredients: UpdateRecipeSubIngredientDto[];
+  id: number;
+  title: string;
+  description?: string;
+  details: UpdateRecipeDetailsDto;
+  nutrition: UpdateRecipeNutritionDto;
+  directions: UpdateRecipeDirectionDto[];
+  tips: UpdateRecipeTipDto[];
+  subIngredients: UpdateRecipeSubIngredientDto[];
 }

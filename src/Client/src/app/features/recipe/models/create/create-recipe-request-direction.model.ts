@@ -1,4 +1,4 @@
 export interface CreateRecipeRequestDirection {
-  Number: number;
-  Description: string;
+  number: number;
+  description: string;
 }

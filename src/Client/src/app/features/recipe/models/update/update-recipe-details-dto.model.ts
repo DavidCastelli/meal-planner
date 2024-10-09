@@ -1,5 +1,5 @@
 export interface UpdateRecipeDetailsDto {
-  PrepTime?: number;
-  CookTime?: number;
-  Servings?: number;
+  prepTime?: number;
+  cookTime?: number;
+  servings?: number;
 }

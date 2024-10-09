@@ -1,5 +1,5 @@
 export interface GetByIdRecipeDetailsDto {
-  PrepTime?: number;
-  CookTime?: number;
-  Servings?: number;
+  prepTime?: number;
+  cookTime?: number;
+  servings?: number;
 }

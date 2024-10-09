@@ -1,6 +1,6 @@
 export interface UpdateRecipeNutritionDto {
-  Calories?: number;
-  Fat?: number;
-  Carbs?: number;
-  Protein?: number;
+  calories?: number;
+  fat?: number;
+  carbs?: number;
+  protein?: number;
 }

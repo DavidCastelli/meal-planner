@@ -1,4 +1,4 @@
 export interface UpdateRecipeIngredientDto {
-  Name: string;
-  Measurement: string;
+  name: string;
+  measurement: string;
 }

@@ -1,4 +1,4 @@
 export interface UpdateRecipeRequestIngredient {
-  Name: string;
-  Measurement: string;
+  name: string;
+  measurement: string;
 }

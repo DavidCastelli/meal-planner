@@ -1,4 +1,4 @@
 export interface GetByIdRecipeMealDto {
-  Id: number;
-  Title: string;
+  id: number;
+  title: string;
 }
