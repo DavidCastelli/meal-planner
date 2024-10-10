@@ -205,7 +205,7 @@ img {
 
 .sub-ingredients-content-container {
   display: grid;
-  grid-template-rows: 1fr;
+  grid-template-rows: minmax(155px, auto) 1fr;
 }
 
 .ingredients {
@@ -248,7 +248,8 @@ img {
   align-items: center;
 }
 
-.errors h2 {
+.errors h2,
+small {
   color: rgb(255, 15, 35);
   text-shadow: 1px 1px 1px rgb(19, 27, 35);
 }
@@ -262,17 +263,16 @@ input[type="file"] {
 }
 
 input[type="text"] {
-  border: 1px solid;
+  border: 1px solid rgb(0, 0, 0);
   text-align: center;
   font-size: 1.2em;
 }
 
-input[type="number"] {
+.number-input {
   background-color: rgb(23, 126, 137);
   border: 1px solid rgb(0, 0, 0);
   color: rgb(252, 247, 255);
   text-shadow: 1px 1px 1px rgb(8, 96, 95);
-  -moz-appearance: textfield;
   text-align: center;
   font-size: 1.2em;
   width: 15%;

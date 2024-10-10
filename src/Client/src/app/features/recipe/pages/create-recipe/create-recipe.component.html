@@ -16,6 +16,19 @@
             <button class="remove-button" type="button" (click)="removeImage()">
               -
             </button>
+            @if (image.invalid) {
+              <br />
+              @if (image.getError("empty")) {
+                <small>Invalid image, file is empty.</small>
+              } @else if (image.getError("max")) {
+                <small>Max upload size 5mb.</small>
+              } @else if (image.getError("permitted")) {
+                <small
+                  >Image must end in one of the following extensions: jpeg,
+                  jpg.</small
+                >
+              }
+            }
           </span>
         } @else {
           <span>
@@ -26,7 +39,7 @@
             <input
               id="image"
               type="file"
-              formControlName="image"
+              accept="image/jpeg"
               (change)="onImagePicked($event)"
             />
           </span>
@@ -75,8 +88,10 @@
         @if (details.controls.prepTime) {
           <label for="prep-time">Prep Time: </label>
           <input
+            class="number-input"
             id="prep-time"
-            type="number"
+            type="text"
+            inputmode="numeric"
             formControlName="prepTime"
             required
           />
@@ -87,7 +102,10 @@
           >
             -
           </button>
-          <app-control-error controlPath="details.prepTime" />
+          <app-control-error
+            controlPath="details.prepTime"
+            [customErrors]="{ pattern: 'Field must be an integer' }"
+          />
         } @else {
           <span class="span-label">Prep Time: </span
           ><button class="add-button" type="button" (click)="addPrepTime()">
@@ -99,8 +117,10 @@
         @if (details.controls.cookTime) {
           <label for="cook-time">Cook Time: </label>
           <input
+            class="number-input"
             id="cook-time"
-            type="number"
+            type="text"
+            inputmode="numeric"
             formControlName="cookTime"
             required
           />
@@ -111,7 +131,10 @@
           >
             -
           </button>
-          <app-control-error controlPath="details.cookTime" />
+          <app-control-error
+            controlPath="details.cookTime"
+            [customErrors]="{ pattern: 'Field must be an integer' }"
+          />
         } @else {
           <span class="span-label">Cook Time: </span
           ><button class="add-button" type="button" (click)="addCookTime()">
@@ -123,8 +146,10 @@
         @if (details.controls.servings) {
           <label for="servings">Servings: </label>
           <input
+            class="number-input"
             id="servings"
-            type="number"
+            type="text"
+            inputmode="numeric"
             formControlName="servings"
             required
           />
@@ -135,7 +160,10 @@
           >
             -
           </button>
-          <app-control-error controlPath="details.servings" />
+          <app-control-error
+            controlPath="details.servings"
+            [customErrors]="{ pattern: 'Field must be an integer' }"
+          />
         } @else {
           <span class="span-label">Servings: </span
           ><button class="add-button" type="button" (click)="addServings()">
@@ -151,8 +179,10 @@
         @if (nutrition.controls.calories) {
           <label for="calories">Calories: </label>
           <input
+            class="number-input"
             id="calories"
-            type="number"
+            type="text"
+            inputmode="numeric"
             formControlName="calories"
             required
           />
@@ -163,7 +193,10 @@
           >
             -
           </button>
-          <app-control-error controlPath="nutrition.calories" />
+          <app-control-error
+            controlPath="nutrition.calories"
+            [customErrors]="{ pattern: 'Field must be an integer' }"
+          />
         } @else {
           <span class="span-label">Calories: </span
           ><button class="add-button" type="button" (click)="addCalories()">
@@ -174,11 +207,21 @@
       <p>
         @if (nutrition.controls.fat) {
           <label for="fat">Fat: </label>
-          <input id="fat" type="number" formControlName="fat" required />
+          <input
+            class="number-input"
+            id="fat"
+            type="text"
+            inputmode="numeric"
+            formControlName="fat"
+            required
+          />
           <button class="remove-button" type="button" (click)="removeFat()">
             -
           </button>
-          <app-control-error controlPath="nutrition.fat" />
+          <app-control-error
+            controlPath="nutrition.fat"
+            [customErrors]="{ pattern: 'Field must be an integer' }"
+          />
         } @else {
           <span class="span-label">Fat: </span
           ><button class="add-button" type="button" (click)="addFat()">
@@ -189,11 +232,21 @@
       <p>
         @if (nutrition.controls.carbs) {
           <label for="carbs">Carbs: </label>
-          <input id="carbs" type="number" formControlName="carbs" required />
+          <input
+            class="number-input"
+            id="carbs"
+            type="text"
+            inputmode="numeric"
+            formControlName="carbs"
+            required
+          />
           <button class="remove-button" type="button" (click)="removeCarbs()">
             -
           </button>
-          <app-control-error controlPath="nutrition.carbs"></app-control-error>
+          <app-control-error
+            controlPath="nutrition.carbs"
+            [customErrors]="{ pattern: 'Field must be an integer' }"
+          />
         } @else {
           <span class="span-label">Carbs: </span
           ><button class="add-button" type="button" (click)="addCarbs()">
@@ -205,15 +258,20 @@
         @if (nutrition.controls.protein) {
           <label for="protein">Protein: </label>
           <input
+            class="number-input"
             id="protein"
-            type="number"
+            type="text"
+            inputmode="numeric"
             formControlName="protein"
             required
           />
           <button class="remove-button" type="button" (click)="removeProtein()">
             -
           </button>
-          <app-control-error controlPath="nutrition.protein" />
+          <app-control-error
+            controlPath="nutrition.protein"
+            [customErrors]="{ pattern: 'Field must be an integer' }"
+          />
         } @else {
           <span class="span-label">Protein: </span
           ><button class="add-button" type="button" (click)="addProtein()">

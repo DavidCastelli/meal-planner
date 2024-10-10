@@ -17,7 +17,7 @@ import {
   tap,
   throwError,
 } from 'rxjs';
-import { ValidationProblemDetails } from '../../shared/validation-problem-details.model';
+import { ValidationProblemDetails } from '../../shared/models/validation-problem-details.model';
 import { UserInfo } from './user-info.model';
 import { SKIP_AUTH_INTERCEPTOR } from '../interceptors/auth.interceptor';
 

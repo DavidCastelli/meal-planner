@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ValidationProblemDetails } from '../../shared/validation-problem-details.model';
+import { ValidationProblemDetails } from '../../shared/models/validation-problem-details.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 
@@ -13,25 +13,18 @@ export class ErrorService {
     this.messages.push(message);
   }
 
-  addProblem(validationProblemDetails: ValidationProblemDetails): void {
-    const message = Object.entries(validationProblemDetails.errors).reduce(
-      (acc, cur) => {
-        acc += `${cur[0]}:`;
-        for (const error of cur[1]) {
-          acc += ` ${error}`;
-        }
-        acc += '\n';
-
-        return acc;
-      },
-      '',
-    );
-
-    this.addMessage(message);
-  }
-
   clear(): void {
     this.messages = [];
+  }
+
+  addProblem(validationProblemDetails: ValidationProblemDetails): void {
+    Object.keys(validationProblemDetails.errors).forEach((errorKey) => {
+      const errors = validationProblemDetails.errors[errorKey];
+      for (const error of errors) {
+        const errorMessage = `${errorKey}: ${error}`;
+        this.messages.push(errorMessage);
+      }
+    });
   }
 
   handleError<T>(result?: T) {

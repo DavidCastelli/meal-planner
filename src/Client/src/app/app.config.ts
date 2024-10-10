@@ -7,7 +7,7 @@ import {
   withFetch,
   withInterceptors,
 } from '@angular/common/http';
-import { API_CONFIG, DEFAULT_API_CONFIG } from './shared/api.config';
+import { API_CONFIG, DEFAULT_API_CONFIG } from './shared/configs/api.config';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { apiInterceptor } from './core/interceptors/api.interceptor';

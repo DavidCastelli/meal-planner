@@ -7,7 +7,7 @@ import {
   Subscription,
 } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
-import { FORM_ERRORS } from '../../error.config';
+import { FORM_ERRORS } from '../../configs/error.config';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({

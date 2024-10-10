@@ -11,13 +11,10 @@ import {
   Validators,
 } from '@angular/forms';
 import { CreateRecipeRequest } from '../../models/create/create-recipe-request.model';
-import { CreateRecipeRequestDirection } from '../../models/create/create-recipe-request-direction.model';
-import { CreateRecipeRequestTip } from '../../models/create/create-recipe-request-tip.model';
-import { CreateRecipeRequestIngredient } from '../../models/create/create-recipe-request-ingredient.model';
-import { CreateRecipeRequestSubIngredient } from '../../models/create/create-recipe-request-subingredient.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgOptimizedImage } from '@angular/common';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error.component';
+import { ImageValidator } from '../../../../shared/validators/image.validator';
 
 interface RecipeDetailsForm {
   prepTime?: FormControl<number>;
@@ -84,7 +81,11 @@ export class CreateRecipeComponent {
       Validators.required,
       Validators.maxLength(20),
     ]),
-    image: this.formBuilder.control<File | null>(null),
+    image: this.formBuilder.control<File | null>(null, [
+      ImageValidator.empty,
+      ImageValidator.max,
+      ImageValidator.extensions,
+    ]),
     details: this.formBuilder.nonNullable.group({}),
     nutrition: this.formBuilder.nonNullable.group({}),
     directions: this.formBuilder.nonNullable.array([
@@ -226,6 +227,7 @@ export class CreateRecipeComponent {
   }
 
   addDirection() {
+    this.directionCount += 1;
     const direction = this.formBuilder.nonNullable.group({
       number: [this.directionCount],
       description: [
@@ -233,7 +235,6 @@ export class CreateRecipeComponent {
         { validators: [Validators.required, Validators.maxLength(255)] },
       ],
     });
-    this.directionCount += 1;
     this.directions.push(direction);
   }
 
@@ -359,6 +360,7 @@ export class CreateRecipeComponent {
       this.previewFileName = image.name;
 
       this.createRecipeForm.patchValue({ image: image });
+      this.image.updateValueAndValidity();
     }
   }
 
@@ -367,6 +369,7 @@ export class CreateRecipeComponent {
     this.errorService.clear();
 
     if (this.createRecipeForm.invalid) {
+      this.errorService.addMessage('Please fix all validation errors.');
       this.isSubmitting = false;
       return;
     }
@@ -388,58 +391,18 @@ export class CreateRecipeComponent {
   }
 
   private fromForm(): CreateRecipeRequest {
-    const directions = [];
-    for (const group of this.directions.controls) {
-      const direction: CreateRecipeRequestDirection = {
-        Number: group.controls.number.defaultValue,
-        Description: group.controls.description.value,
-      };
-      directions.push(direction);
-    }
-
-    const tips = [];
-    for (const control of this.tips.controls) {
-      const tip: CreateRecipeRequestTip = {
-        Description: control.value,
-      };
-      tips.push(tip);
-    }
-
-    const subIngredients = [];
-    for (const group1 of this.subIngredients.controls) {
-      const ingredients = [];
-      for (const group2 of group1.controls.ingredients.controls) {
-        const ingredient: CreateRecipeRequestIngredient = {
-          Name: group2.controls.name.value,
-          Measurement: group2.controls.measurement.value,
-        };
-        ingredients.push(ingredient);
-      }
-
-      const subIngredient: CreateRecipeRequestSubIngredient = {
-        Name: group1.controls.name?.value,
-        Ingredients: ingredients,
-      };
-      subIngredients.push(subIngredient);
-    }
+    const values = this.createRecipeForm.getRawValue();
 
     return {
-      Title: this.title.value,
-      Description: this.description?.value,
-      Details: {
-        PrepTime: this.details.controls.prepTime?.value,
-        CookTime: this.details.controls.cookTime?.value,
-        Servings: this.details.controls.cookTime?.value,
-      },
-      Nutrition: {
-        Calories: this.nutrition.controls.calories?.value,
-        Fat: this.nutrition.controls.fat?.value,
-        Carbs: this.nutrition.controls.carbs?.value,
-        Protein: this.nutrition.controls.protein?.value,
-      },
-      Directions: directions,
-      Tips: tips,
-      SubIngredients: subIngredients,
+      title: values.title,
+      description: values.description,
+      details: values.details,
+      nutrition: values.nutrition,
+      directions: values.directions,
+      tips: values.tips.map((description) => {
+        return { description: description };
+      }),
+      subIngredients: values.subIngredients,
     };
   }
 }
