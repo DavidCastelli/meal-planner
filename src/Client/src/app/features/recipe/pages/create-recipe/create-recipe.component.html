@@ -360,12 +360,14 @@
     </section>
 
     <section class="sub-ingredients" formArrayName="subIngredients">
-      <h2>SubIngredients</h2>
-      @if (subIngredients.length < 5) {
-        <button class="add-button" type="button" (click)="addSubIngredient()">
-          +
-        </button>
-      }
+      <div>
+        <h2>SubIngredients</h2>
+        @if (subIngredients.length < 5) {
+          <button class="add-button" type="button" (click)="addSubIngredient()">
+            +
+          </button>
+        }
+      </div>
 
       <div class="sub-ingredients-container">
         @for (
@@ -387,18 +389,9 @@
                   </button>
                 }
               </div>
-              <p>
-                @if (subIngredient.controls.name) {
-                  <span>
-                    <label for="name">Name: </label>
-                    <button
-                      class="remove-button"
-                      type="button"
-                      (click)="removeSubIngredientName(i)"
-                    >
-                      -
-                    </button>
-                  </span>
+              <p class="sub-ingredient-name">
+                @if (subIngredients.length > 1) {
+                  <label for="name">Name: </label>
                   <input
                     id="name"
                     type="text"
@@ -408,17 +401,6 @@
                   <app-control-error
                     controlPath="subIngredients.{{ i }}.name"
                   />
-                } @else {
-                  <span>
-                    <span>Name: </span
-                    ><button
-                      class="add-button"
-                      type="button"
-                      (click)="addSubIngredientName(i)"
-                    >
-                      +
-                    </button>
-                  </span>
                 }
               </p>
             </section>
