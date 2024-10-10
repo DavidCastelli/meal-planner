@@ -35,11 +35,21 @@ public static class RecipeErrors
         "Recipes.DirectionsNotSequential", "Recipe directions must be sequential.");
 
     /// <summary>
+    /// Error message that is used when a recipe contains a single sub ingredient and this sub ingredient is provided an name.
+    /// </summary>
+    /// <remarks>
+    /// For more information on when to use the error see <see cref="SubIngredient"/>
+    /// </remarks>
+    /// <returns>An <see cref="Error"/> which contains an error code and description.</returns>
+    public static Error SingleSubIngredientName() => new(
+        "Recipes.SingleSubIngredientName", "Sub ingredient must not contain a name when only one sub ingredient is provided.");
+
+    /// <summary>
     /// Error message that is used when a recipe contains multiple sub ingredients but at least one of which is not
     /// given a name.
     /// </summary>
     /// <remarks>
-    /// For more information on when to use the error <see cref="SubIngredient"/>
+    /// For more information on when to use the error see <see cref="SubIngredient"/>
     /// </remarks>
     /// <returns>An <see cref="Error"/> which contains an error code and description.</returns>
     public static Error MultipleSubIngredientName() => new(

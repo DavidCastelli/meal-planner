@@ -53,7 +53,7 @@ public sealed class CreateRecipeController : ApiControllerBase
                 data.OpenReadStream(), jsonOptions.Value.JsonSerializerOptions, cancellationToken: cancellationToken);
         }
         catch (JsonException)
-        { 
+        {
             ModelState.AddModelError("Request.InvalidJson", "Failed to deserialize the request, the request JSON is invalid.");
             var validationProblemDetails = new ValidationProblemDetails(ModelState);
             return TypedResults.BadRequest(validationProblemDetails);
@@ -373,6 +373,12 @@ public sealed class CreateRecipeHandler
         }
 
         var subIngredients = request.SubIngredients;
+
+        if (subIngredients.Count == 1 && subIngredients.First().Name != null)
+        {
+            errors.Add(RecipeErrors.SingleSubIngredientName());
+        }
+
         if (subIngredients.Count > 1 && subIngredients.Any(si => si.Name == null))
         {
             errors.Add(RecipeErrors.MultipleSubIngredientName());

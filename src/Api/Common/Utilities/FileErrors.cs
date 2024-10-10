@@ -31,7 +31,7 @@ public static class FileErrors
     /// <param name="trustedFileNameForDisplay">The html encoded file name.</param>
     /// <returns>An <see cref="Error"/> which contains an error code and description.</returns>
     public static Error InvalidExtensionOrSignature(string trustedFileNameForDisplay) => new(
-        "File.InvalidExtensionOrSignature", $"${trustedFileNameForDisplay} file " +
+        "File.InvalidExtensionOrSignature", $"{trustedFileNameForDisplay} file " +
                         "type isn't permitted or the file's signature " +
                         "doesnt match the file's extension.");
 
