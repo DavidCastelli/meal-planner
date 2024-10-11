@@ -7,7 +7,7 @@
       <p>
         <label for="title">Title: </label>
         <input id="title" type="text" formControlName="title" required />
-        <app-control-error controlPath="title" />
+        <app-control-error class="title-error-position" controlPath="title" />
       </p>
       <p>
         @if (image.value) {

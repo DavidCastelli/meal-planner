@@ -25,7 +25,13 @@ h1 {
   grid-row: 2;
 }
 
+.info label:first-child {
+  margin-right: 5px;
+}
+
 .info p {
+  display: grid;
+  grid-template-columns: auto 1fr;
   width: 66%;
 }
 
@@ -44,6 +50,10 @@ h1 {
   font-size: 1.2em;
 }
 
+.info input[type='text'] {
+  width: 40%;
+}
+
 .info textarea {
   border: 1px solid;
   font-size: 1.3em;
@@ -51,6 +61,10 @@ h1 {
   max-height: 200px;
   margin-top: 5px;
   resize: vertical;
+}
+
+.title-error-position {
+  grid-column: 2;
 }
 
 #file-picker {
