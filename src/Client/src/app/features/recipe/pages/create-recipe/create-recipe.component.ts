@@ -116,10 +116,6 @@ export class CreateRecipeComponent {
     ]),
   });
 
-  get title() {
-    return this.createRecipeForm.controls.title;
-  }
-
   get image() {
     return this.createRecipeForm.controls.image;
   }
@@ -255,33 +251,27 @@ export class CreateRecipeComponent {
       this.subIngredients.at(0).addControl('name', subIngredientName);
     }
 
-    const subIngredient = this.formBuilder.nonNullable.group<SubIngredientForm>({
-      name: this.formBuilder.nonNullable.control('', [
-        Validators.required,
-        Validators.maxLength(20),
-      ]),
-      ingredients: this.formBuilder.nonNullable.array([
-        this.formBuilder.nonNullable.group({
-          name: [
-            '',
-            { validators: [Validators.required, Validators.maxLength(20)] },
-          ],
-          measurement: [
-            '',
-            { validators: [Validators.required, Validators.maxLength(20)] },
-          ],
-        }),
-      ]),
-    });
+    const subIngredient = this.formBuilder.nonNullable.group<SubIngredientForm>(
+      {
+        name: this.formBuilder.nonNullable.control('', [
+          Validators.required,
+          Validators.maxLength(20),
+        ]),
+        ingredients: this.formBuilder.nonNullable.array([
+          this.formBuilder.nonNullable.group({
+            name: [
+              '',
+              { validators: [Validators.required, Validators.maxLength(20)] },
+            ],
+            measurement: [
+              '',
+              { validators: [Validators.required, Validators.maxLength(20)] },
+            ],
+          }),
+        ]),
+      },
+    );
     this.subIngredients.push(subIngredient);
-  }
-
-  addSubIngredientName(index: number) {
-    const subIngredientName = this.formBuilder.nonNullable.control('', [
-      Validators.required,
-      Validators.maxLength(20),
-    ]);
-    this.subIngredients.at(index).addControl('name', subIngredientName);
   }
 
   addIngredient(index: number) {
@@ -350,10 +340,6 @@ export class CreateRecipeComponent {
     if (this.subIngredients.length < 2) {
       this.subIngredients.at(0).removeControl('name');
     }
-  }
-
-  removeSubIngredientName(index: number) {
-    this.subIngredients.at(index).removeControl('name');
   }
 
   removeIngredient(subIngredientIndex: number, ingredientIndex: number) {
