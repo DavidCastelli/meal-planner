@@ -11,6 +11,7 @@ import { RecipesComponent } from './features/recipe/pages/recipes/recipes.compon
 import { CreateMealComponent } from './features/meal/pages/create-meal/create-meal.component';
 import { CreateRecipeComponent } from './features/recipe/pages/create-recipe/create-recipe.component';
 import { NavigationComponent } from './core/layout/navigation/navigation.component';
+import { exitGuard } from './shared/guards/exit.guard';
 
 export const routes: Routes = [
   {
@@ -50,6 +51,7 @@ export const routes: Routes = [
             path: 'manage/recipes/create',
             component: CreateRecipeComponent,
             title: 'Create Recipe',
+            canDeactivate: [exitGuard],
           },
           {
             path: 'manage/meals',

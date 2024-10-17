@@ -1,5 +1,5 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withRouterConfig } from '@angular/router';
 
 import { routes } from './app.routes';
 import {
@@ -15,7 +15,10 @@ import { apiInterceptor } from './core/interceptors/api.interceptor';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes),
+    provideRouter(
+      routes,
+      withRouterConfig({ canceledNavigationResolution: 'computed' }),
+    ),
     provideHttpClient(
       withFetch(),
       withInterceptors([apiInterceptor, authInterceptor]),

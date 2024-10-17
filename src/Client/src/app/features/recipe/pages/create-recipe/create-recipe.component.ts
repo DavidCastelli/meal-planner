@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject } from '@angular/core';
+import { Component, DestroyRef, HostListener, inject } from '@angular/core';
 import { ErrorService } from '../../../../core/errors/error.service';
 import { Router } from '@angular/router';
 import { RecipeService } from '../../recipe.service';
@@ -15,6 +15,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgOptimizedImage } from '@angular/common';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error.component';
 import { ImageValidator } from '../../../../shared/validators/image.validator';
+import { CanComponentDeactivate } from '../../../../shared/interfaces/can-component-deactivate';
+import { ModalService } from '../../../../shared/services/modal.service';
+import { map, Observable } from 'rxjs';
 
 interface RecipeDetailsForm {
   prepTime?: FormControl<number>;
@@ -62,11 +65,12 @@ interface CreateRecipeForm {
   templateUrl: './create-recipe.component.html',
   styleUrl: './create-recipe.component.css',
 })
-export class CreateRecipeComponent {
+export class CreateRecipeComponent implements CanComponentDeactivate {
   private readonly recipeService = inject(RecipeService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly modalService = inject(ModalService);
 
   public readonly errorService = inject(ErrorService);
 
@@ -115,6 +119,38 @@ export class CreateRecipeComponent {
       }),
     ]),
   });
+
+  @HostListener('window:beforeunload', ['$event'])
+  onBeforeUnload(event: BeforeUnloadEvent): void {
+    if (this.isFormTouchedOrDirty()) {
+      event.preventDefault();
+    }
+  }
+
+  canDeactivate(): boolean | Observable<boolean> {
+    if (this.isFormTouchedOrDirty()) {
+      // Needed to fix a bug where a user can trigger the deactivate guard when an onbeforeload confirm dialog is present.
+      // This is caused when using the browser back button while the onbeforeload dialog is open.
+      // This causes multiple modals to be opened and stack on top of each other in the case the user decides to stay on the page.
+      // Therefor modals must be cleared at the start of each call.
+      this.modalService.closeAllModals();
+
+      const title = 'Exit';
+      const message =
+        'Are you sure you want to exit? All data for the current recipe will be lost.';
+
+      return this.modalService.openConfirmationModal(title, message).pipe(
+        map((result) => {
+          if (result === undefined) {
+            return false;
+          }
+          return result;
+        }),
+      );
+    }
+
+    return true;
+  }
 
   get image() {
     return this.createRecipeForm.controls.image;
@@ -405,5 +441,9 @@ export class CreateRecipeComponent {
       }),
       subIngredients: values.subIngredients,
     };
+  }
+
+  private isFormTouchedOrDirty(): boolean {
+    return this.createRecipeForm.touched || this.createRecipeForm.dirty;
   }
 }
