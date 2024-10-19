@@ -75,6 +75,7 @@ export class CreateRecipeComponent implements CanComponentDeactivate {
   public readonly errorService = inject(ErrorService);
 
   private directionCount = 1;
+  private isExitModalOpen = false;
 
   isSubmitting = false;
   previewSrc = '/27002.jpg';
@@ -122,25 +123,42 @@ export class CreateRecipeComponent implements CanComponentDeactivate {
 
   @HostListener('window:beforeunload', ['$event'])
   onBeforeUnload(event: BeforeUnloadEvent): void {
-    if (this.isFormTouchedOrDirty()) {
+    if (this.isFormTouchedOrDirty() && !this.isExitModalOpen) {
+      // This flag is needed to fix a bug where the user can press the browser back button while the onbeforeload confirm dialog is present.
+      // This causes multiple modals to be opened and stack on top of each other in the case the user decides to stay on the page.
+      this.isExitModalOpen = true;
+
+      // Needed as a workaround for determining when the onbeforeload dialog ends in the case a user decides to stay.
+      // The first timeout triggers immediately before event.preventDefault() is called which opens the dialog and
+      // pauses the thread. The inner timeout is then queued and triggers once the dialog closes.
+      setTimeout(() => {
+        setTimeout(() =>
+        {
+          this.isExitModalOpen = false;
+        }, 100);
+      }, 1);
+
       event.preventDefault();
     }
   }
 
   canDeactivate(): boolean | Observable<boolean> {
-    if (this.isFormTouchedOrDirty()) {
-      // Needed to fix a bug where a user can trigger the deactivate guard when an onbeforeload confirm dialog is present.
-      // This is caused when using the browser back button while the onbeforeload dialog is open.
-      // This causes multiple modals to be opened and stack on top of each other in the case the user decides to stay on the page.
-      // Therefor modals must be cleared at the start of each call.
-      this.modalService.closeAllModals();
+    if (this.isExitModalOpen) {
+      return false;
+    }
 
+    if (this.isFormTouchedOrDirty()) {
       const title = 'Exit';
       const message =
         'Are you sure you want to exit? All data for the current recipe will be lost.';
 
+      // Flag used to prevent onbeforeload confirm dialog from stacking on top of the exit modal.
+      // If an exit modal is already open and a user refreshes then the page will reload without an additional dialog.
+      this.isExitModalOpen = true;
+
       return this.modalService.openConfirmationModal(title, message).pipe(
         map((result) => {
+          this.isExitModalOpen = false;
           if (result === undefined) {
             return false;
           }

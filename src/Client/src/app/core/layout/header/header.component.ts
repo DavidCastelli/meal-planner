@@ -4,7 +4,6 @@ import { CommunicationService } from '../communication.service';
 import { Observable } from 'rxjs';
 import { AuthService } from '../../auth/auth.service';
 import { Router } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { UserInfo } from '../../auth/user-info.model';
 
 @Component({
@@ -17,7 +16,6 @@ import { UserInfo } from '../../auth/user-info.model';
 export class HeaderComponent implements OnInit {
   private readonly communicationService = inject(CommunicationService);
   private readonly authService = inject(AuthService);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
 
   public sidebarIsOpen = false;
@@ -33,9 +31,12 @@ export class HeaderComponent implements OnInit {
   }
 
   logout() {
-    this.authService
-      .logout()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({ next: () => void this.router.navigate(['/landing']) });
+    this.router.navigate(['/landing']).then((result) => {
+      if (result) {
+        this.authService
+          .logout()
+          .subscribe();
+      }
+    }).catch((error) => console.log(error));
   }
 }
