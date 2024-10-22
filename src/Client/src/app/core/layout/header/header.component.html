@@ -3,9 +3,15 @@
     class="sidebar-button"
     type="button"
     (click)="toggleSidebar()"
-    [class.is-active]="sidebarIsOpen"
+    [class.is-active]="isSidebarOpen$ | async"
   >
-    <img ngSrc="/menu-grid-r-svgrepo-com.svg" alt="Menu icon." fill />
+    <img
+      id="sidebar-button-img"
+      ngSrc="/menu-grid-r-svgrepo-com.svg"
+      alt="Menu icon."
+      fill
+      priority
+    />
   </button>
   <div class="margin-left-auto">
     @if (curUserInfo$ | async; as user) {

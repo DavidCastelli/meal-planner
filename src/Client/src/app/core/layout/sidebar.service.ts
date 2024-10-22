@@ -4,12 +4,15 @@ import { Subject } from 'rxjs';
 @Injectable({
   providedIn: 'root',
 })
-export class CommunicationService {
+export class SidebarService {
   private readonly toggleNotificationSource = new Subject<boolean>();
   public readonly toggleNotification$ =
     this.toggleNotificationSource.asObservable();
 
-  sendToggleNotification(isOpen: boolean) {
-    this.toggleNotificationSource.next(isOpen);
+  private isSidebarOpen = false;
+
+  sendToggleNotification() {
+    this.isSidebarOpen = !this.isSidebarOpen;
+    this.toggleNotificationSource.next(this.isSidebarOpen);
   }
 }
