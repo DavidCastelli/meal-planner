@@ -10,7 +10,7 @@ import { MealsComponent } from './features/meal/pages/meals/meals.component';
 import { RecipesComponent } from './features/recipe/pages/recipes/recipes.component';
 import { CreateMealComponent } from './features/meal/pages/create-meal/create-meal.component';
 import { CreateRecipeComponent } from './features/recipe/pages/create-recipe/create-recipe.component';
-import { NavigationComponent } from './core/layout/navigation/navigation.component';
+import { PrivateLayoutComponent } from './core/layout/private-layout/private-layout.component';
 import { exitGuard } from './shared/guards/exit.guard';
 
 export const routes: Routes = [
@@ -32,7 +32,7 @@ export const routes: Routes = [
   },
   {
     path: '',
-    component: NavigationComponent,
+    component: PrivateLayoutComponent,
     children: [
       {
         path: '',

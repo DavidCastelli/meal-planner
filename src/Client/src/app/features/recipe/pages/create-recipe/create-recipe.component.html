@@ -1,5 +1,9 @@
 <div class="form-container">
-  <form [formGroup]="createRecipeForm" (ngSubmit)="submit()">
+  <form
+    [formGroup]="createRecipeForm"
+    (ngSubmit)="submit()"
+    [@slide]="(isSideBarOpen$ | async) ? 'right' : 'left'"
+  >
     <h1>Create Recipe</h1>
 
     <section class="info">
@@ -104,7 +108,7 @@
           </button>
           <app-control-error
             controlPath="details.prepTime"
-            [customErrors]="{ pattern: 'Field must be an integer' }"
+            [customErrors]="{ pattern: 'Field must be an integer.' }"
           />
         } @else {
           <span class="span-label">Prep Time: </span
@@ -133,7 +137,7 @@
           </button>
           <app-control-error
             controlPath="details.cookTime"
-            [customErrors]="{ pattern: 'Field must be an integer' }"
+            [customErrors]="{ pattern: 'Field must be an integer.' }"
           />
         } @else {
           <span class="span-label">Cook Time: </span
@@ -162,7 +166,7 @@
           </button>
           <app-control-error
             controlPath="details.servings"
-            [customErrors]="{ pattern: 'Field must be an integer' }"
+            [customErrors]="{ pattern: 'Field must be an integer.' }"
           />
         } @else {
           <span class="span-label">Servings: </span
@@ -195,7 +199,7 @@
           </button>
           <app-control-error
             controlPath="nutrition.calories"
-            [customErrors]="{ pattern: 'Field must be an integer' }"
+            [customErrors]="{ pattern: 'Field must be an integer.' }"
           />
         } @else {
           <span class="span-label">Calories: </span
@@ -220,7 +224,7 @@
           </button>
           <app-control-error
             controlPath="nutrition.fat"
-            [customErrors]="{ pattern: 'Field must be an integer' }"
+            [customErrors]="{ pattern: 'Field must be an integer.' }"
           />
         } @else {
           <span class="span-label">Fat: </span
@@ -245,7 +249,7 @@
           </button>
           <app-control-error
             controlPath="nutrition.carbs"
-            [customErrors]="{ pattern: 'Field must be an integer' }"
+            [customErrors]="{ pattern: 'Field must be an integer.' }"
           />
         } @else {
           <span class="span-label">Carbs: </span
@@ -270,7 +274,7 @@
           </button>
           <app-control-error
             controlPath="nutrition.protein"
-            [customErrors]="{ pattern: 'Field must be an integer' }"
+            [customErrors]="{ pattern: 'Field must be an integer.' }"
           />
         } @else {
           <span class="span-label">Protein: </span
@@ -478,16 +482,19 @@
         </button>
       </p>
     </section>
-  </form>
-  @if (errorService.messages.length > 0) {
-    <section class="errors">
-      <h2>Errors</h2>
 
-      @for (error of errorService.messages; track error) {
-        <p>
-          {{ error }}
-        </p>
-      }
-    </section>
-  }
+    @if (errorService.messages.length > 0) {
+      <section class="errors">
+        <h2>Errors</h2>
+
+        @for (error of errorService.messages; track error) {
+          <p>
+            {{ error }}
+          </p>
+        }
+      </section>
+    }
+
+    <div class="form-bottom" #bottom></div>
+  </form>
 </div>

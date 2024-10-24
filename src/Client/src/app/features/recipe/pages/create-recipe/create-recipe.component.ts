@@ -1,4 +1,11 @@
-import { Component, DestroyRef, HostListener, inject } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  ElementRef,
+  HostListener,
+  inject,
+  ViewChild,
+} from '@angular/core';
 import { ErrorService } from '../../../../core/errors/error.service';
 import { Router } from '@angular/router';
 import { RecipeService } from '../../recipe.service';
@@ -12,12 +19,14 @@ import {
 } from '@angular/forms';
 import { CreateRecipeRequest } from '../../models/create/create-recipe-request.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NgOptimizedImage } from '@angular/common';
+import { AsyncPipe, NgOptimizedImage } from '@angular/common';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error.component';
 import { ImageValidator } from '../../../../shared/validators/image.validator';
 import { CanComponentDeactivate } from '../../../../shared/interfaces/can-component-deactivate';
 import { ModalService } from '../../../../shared/services/modal.service';
 import { map, Observable } from 'rxjs';
+import { SidebarService } from '../../../../core/layout/sidebar.service';
+import { slideAnimation } from '../../../../shared/animations/slide.animation';
 
 interface RecipeDetailsForm {
   prepTime?: FormControl<number>;
@@ -61,18 +70,28 @@ interface CreateRecipeForm {
 @Component({
   selector: 'app-create-recipe',
   standalone: true,
-  imports: [ReactiveFormsModule, NgOptimizedImage, ControlErrorComponent],
+  imports: [
+    ReactiveFormsModule,
+    NgOptimizedImage,
+    ControlErrorComponent,
+    AsyncPipe,
+  ],
+  animations: [slideAnimation],
   templateUrl: './create-recipe.component.html',
   styleUrl: './create-recipe.component.css',
 })
 export class CreateRecipeComponent implements CanComponentDeactivate {
+  @ViewChild('bottom') formBottomRef?: ElementRef<HTMLElement>;
+
   private readonly recipeService = inject(RecipeService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly formBuilder = inject(FormBuilder);
   private readonly modalService = inject(ModalService);
+  private readonly sidebarService = inject(SidebarService);
 
   public readonly errorService = inject(ErrorService);
+  public readonly isSideBarOpen$ = this.sidebarService.openClose$;
 
   private directionCount = 1;
   private isExitModalOpen = false;
@@ -132,8 +151,7 @@ export class CreateRecipeComponent implements CanComponentDeactivate {
       // The first timeout triggers immediately before event.preventDefault() is called which opens the dialog and
       // pauses the thread. The inner timeout is then queued and triggers once the dialog closes.
       setTimeout(() => {
-        setTimeout(() =>
-        {
+        setTimeout(() => {
           this.isExitModalOpen = false;
         }, 100);
       }, 1);
@@ -425,6 +443,7 @@ export class CreateRecipeComponent implements CanComponentDeactivate {
 
     if (this.createRecipeForm.invalid) {
       this.errorService.addMessage('Please fix all validation errors.');
+      this.formBottomRef?.nativeElement.scrollIntoView({ behavior: 'smooth' });
       this.isSubmitting = false;
       return;
     }

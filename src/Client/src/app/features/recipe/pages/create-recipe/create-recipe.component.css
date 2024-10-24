@@ -1,9 +1,11 @@
 .form-container {
   background-color: rgb(23, 126, 137);
   padding: 5px;
+  overflow: hidden;
 }
 
 form {
+  position: relative; /* Needed for animation */
   display: grid;
   grid-template-columns: repeat(12, minmax(75px, 1fr));
   grid-auto-rows: minmax(100px, auto);
@@ -52,6 +54,7 @@ h1 {
 
 .info input[type="text"] {
   width: 40%;
+  min-width: 150px;
 }
 
 .info textarea {
@@ -107,7 +110,7 @@ img {
 
 .extra-info p {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: minmax(115px, 1fr) auto auto;
   width: 88%;
 }
 
@@ -152,9 +155,14 @@ img {
   padding: 5px;
 }
 
+.directions h2 {
+  text-align: center;
+}
+
 .directions-container {
-  display: flex;
-  flex-flow: row wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-auto-rows: minmax(50px, auto);
   gap: 60px;
 }
 
@@ -234,11 +242,13 @@ img {
 .ingredients {
   background-color: rgb(179, 181, 187);
   border: 3px solid rgb(61, 59, 142);
+  min-width: 250px;
 }
 
 .ingredients p {
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: minmax(100px, 1fr) auto;
+  gap: 0 20px;
 }
 
 .submit {
@@ -265,6 +275,8 @@ img {
 }
 
 .errors {
+  grid-column: 1 / 13;
+  grid-row: 7;
   display: flex;
   flex-flow: column;
   align-items: center;
@@ -276,8 +288,17 @@ small {
   text-shadow: 1px 1px 1px rgb(19, 27, 35);
 }
 
+.errors h2 {
+  margin: 0;
+}
+
 .errors p {
   margin-bottom: 0;
+}
+
+.form-bottom {
+  grid-row: 8;
+  grid-column: 1 / 13;
 }
 
 input[type="file"] {
@@ -298,6 +319,7 @@ input[type="text"] {
   text-align: center;
   font-size: 1.2em;
   width: 15%;
+  min-width: 25px;
 }
 
 .span-label {

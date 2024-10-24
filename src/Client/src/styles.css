@@ -2,6 +2,10 @@
 
 @import "@angular/cdk/overlay-prebuilt.css";
 
+html {
+  overscroll-behavior-y: none;
+}
+
 body {
   margin: 0;
   font-family: Helvetica, Arial, sans-serif;
