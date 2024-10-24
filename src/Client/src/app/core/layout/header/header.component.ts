@@ -23,11 +23,15 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit() {
     this.curUserInfo$ = this.authService.curUserInfo$;
-    this.isSidebarOpen$ = this.sidebarService.toggleNotification$;
+    this.isSidebarOpen$ = this.sidebarService.openClose$;
   }
 
   toggleSidebar() {
-    this.sidebarService.sendToggleNotification();
+    const isSidebarAnimationDone = this.sidebarService.getIsAnimationDone();
+    if (!isSidebarAnimationDone) {
+      return;
+    }
+    this.sidebarService.toggle();
   }
 
   logout() {

@@ -1,42 +1,37 @@
-@if (isOpen$ | async) {
-  <nav class="menu" @openClose>
-    <h1>Menu</h1>
-    <ul>
-      <li>
-        <a
-          (click)="closeAfterSelect()"
-          routerLink="/home"
-          routerLinkActive="is-active"
-          ariaCurrentWhenActive="page"
-        >
-          Home
-        </a>
-      </li>
-      <li>
-        <a
-          (click)="closeAfterSelect()"
-          routerLink="/manage/meals"
-          routerLinkActive="is-active"
-          ariaCurrentWhenActive="page"
-          >Manage Meals</a
-        >
-      </li>
-      <li>
-        <a
-          (click)="closeAfterSelect()"
-          routerLink="/manage/recipes"
-          routerLinkActive="is-active"
-          ariaCurrentWhenActive="page"
-        >
-          Manage Recipes
-        </a>
-      </li>
-      <li>
-        <a>Schedule</a>
-      </li>
-      <li>
-        <a>Shopping List</a>
-      </li>
-    </ul>
-  </nav>
-}
+<nav class="menu">
+  <h1>Menu</h1>
+  <ul>
+    <li>
+      <a
+        routerLink="/home"
+        routerLinkActive="is-active"
+        ariaCurrentWhenActive="page"
+      >
+        Home
+      </a>
+    </li>
+    <li>
+      <a
+        routerLink="/manage/meals"
+        routerLinkActive="is-active"
+        ariaCurrentWhenActive="page"
+        >Manage Meals</a
+      >
+    </li>
+    <li>
+      <a
+        routerLink="/manage/recipes"
+        routerLinkActive="is-active"
+        ariaCurrentWhenActive="page"
+      >
+        Manage Recipes
+      </a>
+    </li>
+    <li>
+      <a>Schedule</a>
+    </li>
+    <li>
+      <a>Shopping List</a>
+    </li>
+  </ul>
+</nav>

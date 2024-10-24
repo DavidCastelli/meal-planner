@@ -1,13 +1,17 @@
-.menu {
-  display: flex;
-  flex-flow: column;
-  align-items: center;
+:host {
+  display: block;
   position: fixed;
   background-color: rgb(89, 131, 129);
   height: 95svh;
   width: 15svw;
-  min-width: 200px;
+  min-width: 155px;
   z-index: 1;
+}
+
+.menu {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
 }
 
 h1 {

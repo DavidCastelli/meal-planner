@@ -1,0 +1,11 @@
+<app-header></app-header>
+@if (isSideBarOpen$ | async) {
+  <app-sidebar
+    @openClose
+    (@openClose.start)="sidebarAnimationStart()"
+    (@openClose.done)="sidebarAnimationDone()"
+  ></app-sidebar>
+}
+<main>
+  <router-outlet></router-outlet>
+</main>

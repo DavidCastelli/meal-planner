@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { NavigationComponent } from './navigation.component';
+import { PrivateLayoutComponent } from './private-layout.component';
 
-describe('NavigationComponent', () => {
-  let component: NavigationComponent;
-  let fixture: ComponentFixture<NavigationComponent>;
+describe('PrivateLayoutComponent', () => {
+  let component: PrivateLayoutComponent;
+  let fixture: ComponentFixture<PrivateLayoutComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NavigationComponent],
+      imports: [PrivateLayoutComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(NavigationComponent);
+    fixture = TestBed.createComponent(PrivateLayoutComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
