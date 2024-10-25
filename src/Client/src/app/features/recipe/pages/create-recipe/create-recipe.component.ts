@@ -443,7 +443,11 @@ export class CreateRecipeComponent implements CanComponentDeactivate {
 
     if (this.createRecipeForm.invalid) {
       this.errorService.addMessage('Please fix all validation errors.');
-      this.formBottomRef?.nativeElement.scrollIntoView({ behavior: 'smooth' });
+      // Timeout is needed so that scrolling happens after the error message is rendered to the DOM.
+      // Otherwise, the page will not scroll properly to the bottom.
+      setTimeout(() => {
+        this.formBottomRef?.nativeElement.scrollIntoView({ behavior: 'smooth' });
+      }, 0)
       this.isSubmitting = false;
       return;
     }
