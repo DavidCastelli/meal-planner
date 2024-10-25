@@ -12,23 +12,40 @@ import { CreateMealComponent } from './features/meal/pages/create-meal/create-me
 import { CreateRecipeComponent } from './features/recipe/pages/create-recipe/create-recipe.component';
 import { PrivateLayoutComponent } from './core/layout/private-layout/private-layout.component';
 import { exitGuard } from './shared/guards/exit.guard';
+import {PublicLayoutComponent} from "./core/layout/public-layout/public-layout.component";
 
 export const routes: Routes = [
   {
-    path: 'landing',
-    component: LandingComponent,
-    title: 'Landing',
+    path: '',
+    redirectTo: '/landing',
+    pathMatch: 'full',
   },
   {
-    path: 'register',
-    component: RegisterComponent,
-    title: 'Register',
-  },
-  {
-    path: 'login',
-    component: LoginComponent,
-    title: 'Login',
-    canActivate: [loginGuard],
+    path: '',
+    component: PublicLayoutComponent,
+    children: [
+      {
+        path: '',
+        children: [
+          {
+            path: 'landing',
+            component: LandingComponent,
+            title: 'Landing',
+          },
+          {
+            path: 'register',
+            component: RegisterComponent,
+            title: 'Register',
+          },
+          {
+            path: 'login',
+            component: LoginComponent,
+            title: 'Login',
+            canActivate: [loginGuard],
+          },
+        ],
+      }
+    ],
   },
   {
     path: '',
@@ -68,11 +85,6 @@ export const routes: Routes = [
       },
     ],
     canActivate: [authGuard],
-  },
-  {
-    path: '',
-    redirectTo: '/landing',
-    pathMatch: 'full',
   },
   {
     path: '**',
