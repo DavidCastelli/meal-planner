@@ -1,3 +1,7 @@
+:host {
+  display: block;
+}
+
 .error-message {
   color: rgb(255, 15, 35);
   text-shadow: 1px 1px 1px rgb(19, 27, 35);
