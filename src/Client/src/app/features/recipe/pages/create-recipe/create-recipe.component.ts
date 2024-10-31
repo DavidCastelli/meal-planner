@@ -27,6 +27,7 @@ import { ModalService } from '../../../../shared/services/modal.service';
 import { map, Observable } from 'rxjs';
 import { SidebarService } from '../../../../core/layout/sidebar.service';
 import { slideAnimation } from '../../../../shared/animations/slide.animation';
+import { FormErrorsComponent } from '../../../../shared/components/form-errors/form-errors.component';
 
 interface RecipeDetailsForm {
   prepTime?: FormControl<number>;
@@ -75,6 +76,7 @@ interface CreateRecipeForm {
     NgOptimizedImage,
     ControlErrorComponent,
     AsyncPipe,
+    FormErrorsComponent,
   ],
   animations: [slideAnimation],
   templateUrl: './create-recipe.component.html',
@@ -161,6 +163,10 @@ export class CreateRecipeComponent implements CanComponentDeactivate {
   }
 
   canDeactivate(): boolean | Observable<boolean> {
+    if (this.isSubmitting) {
+      return true;
+    }
+
     if (this.isExitModalOpen) {
       return false;
     }
@@ -446,8 +452,10 @@ export class CreateRecipeComponent implements CanComponentDeactivate {
       // Timeout is needed so that scrolling happens after the error message is rendered to the DOM.
       // Otherwise, the page will not scroll properly to the bottom.
       setTimeout(() => {
-        this.formBottomRef?.nativeElement.scrollIntoView({ behavior: 'smooth' });
-      }, 0)
+        this.formBottomRef?.nativeElement.scrollIntoView({
+          behavior: 'smooth',
+        });
+      }, 0);
       this.isSubmitting = false;
       return;
     }
@@ -457,14 +465,13 @@ export class CreateRecipeComponent implements CanComponentDeactivate {
     this.recipeService
       .CreateRecipe(request, image)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (value) => {
-          if (value) {
-            void this.router.navigate(['/manage/recipes/']);
-          } else {
-            this.isSubmitting = false;
-          }
-        },
+      .subscribe((recipe) => {
+        const success = recipe && Object.keys(recipe).length > 0;
+        if (success) {
+          void this.router.navigate(['/manage/recipes/']);
+        } else {
+          this.isSubmitting = false;
+        }
       });
   }
 

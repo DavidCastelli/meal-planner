@@ -1,24 +1,18 @@
 import { inject, Injectable } from '@angular/core';
-import {
-  HttpClient,
-  HttpErrorResponse,
-  HttpResponse,
-} from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { CreateRecipeRequest } from './models/create/create-recipe-request.model';
 import { UpdateRecipeRequest } from './models/update/update-recipe-request.model';
-import { catchError, EMPTY, Observable } from 'rxjs';
+import { catchError, EMPTY, Observable, of } from 'rxjs';
 import { CreateRecipeDto } from './models/create/create-recipe-dto.model';
 import { GetByIdRecipeDto } from './models/get/get-by-id-recipe-dto.model';
 import { GetRecipesDto } from './models/get/get-recipes-dto.model';
 import { UpdateRecipeDto } from './models/update/update-recipe-dto.model';
-import { ErrorService } from '../../core/errors/error.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class RecipeService {
   private readonly http = inject(HttpClient);
-  private readonly errorService = inject(ErrorService);
 
   GetRecipes(): Observable<GetRecipesDto[]> {
     return this.http
@@ -26,7 +20,11 @@ export class RecipeService {
         withCredentials: true,
         responseType: 'json',
       })
-      .pipe(catchError(this.handleError<GetRecipesDto[]>([])));
+      .pipe(
+        catchError(() => {
+          return of([]);
+        }),
+      );
   }
 
   GetRecipe(id: number): Observable<GetByIdRecipeDto> {
@@ -35,7 +33,11 @@ export class RecipeService {
         withCredentials: true,
         responseType: 'json',
       })
-      .pipe(catchError(this.handleError<GetByIdRecipeDto>()));
+      .pipe(
+        catchError(() => {
+          return of({} as GetByIdRecipeDto);
+        }),
+      );
   }
 
   GetRecipeImage(id: number): Observable<Blob> {
@@ -44,7 +46,11 @@ export class RecipeService {
         withCredentials: true,
         responseType: 'blob',
       })
-      .pipe(catchError(this.handleError<Blob>()));
+      .pipe(
+        catchError(() => {
+          return of({} as Blob);
+        }),
+      );
   }
 
   CreateRecipe(
@@ -67,7 +73,11 @@ export class RecipeService {
         withCredentials: true,
         responseType: 'json',
       })
-      .pipe(catchError(this.handleError<CreateRecipeDto>()));
+      .pipe(
+        catchError(() => {
+          return of({} as CreateRecipeDto);
+        }),
+      );
   }
 
   DeleteRecipe(id: number): Observable<HttpResponse<string>> {
@@ -78,8 +88,7 @@ export class RecipeService {
         responseType: 'text',
       })
       .pipe(
-        catchError((err: HttpErrorResponse) => {
-          console.error(err);
+        catchError(() => {
           return EMPTY;
         }),
       );
@@ -94,10 +103,10 @@ export class RecipeService {
         withCredentials: true,
         responseType: 'json',
       })
-      .pipe(catchError(this.handleError<UpdateRecipeDto>()));
-  }
-
-  private handleError<T>(result?: T) {
-    return this.errorService.handleError<T>(result);
+      .pipe(
+        catchError(() => {
+          return of({} as UpdateRecipeDto);
+        }),
+      );
   }
 }

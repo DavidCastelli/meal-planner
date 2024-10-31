@@ -9,8 +9,8 @@ import {
 } from '@angular/common/http';
 import { API_CONFIG, DEFAULT_API_CONFIG } from './shared/configs/api.config';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { apiInterceptor } from './core/interceptors/api.interceptor';
+import { errorInterceptor } from './core/interceptors/error.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -21,7 +21,7 @@ export const appConfig: ApplicationConfig = {
     ),
     provideHttpClient(
       withFetch(),
-      withInterceptors([apiInterceptor, authInterceptor]),
+      withInterceptors([apiInterceptor, errorInterceptor]),
     ),
     {
       provide: API_CONFIG,

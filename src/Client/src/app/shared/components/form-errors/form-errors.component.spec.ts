@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PublicLayoutComponent } from './public-layout.component';
+import { FormErrorsComponent } from './form-errors.component';
 
-describe('PublicLayoutComponent', () => {
-  let component: PublicLayoutComponent;
-  let fixture: ComponentFixture<PublicLayoutComponent>;
+describe('FormErrorsComponent', () => {
+  let component: FormErrorsComponent;
+  let fixture: ComponentFixture<FormErrorsComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PublicLayoutComponent],
+      imports: [FormErrorsComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(PublicLayoutComponent);
+    fixture = TestBed.createComponent(FormErrorsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

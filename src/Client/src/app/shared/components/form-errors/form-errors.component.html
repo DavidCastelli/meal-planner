@@ -1,0 +1,9 @@
+<section class="errors">
+  <h2>Errors</h2>
+
+  @for (error of errorService.messages; track error) {
+    <p>
+      {{ error }}
+    </p>
+  }
+</section>

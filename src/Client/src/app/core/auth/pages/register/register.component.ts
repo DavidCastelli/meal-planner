@@ -1,69 +1,49 @@
-import { Component, DestroyRef, inject, OnInit } from '@angular/core';
-import {
-  ReactiveFormsModule,
-  FormGroup,
-  FormControl,
-  Validators,
-  FormBuilder,
-} from '@angular/forms';
+import { Component, DestroyRef, inject } from '@angular/core';
+import { ReactiveFormsModule, Validators, FormBuilder } from '@angular/forms';
 import { AuthService } from '../../auth.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PasswordValidator } from '../../password.validator';
-import { catchError, EMPTY } from 'rxjs';
 import { Router } from '@angular/router';
+import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error.component';
+import { ErrorService } from '../../../errors/error.service';
+import { FormErrorsComponent } from '../../../../shared/components/form-errors/form-errors.component';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, ControlErrorComponent, FormErrorsComponent],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css',
 })
-export class RegisterComponent implements OnInit {
+export class RegisterComponent {
   private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router: Router = inject(Router);
   private readonly formBuilder = inject(FormBuilder);
 
-  registrationForm!: FormGroup<{
-    email: FormControl<string>;
-    password: FormControl<string>;
-  }>;
+  public readonly errorService = inject(ErrorService);
 
-  errorMessage: string | null = null;
+  registrationForm = this.formBuilder.nonNullable.group({
+    email: ['', { validators: [Validators.required, Validators.email] }],
+    password: [
+      '',
+      {
+        validators: [
+          Validators.required,
+          Validators.minLength(6),
+          PasswordValidator.strong,
+        ],
+      },
+    ],
+  });
+
   isSubmitting = false;
-
-  ngOnInit() {
-    this.registrationForm = this.formBuilder.nonNullable.group({
-      email: ['', { validators: [Validators.required, Validators.email] }],
-      password: [
-        '',
-        {
-          validators: [
-            Validators.required,
-            Validators.minLength(6),
-            PasswordValidator.strong,
-          ],
-        },
-      ],
-    });
-  }
-
-  get email() {
-    return this.registrationForm.controls.email;
-  }
-
-  get password() {
-    return this.registrationForm.controls.password;
-  }
 
   onSubmit() {
     this.isSubmitting = true;
-    this.errorMessage = null;
+    this.errorService.clear();
 
     if (this.registrationForm.invalid) {
-      // Mark all as touched to handle the case where the user submits without interacting with the inputs.
-      this.registrationForm.markAllAsTouched();
       this.isSubmitting = false;
       return;
     }
@@ -71,15 +51,14 @@ export class RegisterComponent implements OnInit {
     const credentials = this.registrationForm.getRawValue(); // Assumes controls are never disabled.
     this.authService
       .register(credentials)
-      .pipe(
-        catchError((err) => {
-          this.errorMessage = err;
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((success) => {
+        if (success) {
+          void this.router.navigate(['/login']);
+        } else {
           this.registrationForm.reset();
           this.isSubmitting = false;
-          return EMPTY;
-        }),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe({ next: () => void this.router.navigate(['/login']) });
+        }
+      });
   }
 }

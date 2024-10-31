@@ -18,9 +18,7 @@ img {
 
 .sidebar-button {
   position: relative;
-  height: 90%;
-  width: 3%;
-  min-width: 50px;
+  padding: 25px;
   background-color: rgb(8, 96, 95);
   border: rgb(8, 96, 95);
   cursor: pointer;
@@ -39,7 +37,6 @@ img {
 }
 
 .logout-button {
-  height: 60%;
   background: rgb(3, 252, 186);
   background: linear-gradient(
     135deg,

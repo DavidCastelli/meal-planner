@@ -274,26 +274,14 @@ img {
   background-color: rgb(61, 59, 142, 0.8);
 }
 
-.errors {
+.errors-position {
   grid-column: 1 / 13;
   grid-row: 7;
-  display: flex;
-  flex-flow: column;
-  align-items: center;
 }
 
-.errors h2,
 small {
   color: rgb(255, 15, 35);
   text-shadow: 1px 1px 1px rgb(19, 27, 35);
-}
-
-.errors h2 {
-  margin: 0;
-}
-
-.errors p {
-  margin-bottom: 0;
 }
 
 .form-bottom {

@@ -2,16 +2,11 @@
   <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()">
     <h1>Register</h1>
 
-    <section>
+    <section class="register">
       <p>
         <label for="email">Email: </label>
-        <input
-          id="email"
-          type="email"
-          formControlName="email"
-          required
-          [class.invalid]="email.invalid && email.touched"
-        />
+        <input id="email" type="email" formControlName="email" required />
+        <app-control-error controlPath="email"></app-control-error>
       </p>
       <p>
         <label for="password">Password: </label>
@@ -20,8 +15,15 @@
           type="password"
           formControlName="password"
           required
-          [class.invalid]="password.invalid && password.touched"
         />
+        <app-control-error
+          controlPath="password"
+          [customErrors]="{
+            minlength: 'Password must be at least 6 characters long.',
+            strong:
+              'Password must contain at least one uppercase letter, one lowercase letter, one numeric digit, and one nonalphanumeric character.',
+          }"
+        ></app-control-error>
       </p>
     </section>
 
@@ -31,36 +33,8 @@
       </p>
     </section>
 
-    @if (errorMessage) {
-      <section class="error">
-        <p class="error-message">
-          {{ errorMessage }}
-        </p>
-      </section>
-    } @else if (
-      (email.hasError("required") && email.touched) ||
-      (password.hasError("required") && password.touched)
-    ) {
-      <section class="error">
-        <p class="error-message">Please enter both username and password.</p>
-      </section>
-    } @else if (email.hasError("email") && email.touched) {
-      <section class="error">
-        <p class="error-message">Please enter a valid email address.</p>
-      </section>
-    } @else if (password.hasError("minlength") && password.touched) {
-      <section class="error">
-        <p class="error-message">
-          Password must be at least 6 characters long.
-        </p>
-      </section>
-    } @else if (password.hasError("strong") && password.touched) {
-      <section class="error">
-        <p class="error-message">
-          Password must contain at least one uppercase letter, one lowercase
-          letter, one numeric digit, and one nonalphanumeric character.
-        </p>
-      </section>
+    @if (errorService.messages.length > 0) {
+      <app-form-errors></app-form-errors>
     }
   </form>
 </div>

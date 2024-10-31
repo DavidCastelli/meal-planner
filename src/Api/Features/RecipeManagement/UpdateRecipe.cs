@@ -459,12 +459,12 @@ public sealed class UpdateRecipeHandler
         }
 
         var subIngredients = request.SubIngredients;
-        
+
         if (subIngredients.Count == 1 && subIngredients.First().Name != null)
         {
             errors.Add(RecipeErrors.SingleSubIngredientName());
         }
-        
+
         if (subIngredients.Count > 1 && subIngredients.Any(si => si.Name == null))
         {
             errors.Add(RecipeErrors.MultipleSubIngredientName());

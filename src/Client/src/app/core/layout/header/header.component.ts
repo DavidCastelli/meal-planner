@@ -1,9 +1,7 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { AsyncPipe, NgOptimizedImage } from '@angular/common';
-import { Observable } from 'rxjs';
 import { AuthService } from '../../auth/auth.service';
 import { Router } from '@angular/router';
-import { UserInfo } from '../../auth/user-info.model';
 import { SidebarService } from '../sidebar.service';
 
 @Component({
@@ -13,18 +11,13 @@ import { SidebarService } from '../sidebar.service';
   templateUrl: './header.component.html',
   styleUrl: './header.component.css',
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent {
   private readonly sidebarService = inject(SidebarService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-  public curUserInfo$!: Observable<UserInfo | null>;
-  public isSidebarOpen$!: Observable<boolean>;
-
-  ngOnInit() {
-    this.curUserInfo$ = this.authService.curUserInfo$;
-    this.isSidebarOpen$ = this.sidebarService.openClose$;
-  }
+  public readonly curUserInfo$ = this.authService.curUserInfo$;
+  public readonly isSidebarOpen$ = this.sidebarService.openClose$;
 
   toggleSidebar() {
     const isSidebarAnimationDone = this.sidebarService.getIsAnimationDone();

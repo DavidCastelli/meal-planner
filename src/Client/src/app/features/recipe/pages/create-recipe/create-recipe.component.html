@@ -484,15 +484,7 @@
     </section>
 
     @if (errorService.messages.length > 0) {
-      <section class="errors">
-        <h2>Errors</h2>
-
-        @for (error of errorService.messages; track error) {
-          <p>
-            {{ error }}
-          </p>
-        }
-      </section>
+      <app-form-errors class="errors-position"></app-form-errors>
     }
 
     <div class="form-bottom" #bottom></div>

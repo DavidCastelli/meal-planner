@@ -8,11 +8,12 @@ import {
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { HeaderComponent } from '../header/header.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
-import { filter, Observable } from 'rxjs';
+import { filter } from 'rxjs';
 import { SidebarService } from '../sidebar.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AsyncPipe } from '@angular/common';
 import { animate, style, transition, trigger } from '@angular/animations';
+import { ErrorService } from '../../errors/error.service';
 
 @Component({
   selector: 'app-private-layout',
@@ -39,8 +40,9 @@ export class PrivateLayoutComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly sidebarService = inject(SidebarService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly errorService = inject(ErrorService);
 
-  public isSideBarOpen$!: Observable<boolean>;
+  public readonly isSideBarOpen$ = this.sidebarService.openClose$;
 
   @HostListener('window:keydown.alt.q')
   sidebarToggleShortcut() {
@@ -52,14 +54,13 @@ export class PrivateLayoutComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.isSideBarOpen$ = this.sidebarService.openClose$;
-
     this.router.events
       .pipe(
         filter((event) => event instanceof NavigationEnd),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe(() => {
+        this.errorService.clear();
         this.sidebarService.setIsOpen(false);
       });
   }

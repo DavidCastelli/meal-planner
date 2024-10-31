@@ -2,10 +2,11 @@
   <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
     <h1>Login</h1>
 
-    <section>
+    <section class="login">
       <p>
         <label for="email">Email: </label>
         <input id="email" type="email" formControlName="email" required />
+        <app-control-error controlPath="email" />
       </p>
       <p>
         <label for="password">Password: </label>
@@ -15,6 +16,7 @@
           formControlName="password"
           required
         />
+        <app-control-error controlPath="password" />
       </p>
     </section>
 
@@ -24,19 +26,8 @@
       </p>
     </section>
 
-    @if (errorMessage) {
-      <section class="error">
-        <p class="error-message">
-          {{ errorMessage }}
-        </p>
-      </section>
-    } @else if (
-      (email.hasError("required") && email.touched) ||
-      (password.hasError("required") && password.touched)
-    ) {
-      <section class="error">
-        <p class="error-message">Please enter both username and password.</p>
-      </section>
+    @if (errorService.messages.length > 0) {
+      <app-form-errors></app-form-errors>
     }
   </form>
 </div>

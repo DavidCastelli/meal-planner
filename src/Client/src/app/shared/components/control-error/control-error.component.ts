@@ -2,6 +2,7 @@ import { Component, DestroyRef, inject, Input, OnInit } from '@angular/core';
 import { FormGroupDirective, ValidationErrors } from '@angular/forms';
 import {
   BehaviorSubject,
+  debounceTime,
   distinctUntilChanged,
   merge,
   Subscription,
@@ -33,7 +34,7 @@ export class ControlErrorComponent implements OnInit {
 
     if (control) {
       this.subscription = merge(
-        control.valueChanges,
+        control.valueChanges.pipe(debounceTime(1000)),
         this.formGroupDirective.ngSubmit,
       )
         .pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
