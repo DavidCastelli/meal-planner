@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { AsyncPipe, NgOptimizedImage } from '@angular/common';
 import { AuthService } from '../../auth/auth.service';
 import { Router } from '@angular/router';
@@ -12,7 +12,7 @@ import { HeaderService } from '../header.service';
   templateUrl: './header.component.html',
   styleUrl: './header.component.css',
 })
-export class HeaderComponent implements AfterViewInit {
+export class HeaderComponent implements OnInit {
   private readonly sidebarService = inject(SidebarService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
@@ -22,7 +22,7 @@ export class HeaderComponent implements AfterViewInit {
   public readonly isSidebarOpen$ = this.sidebarService.openClose$;
   public readonly title$ = this.headerService.title$;
 
-  ngAfterViewInit() {
+  ngOnInit() {
     this.headerService.updateTitle();
   }
 

@@ -1,13 +1,13 @@
 import { inject, Injectable } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class HeaderService {
   private readonly title = inject(Title);
-  private readonly titleSource = new Subject<string>();
+  private readonly titleSource = new BehaviorSubject<string>('');
   public readonly title$ = this.titleSource.asObservable();
 
   updateTitle() {
