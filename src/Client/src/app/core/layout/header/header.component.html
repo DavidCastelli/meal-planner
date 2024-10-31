@@ -13,6 +13,7 @@
       priority
     />
   </button>
+  <span class="title">{{ title$ | async }}</span>
   <div class="margin-left-auto">
     @if (curUserInfo$ | async; as user) {
       <span>{{ user.email }}</span>

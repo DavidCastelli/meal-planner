@@ -1,9 +1,11 @@
 <section class="errors">
-  <h2>Errors</h2>
+  @if (errorService.messages.length > 1) {
+    <h2>Errors</h2>
+  }
 
   @for (error of errorService.messages; track error) {
     <p>
-      {{ error }}
+      <span class="error-message">{{ error }}</span>
     </p>
   }
 </section>

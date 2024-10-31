@@ -14,6 +14,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AsyncPipe } from '@angular/common';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { ErrorService } from '../../errors/error.service';
+import { HeaderService } from '../header.service';
 
 @Component({
   selector: 'app-private-layout',
@@ -41,6 +42,7 @@ export class PrivateLayoutComponent implements OnInit {
   private readonly sidebarService = inject(SidebarService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly errorService = inject(ErrorService);
+  private readonly headerService = inject(HeaderService);
 
   public readonly isSideBarOpen$ = this.sidebarService.openClose$;
 
@@ -61,6 +63,10 @@ export class PrivateLayoutComponent implements OnInit {
       )
       .subscribe(() => {
         this.errorService.clear();
+        // Timeout on updating the header title is needed because the page title is updated after navigation end.
+        setTimeout(() => {
+          this.headerService.updateTitle();
+        }, 50);
         this.sidebarService.setIsOpen(false);
       });
   }

@@ -32,6 +32,14 @@ img {
   background-color: rgb(219, 211, 216, 0.2);
 }
 
+.title {
+  color: rgb(3, 252, 186);
+  text-shadow: 1px 1px 1px rgb(19, 27, 35);
+  margin-left: 5px;
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
 .margin-left-auto {
   margin-left: auto;
 }
