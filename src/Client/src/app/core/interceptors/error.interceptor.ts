@@ -16,6 +16,10 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
+      if (req.context.get(SKIP_ERROR_INTERCEPTOR)) {
+        return throwError(() => error);
+      }
+
       switch (error.status) {
         case 0:
           console.error('An error occured:', error.error.message);
@@ -54,6 +58,10 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
     }),
   );
 };
+
+export const SKIP_ERROR_INTERCEPTOR = new HttpContextToken<boolean>(
+  () => false,
+);
 
 export const SKIP_UNAUTHORIZED_REDIRECT = new HttpContextToken<boolean>(
   () => false,

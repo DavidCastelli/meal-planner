@@ -15,7 +15,10 @@ import {
   tap,
 } from 'rxjs';
 import { UserInfo } from './user-info.model';
-import { SKIP_UNAUTHORIZED_REDIRECT } from '../interceptors/error.interceptor';
+import {
+  SKIP_ERROR_INTERCEPTOR,
+  SKIP_UNAUTHORIZED_REDIRECT,
+} from '../interceptors/error.interceptor';
 import { ErrorService } from '../errors/error.service';
 
 @Injectable({
@@ -100,7 +103,7 @@ export class AuthService {
       .get<UserInfo>('/manage/info', {
         withCredentials: true,
         responseType: 'json',
-        context: new HttpContext().set(SKIP_UNAUTHORIZED_REDIRECT, true),
+        context: new HttpContext().set(SKIP_ERROR_INTERCEPTOR, true),
       })
       .pipe(
         catchError(() => {
