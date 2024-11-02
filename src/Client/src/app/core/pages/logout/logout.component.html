@@ -1,0 +1,12 @@
+<div class="logout-container">
+  <section class="logout">
+    <h1>Logout Confirmation</h1>
+
+    <p>
+      <span class="logout-status">{{ logoutStatus }}</span>
+    </p>
+    @if (canContinue) {
+      <button type="button" (click)="continue()">Continue</button>
+    }
+  </section>
+</div>

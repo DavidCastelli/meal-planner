@@ -13,6 +13,7 @@ import { CreateRecipeComponent } from './features/recipe/pages/create-recipe/cre
 import { PrivateLayoutComponent } from './core/layout/private-layout/private-layout.component';
 import { exitGuard } from './shared/guards/exit.guard';
 import { PublicLayoutComponent } from './core/layout/public-layout/public-layout.component';
+import { LogoutComponent } from './core/pages/logout/logout.component';
 
 export const routes: Routes = [
   {
@@ -42,6 +43,12 @@ export const routes: Routes = [
             component: LoginComponent,
             title: 'Login',
             canActivate: [loginGuard],
+          },
+          {
+            path: 'logout',
+            component: LogoutComponent,
+            title: 'Logout',
+            canActivate: [authGuard],
           },
         ],
       },

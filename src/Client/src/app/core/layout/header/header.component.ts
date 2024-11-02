@@ -35,14 +35,6 @@ export class HeaderComponent implements OnInit {
   }
 
   logout() {
-    this.router
-      .navigate(['/landing'])
-      .then((success) => {
-        if (success) {
-          this.sidebarService.setIsOpen(false); // Needed so sidebar does not open after logging back in
-          this.authService.logout().subscribe();
-        }
-      })
-      .catch((error) => console.error(error));
+    void this.router.navigate(['/logout']);
   }
 }
