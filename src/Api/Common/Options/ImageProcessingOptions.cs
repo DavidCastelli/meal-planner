@@ -1,17 +1,22 @@
-namespace Api.Common.Interfaces;
+namespace Api.Common.Options;
 
 /// <summary>
-/// Classes implementing this interface are able to retrieve information on the image processing configuration.
+/// Options used to retrieve information on the image processing configuration.
 /// </summary>
-public interface IImageProcessingInfo
+public class ImageProcessingOptions
 {
+    /// <summary>
+    /// Constant for accessing the section within the application configuration.
+    /// </summary>
+    public const string ImageProcessing = "ImageProcessing";
+
     /// <summary>
     /// Gets the image size limit of the application.
     /// </summary>
     /// <value>
     /// A 64-bit integer specifying the maximum image size in bytes supported by the application.
     /// </value>
-    public long ImageSizeLimit { get; }
+    public long ImageSizeLimit { get; set; }
 
     /// <summary>
     /// Gets the permitted file extensions of the application.
@@ -19,7 +24,7 @@ public interface IImageProcessingInfo
     /// <value>
     /// A string array of supported file extensions.
     /// </value>
-    public string[] PermittedExtensions { get; }
+    public string[] PermittedExtensions { get; set; } = [];
 
     /// <summary>
     /// Gets the temporary image storage path of the application.
@@ -31,7 +36,7 @@ public interface IImageProcessingInfo
     /// <value>
     /// The absolute path where images are temporarily stored.
     /// </value>
-    public string TempImageStoragePath { get; }
+    public string TempImageStoragePath { get; set; } = String.Empty;
 
     /// <summary>
     /// Gets the image storage path of the application.
@@ -39,5 +44,5 @@ public interface IImageProcessingInfo
     /// <value>
     /// The absolute path where images are stored.
     /// </value>
-    public string ImageStoragePath { get; }
+    public string ImageStoragePath { get; set; } = String.Empty;
 }

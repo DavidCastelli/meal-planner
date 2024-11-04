@@ -4,6 +4,7 @@ using System.Text.Json;
 using Api.Common;
 using Api.Common.Exceptions;
 using Api.Common.Interfaces;
+using Api.Common.Options;
 using Api.Common.Utilities;
 using Api.Domain;
 using Api.Domain.Meals;
@@ -124,7 +125,7 @@ public sealed class UpdateMealHandler
     private readonly MealPlannerContext _dbContext;
     private readonly IUserContext _userContext;
     private readonly IAuthorizationService _authorizationService;
-    private readonly IImageProcessingInfo _imageProcessingInfo;
+    private readonly ImageProcessingOptions _imageProcessingOptions;
 
     /// <summary>
     /// Creates a <see cref="UpdateMealHandler"/>.
@@ -132,13 +133,13 @@ public sealed class UpdateMealHandler
     /// <param name="dbContext">The database context.</param>
     /// <param name="userContext">The user context.</param>
     /// <param name="authorizationService">The authorization service.</param>
-    /// <param name="imageProcessingInfo">The image processing configuration of the application.</param>
-    public UpdateMealHandler(MealPlannerContext dbContext, IUserContext userContext, IAuthorizationService authorizationService, IImageProcessingInfo imageProcessingInfo)
+    /// <param name="imageProcessingOptions">The image processing configuration of the application.</param>
+    public UpdateMealHandler(MealPlannerContext dbContext, IUserContext userContext, IAuthorizationService authorizationService, IOptions<ImageProcessingOptions> imageProcessingOptions)
     {
         _dbContext = dbContext;
         _userContext = userContext;
         _authorizationService = authorizationService;
-        _imageProcessingInfo = imageProcessingInfo;
+        _imageProcessingOptions = imageProcessingOptions.Value;
     }
 
     /// <summary>
@@ -212,11 +213,11 @@ public sealed class UpdateMealHandler
             {
                 if (meal.ImagePath != null)
                 {
-                    var tempFilePath = Path.Combine(_imageProcessingInfo.TempImageStoragePath,
+                    var tempFilePath = Path.Combine(_imageProcessingOptions.TempImageStoragePath,
                         Path.GetFileName(meal.ImagePath));
 
                     var imageProcessingErrors = await FileHelpers.ProcessFormFileAsync(image, tempFilePath, meal.ImagePath,
-                        _imageProcessingInfo.PermittedExtensions, _imageProcessingInfo.ImageSizeLimit, true);
+                        _imageProcessingOptions.PermittedExtensions, _imageProcessingOptions.ImageSizeLimit, true);
 
                     if (imageProcessingErrors.Length != 0)
                     {
@@ -228,12 +229,12 @@ public sealed class UpdateMealHandler
                 else
                 {
                     var randomFileName = Path.GetRandomFileName();
-                    var tempFilePath = Path.Combine(_imageProcessingInfo.TempImageStoragePath, randomFileName);
-                    var filePath = Path.Combine(_imageProcessingInfo.ImageStoragePath, randomFileName);
+                    var tempFilePath = Path.Combine(_imageProcessingOptions.TempImageStoragePath, randomFileName);
+                    var filePath = Path.Combine(_imageProcessingOptions.ImageStoragePath, randomFileName);
                     meal.ImagePath = filePath;
 
                     var imageProcessingErrors = await FileHelpers.ProcessFormFileAsync(image, tempFilePath, filePath,
-                        _imageProcessingInfo.PermittedExtensions, _imageProcessingInfo.ImageSizeLimit);
+                        _imageProcessingOptions.PermittedExtensions, _imageProcessingOptions.ImageSizeLimit);
 
                     if (imageProcessingErrors.Length != 0)
                     {

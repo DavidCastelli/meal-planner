@@ -4,6 +4,7 @@ using System.Text.Json;
 using Api.Common;
 using Api.Common.Exceptions;
 using Api.Common.Interfaces;
+using Api.Common.Options;
 using Api.Common.Utilities;
 using Api.Domain;
 using Api.Domain.Meals;
@@ -113,19 +114,19 @@ public sealed class CreateMealHandler
 {
     private readonly MealPlannerContext _dbContext;
     private readonly IUserContext _userContext;
-    private readonly IImageProcessingInfo _imageProcessingInfo;
+    private readonly ImageProcessingOptions _imageProcessingOptions;
 
     /// <summary>
     /// Creates a <see cref="CreateMealHandler"/>.
     /// </summary>
     /// <param name="dbContext">The database context.</param>
     /// <param name="userContext">The user context.</param>
-    /// <param name="imageProcessingInfo">The image processing configuration of the application.</param>
-    public CreateMealHandler(MealPlannerContext dbContext, IUserContext userContext, IImageProcessingInfo imageProcessingInfo)
+    /// <param name="imageProcessingOptions">The image processing configuration of the application.</param>
+    public CreateMealHandler(MealPlannerContext dbContext, IUserContext userContext, IOptions<ImageProcessingOptions> imageProcessingOptions)
     {
         _dbContext = dbContext;
         _userContext = userContext;
-        _imageProcessingInfo = imageProcessingInfo;
+        _imageProcessingOptions = imageProcessingOptions.Value;
     }
 
     /// <summary>
@@ -181,12 +182,12 @@ public sealed class CreateMealHandler
         if (image != null)
         {
             var randomFileName = Path.GetRandomFileName();
-            var tempFilePath = Path.Combine(_imageProcessingInfo.TempImageStoragePath, randomFileName);
-            var filePath = Path.Combine(_imageProcessingInfo.ImageStoragePath, randomFileName);
+            var tempFilePath = Path.Combine(_imageProcessingOptions.TempImageStoragePath, randomFileName);
+            var filePath = Path.Combine(_imageProcessingOptions.ImageStoragePath, randomFileName);
             meal.ImagePath = filePath;
 
             var imageProcessingErrors = await FileHelpers.ProcessFormFileAsync(image, tempFilePath, filePath,
-                _imageProcessingInfo.PermittedExtensions, _imageProcessingInfo.ImageSizeLimit);
+                _imageProcessingOptions.PermittedExtensions, _imageProcessingOptions.ImageSizeLimit);
 
             if (imageProcessingErrors.Length != 0)
             {

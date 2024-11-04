@@ -1,5 +1,6 @@
 using Api.Common;
 using Api.Common.Interfaces;
+using Api.Common.Options;
 using Api.Infrastructure;
 using Api.Infrastructure.Authorization;
 using Api.Infrastructure.Identity;
@@ -21,8 +22,9 @@ public static class ConfigureServiceCollectionExtensions
     /// Adds services related to the application to the service collection.
     /// </summary>
     /// <param name="services">The service collection.</param>
+    /// <param name="configuration">The application config.</param>
     /// <returns>The modified service collection.</returns>
-    public static IServiceCollection AddApplication(this IServiceCollection services)
+    public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
     {
         foreach (var type in typeof(Program).Assembly.GetTypes()
                      .Where(type => type.Name.EndsWith("Handler", StringComparison.Ordinal) && type is { IsInterface: false, IsAbstract: false }))
@@ -32,7 +34,8 @@ public static class ConfigureServiceCollectionExtensions
 
         services.AddValidatorsFromAssembly(typeof(Program).Assembly, includeInternalTypes: true);
 
-        services.AddSingleton<IImageProcessingInfo, ImageProcessingInfo>();
+        services.Configure<ImageProcessingOptions>(
+            configuration.GetSection(ImageProcessingOptions.ImageProcessing));
 
         return services;
     }
