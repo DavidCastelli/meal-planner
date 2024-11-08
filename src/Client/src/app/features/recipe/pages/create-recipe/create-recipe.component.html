@@ -1,9 +1,8 @@
-<div class="form-container">
-  <form
-    [formGroup]="createRecipeForm"
-    (ngSubmit)="submit()"
-    [@slide]="(isSideBarOpen$ | async) ? 'right' : 'left'"
-  >
+<div
+  class="form-container"
+  [@slide]="(isSideBarOpen$ | async) ? 'right' : 'left'"
+>
+  <form [formGroup]="createRecipeForm" (ngSubmit)="submit()">
     <h1>Create Recipe</h1>
 
     <section class="info">

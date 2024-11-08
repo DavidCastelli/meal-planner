@@ -1,15 +1,16 @@
 :host {
   display: block;
+  background-color: rgb(23, 126, 137);
 }
 
 .form-container {
-  background-color: rgb(23, 126, 137);
-  padding: 5px;
+  position: relative; /* Needed for animation */
+  padding: 15px;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 form {
-  position: relative; /* Needed for animation */
   display: grid;
   grid-template-columns: repeat(12, minmax(75px, 1fr));
   grid-auto-rows: minmax(100px, auto);
