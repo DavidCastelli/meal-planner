@@ -3,6 +3,7 @@ using System.Net.Mime;
 using Api.Common;
 using Api.Common.Interfaces;
 using Api.Infrastructure;
+using Api.Infrastructure.Services;
 
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -43,16 +44,19 @@ public sealed class GetMealsHandler
 {
     private readonly MealPlannerContext _dbContext;
     private readonly IUserContext _userContext;
+    private readonly IUrlGenerator _urlGenerator;
 
     /// <summary>
     /// Creates a <see cref="GetMealsHandler"/>.
     /// </summary>
     /// <param name="dbContext">The database context.</param>
     /// <param name="userContext">The user context.</param>
-    public GetMealsHandler(MealPlannerContext dbContext, IUserContext userContext)
+    /// <param name="urlGenerator">A URL generator.</param>
+    public GetMealsHandler(MealPlannerContext dbContext, IUserContext userContext, IUrlGenerator urlGenerator)
     {
         _dbContext = dbContext;
         _userContext = userContext;
+        _urlGenerator = urlGenerator;
     }
 
     /// <summary>
@@ -68,7 +72,9 @@ public sealed class GetMealsHandler
         var meals = await _dbContext.Meals
             .AsNoTracking()
             .Where(m => m.ApplicationUserId == _userContext.UserId)
-            .Select(m => new GetMealsDto(m.Id, m.Title))
+            .Select(m =>
+                new GetMealsDto(m.Id, m.Title, m.ImagePath == null ? null : _urlGenerator.GenerateUrl("GetMealImageById", new { id = m.Id }))
+            )
             .ToListAsync(cancellationToken);
 
         return meals;
@@ -80,4 +86,5 @@ public sealed class GetMealsHandler
 /// </summary>
 /// <param name="Id">The id of the meal.</param>
 /// <param name="Title">The title of the meal.</param>
-public sealed record GetMealsDto(int Id, string Title);
+/// <param name="ImageUrl">The URL of the meals image.</param>
+public sealed record GetMealsDto(int Id, string Title, string? ImageUrl);

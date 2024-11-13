@@ -2,6 +2,6 @@
   <button>...</button>
   <h2 class="card-title">{{ title }}</h2>
   <div class="card-image-container">
-    <img class="card-image" [ngSrc]="image" alt="Recipe image." fill />
+    <img class="card-image" [ngSrc]="imageUrl || '/27002.jpg'" alt="Recipe image." fill priority />
   </div>
 </div>

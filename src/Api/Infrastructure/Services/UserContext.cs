@@ -6,7 +6,7 @@ using Api.Common.Interfaces;
 namespace Api.Infrastructure.Services;
 
 /// <summary>
-/// A class implementing <see cref="IUserContext"/>.;
+/// A class implementing <see cref="IUserContext"/>.
 /// </summary>
 /// <remarks>
 /// The implementation of this class relies on the <see cref="IHttpContextAccessor"/> whose use can be dangerous.

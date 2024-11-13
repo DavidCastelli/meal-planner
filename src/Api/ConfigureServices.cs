@@ -58,6 +58,7 @@ public static class ConfigureServiceCollectionExtensions
             .AddEntityFrameworkStores<MealPlannerContext>();
 
         services.AddSingleton<IUserContext, UserContext>();
+        services.AddSingleton<IUrlGenerator, UrlGenerator>();
 
         return services;
     }

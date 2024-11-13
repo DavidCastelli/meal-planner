@@ -9,6 +9,6 @@ import { NgOptimizedImage } from '@angular/common';
   styleUrl: './card.component.css',
 })
 export class CardComponent {
-  @Input({ required: true }) title = '';
-  @Input() image = '/27002.jpg';
+  @Input({ required: true }) title!: string;
+  @Input() imageUrl?: string | undefined;
 }

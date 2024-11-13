@@ -14,7 +14,7 @@ import { UpdateRecipeDto } from './models/update/update-recipe-dto.model';
 export class RecipeService {
   private readonly http = inject(HttpClient);
 
-  GetRecipes(): Observable<GetRecipesDto[]> {
+  getRecipes(): Observable<GetRecipesDto[]> {
     return this.http
       .get<GetRecipesDto[]>('/manage/recipes', {
         withCredentials: true,
@@ -22,12 +22,12 @@ export class RecipeService {
       })
       .pipe(
         catchError(() => {
-          return of([]);
+          return of([] as GetRecipesDto[]);
         }),
       );
   }
 
-  GetRecipe(id: number): Observable<GetByIdRecipeDto> {
+  getRecipe(id: number): Observable<GetByIdRecipeDto> {
     return this.http
       .get<GetByIdRecipeDto>(`/manage/recipes/${id}`, {
         withCredentials: true,
@@ -40,20 +40,7 @@ export class RecipeService {
       );
   }
 
-  GetRecipeImage(id: number): Observable<Blob> {
-    return this.http
-      .get(`manage/recipes/${id}`, {
-        withCredentials: true,
-        responseType: 'blob',
-      })
-      .pipe(
-        catchError(() => {
-          return of({} as Blob);
-        }),
-      );
-  }
-
-  CreateRecipe(
+  createRecipe(
     request: CreateRecipeRequest,
     image: File | null,
   ): Observable<CreateRecipeDto> {
@@ -80,7 +67,7 @@ export class RecipeService {
       );
   }
 
-  DeleteRecipe(id: number): Observable<HttpResponse<string>> {
+  deleteRecipe(id: number): Observable<HttpResponse<string>> {
     return this.http
       .delete(`manage/recipes/${id}`, {
         withCredentials: true,
@@ -94,7 +81,7 @@ export class RecipeService {
       );
   }
 
-  UpdateRecipe(
+  updateRecipe(
     id: number,
     request: UpdateRecipeRequest,
   ): Observable<UpdateRecipeDto> {

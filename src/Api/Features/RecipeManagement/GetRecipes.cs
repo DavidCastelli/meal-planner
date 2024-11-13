@@ -43,16 +43,19 @@ public sealed class GetRecipesHandler
 {
     private readonly MealPlannerContext _dbContext;
     private readonly IUserContext _userContext;
+    private readonly IUrlGenerator _urlGenerator;
 
     /// <summary>
     /// Creates a <see cref="GetRecipesHandler"/>.
     /// </summary>
     /// <param name="dbContext">The database context.</param>
     /// <param name="userContext">The user context.</param>
-    public GetRecipesHandler(MealPlannerContext dbContext, IUserContext userContext)
+    /// <param name="urlGenerator">A URL generator.</param>
+    public GetRecipesHandler(MealPlannerContext dbContext, IUserContext userContext, IUrlGenerator urlGenerator)
     {
         _dbContext = dbContext;
         _userContext = userContext;
+        _urlGenerator = urlGenerator;
     }
 
     /// <summary>
@@ -68,7 +71,9 @@ public sealed class GetRecipesHandler
         var recipes = await _dbContext.Recipes
             .AsNoTracking()
             .Where(r => r.ApplicationUserId == _userContext.UserId)
-            .Select(r => new GetRecipesDto(r.Id, r.Title))
+            .Select(r =>
+                new GetRecipesDto(r.Id, r.Title, r.ImagePath == null ? null : _urlGenerator.GenerateUrl("GetRecipeImageById", new { id = r.Id }))
+            )
             .ToListAsync(cancellationToken);
 
         return recipes;
@@ -80,4 +85,5 @@ public sealed class GetRecipesHandler
 /// </summary>
 /// <param name="Id">The id of the recipe.</param>
 /// <param name="Title">The title of the recipe.</param>
-public sealed record GetRecipesDto(int Id, string Title);
+/// <param name="ImageUrl">The URL of the recipes image.</param>
+public sealed record GetRecipesDto(int Id, string Title, string? ImageUrl);

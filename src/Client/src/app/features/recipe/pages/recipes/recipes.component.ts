@@ -31,7 +31,7 @@ export class RecipesComponent implements OnInit {
 
   getRecipes() {
     this.recipeService
-      .GetRecipes()
+      .getRecipes()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((recipes) => {
         this.recipes = recipes;

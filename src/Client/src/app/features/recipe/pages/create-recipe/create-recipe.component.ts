@@ -463,7 +463,7 @@ export class CreateRecipeComponent implements CanComponentDeactivate {
     const request = this.fromForm();
     const image = this.image.value;
     this.recipeService
-      .CreateRecipe(request, image)
+      .createRecipe(request, image)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((recipe) => {
         const success = recipe && Object.keys(recipe).length > 0;

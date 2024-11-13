@@ -27,7 +27,7 @@ public sealed class GetRecipeImageByIdController : ApiControllerBase
     /// A task which represents the asynchronous read operation.
     /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3}"/> object.
     /// </returns>
-    [HttpGet("/api/manage/recipes/{id:int}/image")]
+    [HttpGet("/api/manage/recipes/{id:int}/image", Name = "GetRecipeImageById")]
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(PhysicalFileHttpResult), StatusCodes.Status200OK, MediaTypeNames.Image.Jpeg)]
