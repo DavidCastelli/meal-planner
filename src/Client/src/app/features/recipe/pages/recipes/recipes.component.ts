@@ -1,9 +1,10 @@
-import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { Router } from '@angular/router';
-import { RecipeService } from '../../recipe.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { GetRecipesDto } from '../../models/get/get-recipes-dto.model';
-import { CardComponent } from '../../../../shared/components/card/card.component';
+import {
+  CardComponent,
+  CardType,
+} from '../../../../shared/components/card/card.component';
 import { slideAnimation } from '../../../../shared/animations/slide.animation';
 import { SidebarService } from '../../../../core/layout/sidebar.service';
 import { AsyncPipe } from '@angular/common';
@@ -16,29 +17,21 @@ import { AsyncPipe } from '@angular/common';
   templateUrl: './recipes.component.html',
   styleUrl: './recipes.component.css',
 })
-export class RecipesComponent implements OnInit {
-  private readonly recipeService = inject(RecipeService);
+export class RecipesComponent {
   private readonly router = inject(Router);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly sidebarService = inject(SidebarService);
 
+  protected readonly CardType = CardType;
   public readonly isSideBarOpen$ = this.sidebarService.openClose$;
-  public recipes: GetRecipesDto[] = [];
 
-  ngOnInit() {
-    this.getRecipes();
-  }
-
-  getRecipes() {
-    this.recipeService
-      .getRecipes()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((recipes) => {
-        this.recipes = recipes;
-      });
-  }
+  @Input() recipes: GetRecipesDto[] = [];
 
   create() {
     void this.router.navigate(['/manage/recipes/create']);
+  }
+
+  deleteRecipe(id: number) {
+    const index = this.recipes.findIndex((recipe) => recipe.id === id);
+    this.recipes.splice(index, 1);
   }
 }

@@ -35,7 +35,7 @@ export class RecipeService {
       })
       .pipe(
         catchError(() => {
-          return of({} as GetByIdRecipeDto);
+          return EMPTY;
         }),
       );
   }
@@ -69,7 +69,7 @@ export class RecipeService {
 
   deleteRecipe(id: number): Observable<HttpResponse<string>> {
     return this.http
-      .delete(`manage/recipes/${id}`, {
+      .delete(`/manage/recipes/${id}`, {
         withCredentials: true,
         observe: 'response',
         responseType: 'text',

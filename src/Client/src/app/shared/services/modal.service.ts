@@ -19,8 +19,4 @@ export class ModalService {
     });
     return dialogRef.closed;
   }
-
-  closeAllModals(): void {
-    this.dialog.closeAll();
-  }
 }

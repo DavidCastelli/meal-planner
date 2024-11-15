@@ -12,8 +12,7 @@
   padding: 10px;
 }
 
-.card:hover {
-  transform: scale(1.05);
+.card:hover:not(:has(.action-menu-trigger:hover)) {
   cursor: pointer;
   background-color: rgb(3, 252, 186, 0.8);
 }
@@ -34,9 +33,10 @@
 
 .card-image {
   object-fit: cover;
+  user-select: none;
 }
 
-button {
+.action-menu-trigger {
   place-self: flex-end;
   background-color: rgb(179, 181, 187);
   border: 2px solid rgb(19, 27, 35);
@@ -47,6 +47,29 @@ button {
   font-size: 1.2em;
 }
 
-button:hover {
+.action-menu-trigger:hover {
   transform: scale(1.15);
+}
+
+.action-menu {
+  display: flex;
+  flex-flow: column;
+  background-color: rgb(34, 116, 165);
+  border: 1px solid rgb(19, 27, 35);
+  padding: 5px;
+}
+
+.action-menu-item {
+  background-color: transparent;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  user-select: none;
+  padding: 5px;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.action-menu-item:hover {
+  background-color: rgb(61, 59, 142);
 }

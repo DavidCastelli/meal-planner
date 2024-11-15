@@ -3,7 +3,13 @@
   <button class="create-button" type="button" (click)="create()">Create</button>
   <div class="recipes-content-container">
     @for (recipe of recipes; track recipe.id) {
-      <app-card [title]="recipe.title" [imageUrl]="recipe.imageUrl"></app-card>
+      <app-card
+        [type]="CardType.RECIPE"
+        [id]="recipe.id"
+        [title]="recipe.title"
+        [imageUrl]="recipe.imageUrl"
+        (recipeDeleted)="deleteRecipe($event)"
+      ></app-card>
     } @empty {
       <p class="empty">No recipes found... Create your first!</p>
     }

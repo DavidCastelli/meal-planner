@@ -1,5 +1,9 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
-import { provideRouter, withRouterConfig } from '@angular/router';
+import {
+  provideRouter,
+  withComponentInputBinding,
+  withRouterConfig,
+} from '@angular/router';
 
 import { routes } from './app.routes';
 import {
@@ -18,6 +22,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(
       routes,
       withRouterConfig({ canceledNavigationResolution: 'computed' }),
+      withComponentInputBinding(),
     ),
     provideHttpClient(
       withFetch(),

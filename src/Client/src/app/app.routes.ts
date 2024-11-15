@@ -14,6 +14,12 @@ import { PrivateLayoutComponent } from './core/layout/private-layout/private-lay
 import { exitGuard } from './shared/guards/exit.guard';
 import { PublicLayoutComponent } from './core/layout/public-layout/public-layout.component';
 import { LogoutComponent } from './core/pages/logout/logout.component';
+import { EditRecipeComponent } from './features/recipe/pages/edit-recipe/edit-recipe.component';
+import { EditMealComponent } from './features/meal/pages/edit-meal/edit-meal.component';
+import { MealDetailsComponent } from './features/meal/pages/meal-details/meal-details.component';
+import { RecipeDetailsComponent } from './features/recipe/pages/recipe-details/recipe-details.component';
+import { recipeResolver } from './features/recipe/resolvers/recipe.resolver';
+import { recipesResolver } from './features/recipe/resolvers/recipes.resolver';
 
 export const routes: Routes = [
   {
@@ -86,12 +92,40 @@ export const routes: Routes = [
             path: 'manage/recipes',
             component: RecipesComponent,
             title: 'Recipes',
+            resolve: { recipes: recipesResolver },
+          },
+          {
+            path: 'manage/meals/:id/details',
+            component: MealDetailsComponent,
+            title: 'Meal Details',
+          },
+          {
+            path: 'manage/recipes/:id/details',
+            component: RecipeDetailsComponent,
+            title: 'Recipe Details',
+            resolve: { recipe: recipeResolver },
+          },
+          {
+            path: 'manage/meals/:id/edit',
+            component: EditMealComponent,
+            title: 'Edit Meal',
+          },
+          {
+            path: 'manage/recipes/:id/edit',
+            component: EditRecipeComponent,
+            title: 'Edit Recipe',
+            resolve: { recipe: recipeResolver },
           },
         ],
         canActivateChild: [authGuard],
       },
     ],
     canActivate: [authGuard],
+  },
+  {
+    path: '404',
+    component: PageNotFoundComponent,
+    title: 'PageNotFound',
   },
   {
     path: '**',
