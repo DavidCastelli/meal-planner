@@ -20,6 +20,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
+using Npgsql;
+
 namespace Api.Features.MealManagement;
 
 /// <summary>
@@ -156,6 +158,7 @@ public sealed class UpdateMealHandler
     /// <exception cref="UpdateMealValidationException">Is thrown if validation fails on the <paramref name="request"/>.</exception>
     /// <exception cref="ForbiddenException">Is thrown if the user is authenticated but lacks permission to access the resource.</exception>
     /// <exception cref="UnauthorizedException">Is thrown if the user lacks the necessary authentication credentials.</exception>
+    /// <exception cref="UniqueConstraintViolationException">Is thrown if a unique constraint violation occurs.</exception>
     public async Task<UpdateMealDto> HandleAsync(UpdateMealRequest request, IFormFile? image, CancellationToken cancellationToken)
     {
         var meal = await _dbContext.Meals
@@ -254,7 +257,19 @@ public sealed class UpdateMealHandler
                 }
             }
 
-            await _dbContext.SaveChangesAsync(isCancellable ? cancellationToken : CancellationToken.None);
+            try
+            {
+                await _dbContext.SaveChangesAsync(isCancellable ? cancellationToken : CancellationToken.None);
+            }
+            catch (DbUpdateException ex)
+            {
+                if (ex.GetBaseException() is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } postgresException)
+                {
+                    throw new UniqueConstraintViolationException(postgresException.ConstraintName);
+                }
+
+                throw;
+            }
 
             return ToDto(meal);
         }

@@ -42,6 +42,10 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
           console.error(`Not Found: ${error.message}`);
           void router.navigate(['/404'], { skipLocationChange: true });
           break;
+        case HttpStatusCode.Conflict:
+          console.error(`Conflict: ${error.message}`);
+          errorService.addMessage(error.error.detail);
+          break;
         case HttpStatusCode.InternalServerError:
           console.error(`Internal Server Error: ${error.message}`);
           errorService.addMessage(

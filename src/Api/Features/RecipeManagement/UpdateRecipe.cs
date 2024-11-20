@@ -16,7 +16,10 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+
+using Npgsql;
 
 namespace Api.Features.RecipeManagement;
 
@@ -308,6 +311,7 @@ public sealed class UpdateRecipeHandler
     /// <exception cref="RecipeValidationException">Is thrown if validation fails on the <paramref name="request"/>.</exception>
     /// <exception cref="ForbiddenException">Is thrown if the user is authenticated but lacks permission to access the resource.</exception>
     /// <exception cref="UnauthorizedException">Is thrown if the user lacks the necessary authentication credentials.</exception>
+    /// <exception cref="UniqueConstraintViolationException">Is thrown if a unique constraint violation occurs.</exception>
     public async Task<UpdateRecipeDto> HandleAsync(UpdateRecipeRequest request, IFormFile? image, CancellationToken cancellationToken)
     {
         var validationErrors = ValidateRecipe(request);
@@ -400,7 +404,20 @@ public sealed class UpdateRecipeHandler
                 }
             }
 
-            await _dbContext.SaveChangesAsync(isCancellable ? cancellationToken : CancellationToken.None);
+            try
+            {
+                await _dbContext.SaveChangesAsync(isCancellable ? cancellationToken : CancellationToken.None);
+            }
+            catch (DbUpdateException ex)
+            {
+                if (ex.GetBaseException() is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } postgresException)
+                {
+                    throw new UniqueConstraintViolationException(postgresException.ConstraintName);
+                }
+
+                throw;
+            }
+
             return ToDto(recipe);
         }
         else if (_userContext.IsAuthenticated)

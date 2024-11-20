@@ -19,6 +19,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
+using Npgsql;
+
 namespace Api.Features.MealManagement;
 
 /// <summary>
@@ -140,6 +142,7 @@ public sealed class CreateMealHandler
     /// The result of the task upon completion returns a <see cref="CreateMealDto"/>.
     /// </returns>
     /// <exception cref="CreateMealValidationException">Is thrown if validation fails on the <paramref name="request"/>.</exception>
+    /// <exception cref="UniqueConstraintViolationException">Is thrown if a unique constraint violation occurs.</exception>
     public async Task<CreateMealDto> HandleAsync(CreateMealRequest request, IFormFile? image, CancellationToken cancellationToken)
     {
         var tags = await _dbContext.Tags
@@ -198,7 +201,19 @@ public sealed class CreateMealHandler
         }
 
         _dbContext.Meals.Add(meal);
-        await _dbContext.SaveChangesAsync(isCancellable ? cancellationToken : CancellationToken.None);
+        try
+        {
+            await _dbContext.SaveChangesAsync(isCancellable ? cancellationToken : CancellationToken.None);
+        }
+        catch (DbUpdateException ex)
+        {
+            if (ex.GetBaseException() is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } postgresException)
+            {
+                throw new UniqueConstraintViolationException(postgresException.ConstraintName);
+            }
+
+            throw;
+        }
 
         return ToDto(meal);
     }

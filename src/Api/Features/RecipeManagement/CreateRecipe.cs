@@ -15,7 +15,10 @@ using FluentValidation;
 
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+
+using Npgsql;
 
 namespace Api.Features.RecipeManagement;
 
@@ -292,6 +295,7 @@ public sealed class CreateRecipeHandler
     /// The result of the task upon completion returns a <see cref="CreateRecipeDto"/>.
     /// </returns>
     /// <exception cref="RecipeValidationException">Is thrown if validation fails on the <paramref name="request"/>.</exception>
+    /// <exception cref="UniqueConstraintViolationException">Is thrown if a unique constraint violation occurs.</exception>
     public async Task<CreateRecipeDto> HandleAsync(CreateRecipeRequest request, IFormFile? image, CancellationToken cancellationToken)
     {
         var validationErrors = ValidateRecipe(request);
@@ -323,7 +327,20 @@ public sealed class CreateRecipeHandler
         }
 
         _dbContext.Recipes.Add(recipe);
-        await _dbContext.SaveChangesAsync(isCancellable ? cancellationToken : CancellationToken.None);
+        try
+        {
+            await _dbContext.SaveChangesAsync(isCancellable ? cancellationToken : CancellationToken.None);
+        }
+        catch (DbUpdateException ex)
+        {
+            if (ex.GetBaseException() is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } postgresException)
+            {
+                throw new UniqueConstraintViolationException(postgresException.ConstraintName);
+            }
+
+            throw;
+        }
+
         return ToDto(recipe);
     }
 

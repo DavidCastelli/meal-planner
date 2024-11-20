@@ -63,6 +63,9 @@ public sealed class MealPlannerContext : IdentityDbContext<ApplicationUser, Iden
 
         builder.Entity<Meal>(b =>
         {
+            b.HasIndex(m => new { m.ApplicationUserId, m.Title })
+                .IsUnique();
+
             b.Property(m => m.Title)
                 .HasMaxLength(20);
             b.Property(m => m.ImagePath)
@@ -71,6 +74,9 @@ public sealed class MealPlannerContext : IdentityDbContext<ApplicationUser, Iden
 
         builder.Entity<Recipe>(b =>
         {
+            b.HasIndex(r => new { r.ApplicationUserId, r.Title })
+                .IsUnique();
+
             b.Property(r => r.Title)
                 .HasMaxLength(20);
             b.Property(r => r.Description)
@@ -80,6 +86,14 @@ public sealed class MealPlannerContext : IdentityDbContext<ApplicationUser, Iden
 
             b.OwnsOne(r => r.RecipeDetails);
             b.OwnsOne(r => r.RecipeNutrition);
+
+            b.OwnsMany(r => r.Directions)
+                .Property(d => d.Description)
+                .HasMaxLength(255);
+
+            b.OwnsMany(r => r.Tips)
+                .Property(t => t.Description)
+                .HasMaxLength(255);
 
             b.OwnsMany(r => r.SubIngredients, sib =>
             {
@@ -94,14 +108,6 @@ public sealed class MealPlannerContext : IdentityDbContext<ApplicationUser, Iden
                         .HasMaxLength(20);
                 });
             });
-
-            b.OwnsMany(r => r.Directions)
-                .Property(d => d.Description)
-                .HasMaxLength(255);
-
-            b.OwnsMany(r => r.Tips)
-                .Property(t => t.Description)
-                .HasMaxLength(255);
         });
     }
 

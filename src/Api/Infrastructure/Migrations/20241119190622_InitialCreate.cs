@@ -398,9 +398,10 @@ namespace Api.Infrastructure.Migrations
                 column: "RecipesId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Meals_ApplicationUserId",
+                name: "IX_Meals_ApplicationUserId_Title",
                 table: "Meals",
-                column: "ApplicationUserId");
+                columns: new[] { "ApplicationUserId", "Title" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_MealTag_TagsId",
@@ -408,9 +409,10 @@ namespace Api.Infrastructure.Migrations
                 column: "TagsId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Recipes_ApplicationUserId",
+                name: "IX_Recipes_ApplicationUserId_Title",
                 table: "Recipes",
-                column: "ApplicationUserId");
+                columns: new[] { "ApplicationUserId", "Title" },
+                unique: true);
         }
 
         /// <inheritdoc />

@@ -44,7 +44,8 @@ namespace Api.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
+                    b.HasIndex("ApplicationUserId", "Title")
+                        .IsUnique();
 
                     b.ToTable("Meals");
                 });
@@ -75,7 +76,8 @@ namespace Api.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
+                    b.HasIndex("ApplicationUserId", "Title")
+                        .IsUnique();
 
                     b.ToTable("Recipes");
                 });

@@ -23,13 +23,6 @@ internal sealed class ExceptionHandler : IExceptionHandler
                     { "errors", br.ToDictionary() }
                 }
             },
-            NotFoundException nf => new ProblemDetails
-            {
-                Title = "NotFound",
-                Detail = nf.Message,
-                Type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
-                Status = StatusCodes.Status404NotFound
-            },
             UnauthorizedException ua => new ProblemDetails
             {
                 Title = "Unauthorized",
@@ -42,6 +35,20 @@ internal sealed class ExceptionHandler : IExceptionHandler
                 Detail = fe.Message,
                 Type = "https://tools.ietf.org/html/rfc7231#section-6.5.3",
                 Status = StatusCodes.Status403Forbidden
+            },
+            NotFoundException nf => new ProblemDetails
+            {
+                Title = "NotFound",
+                Detail = nf.Message,
+                Type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
+                Status = StatusCodes.Status404NotFound
+            },
+            UniqueConstraintViolationException ucve => new ProblemDetails
+            {
+                Title = "Conflict",
+                Detail = ucve.Message,
+                Type = "https://tools.ietf.org/html/rfc7231#section-6.5.8",
+                Status = StatusCodes.Status409Conflict
             },
             _ => new ProblemDetails
             {

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Infrastructure.Migrations
 {
     [DbContext(typeof(MealPlannerContext))]
-    [Migration("20240914161843_InitialCreate")]
+    [Migration("20241119190622_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -47,7 +47,8 @@ namespace Api.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
+                    b.HasIndex("ApplicationUserId", "Title")
+                        .IsUnique();
 
                     b.ToTable("Meals");
                 });
@@ -78,7 +79,8 @@ namespace Api.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
+                    b.HasIndex("ApplicationUserId", "Title")
+                        .IsUnique();
 
                     b.ToTable("Recipes");
                 });
