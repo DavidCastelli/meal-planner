@@ -1,3 +1,6 @@
+using Api.Domain.Images;
+using Api.Domain.ManageableEntities;
+using Api.Domain.MealRecipes;
 using Api.Domain.Meals;
 using Api.Domain.Recipes;
 using Api.Domain.Tags;
@@ -24,72 +27,105 @@ public sealed class MealPlannerContext : IdentityDbContext<ApplicationUser, Iden
     }
 
     /// <summary>
-    /// Gets the set of <see cref="Meal"/> entities.
+    /// Gets the set of <see cref="Domain.ManageableEntities.ManageableEntity"/> entities.
+    /// </summary>
+    /// <value>
+    /// A set of manageable entities.
+    /// </value>
+    public DbSet<ManageableEntity> ManageableEntity => Set<ManageableEntity>();
+
+    /// <summary>
+    /// Gets the set of <see cref="Domain.Meals.Meal"/> entities.
     /// </summary>
     /// <value>
     /// A set of meals.
     /// </value>
-    public DbSet<Meal> Meals => Set<Meal>();
+    public DbSet<Meal> Meal => Set<Meal>();
 
     /// <summary>
-    /// Gets the set of <see cref="Tag"/> entities.
+    /// Gets the set of <see cref="Domain.Tags.Tag"/> entities.
     /// </summary>
     /// <value>
     /// A set of tags.
     /// </value>
-    public DbSet<Tag> Tags => Set<Tag>();
+    public DbSet<Tag> Tag => Set<Tag>();
 
     /// <summary>
-    /// Gets the set of <see cref="Recipe"/> entities.
+    /// Gets the set of <see cref="Domain.Recipes.Recipe"/> entities.
     /// </summary>
     /// <value>
     /// A set of recipes.
     /// </value>
-    public DbSet<Recipe> Recipes => Set<Recipe>();
+    public DbSet<Recipe> Recipe => Set<Recipe>();
+
+    /// <summary>
+    /// Gets the set of <see cref="Domain.MealRecipes.MealRecipe"/> entities.
+    /// </summary>
+    /// <value>
+    /// A set of meal recipe.
+    /// </value>
+    public DbSet<MealRecipe> MealRecipe => Set<MealRecipe>();
+
+    /// <summary>
+    /// Gets the set of <see cref="Domain.Images.Image"/> entities.
+    /// </summary>
+    /// <value>
+    /// A set of images.
+    /// </value>
+    public DbSet<Image> Image => Set<Image>();
 
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
 
+        builder.HasCollation("case_insensitive", "en-u-ks-primary", "icu", false);
+
         builder.Entity<ApplicationUser>(b =>
         {
-            b.HasMany<Meal>()
+            b.HasMany<ManageableEntity>()
                 .WithOne();
+        });
 
-            b.HasMany<Recipe>()
-                .WithOne();
+        builder.Entity<ManageableEntity>(b =>
+        {
+            b.UseTptMappingStrategy();
+
+            b.HasIndex(r => new { r.ApplicationUserId, r.Title })
+                .IsUnique();
+
+            b.Property(me => me.Title)
+                .HasMaxLength(20)
+                .UseCollation("case_insensitive");
         });
 
         builder.Entity<Meal>(b =>
         {
-            b.HasIndex(m => new { m.ApplicationUserId, m.Title })
-                .IsUnique();
+            b.HasBaseType<ManageableEntity>();
 
-            b.Property(m => m.Title)
-                .HasMaxLength(20);
-            b.Property(m => m.ImagePath)
-                .HasMaxLength(255);
+            b.HasMany(m => m.Recipes)
+                .WithMany(r => r.Meals)
+                .UsingEntity<MealRecipe>();
         });
 
         builder.Entity<Recipe>(b =>
         {
-            b.HasIndex(r => new { r.ApplicationUserId, r.Title })
-                .IsUnique();
+            b.HasBaseType<ManageableEntity>();
 
-            b.Property(r => r.Title)
-                .HasMaxLength(20);
             b.Property(r => r.Description)
-                .HasMaxLength(255);
-            b.Property(r => r.ImagePath)
                 .HasMaxLength(255);
 
             b.OwnsOne(r => r.RecipeDetails);
             b.OwnsOne(r => r.RecipeNutrition);
 
-            b.OwnsMany(r => r.Directions)
-                .Property(d => d.Description)
-                .HasMaxLength(255);
+            b.OwnsMany(r => r.Directions, db =>
+            {
+                db.HasIndex("RecipeId", "Number")
+                    .IsUnique();
+
+                db.Property(d => d.Description)
+                    .HasMaxLength(255);
+            });
 
             b.OwnsMany(r => r.Tips)
                 .Property(t => t.Description)
@@ -97,6 +133,9 @@ public sealed class MealPlannerContext : IdentityDbContext<ApplicationUser, Iden
 
             b.OwnsMany(r => r.SubIngredients, sib =>
             {
+                sib.HasIndex("RecipeId", "Name")
+                    .IsUnique();
+
                 sib.Property(si => si.Name)
                     .HasMaxLength(20);
 
@@ -108,6 +147,21 @@ public sealed class MealPlannerContext : IdentityDbContext<ApplicationUser, Iden
                         .HasMaxLength(20);
                 });
             });
+        });
+
+        builder.Entity<Image>(b =>
+        {
+            b.HasIndex(i => i.StorageFileName)
+                .IsUnique();
+
+            b.Property(i => i.StorageFileName)
+                .HasMaxLength(12);
+            b.Property(i => i.DisplayFileName)
+                .HasMaxLength(255);
+            b.Property(i => i.ImagePath)
+                .HasMaxLength(255);
+            b.Property(i => i.ImageUrl)
+                .HasMaxLength(255);
         });
     }
 

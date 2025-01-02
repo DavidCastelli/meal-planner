@@ -1,4 +1,4 @@
-using Api.Domain.Ingredients;
+using Api.Domain.ManageableEntities;
 using Api.Domain.Meals;
 
 namespace Api.Domain.Recipes;
@@ -6,24 +6,8 @@ namespace Api.Domain.Recipes;
 /// <summary>
 /// Entity which represents a recipe.
 /// </summary>
-public sealed class Recipe
+public sealed class Recipe : ManageableEntity
 {
-    /// <summary>
-    /// Gets or sets the id of a recipe.
-    /// </summary>
-    /// <value>
-    /// An integer specifying the id of a recipe.
-    /// </value>
-    public int Id { get; set; }
-
-    /// <summary>
-    /// Gets or sets the title of a recipe.
-    /// </summary>
-    /// <value>
-    /// A string specifying the title of a recipe.
-    /// </value>
-    public required string Title { get; set; }
-
     /// <summary>
     /// Gets or sets the description of a recipe.
     /// </summary>
@@ -31,19 +15,6 @@ public sealed class Recipe
     /// A string describing the recipe or possibly null.
     /// </value>
     public string? Description { get; set; }
-
-    /// <summary>
-    /// Gets or sets the image path of the recipe.
-    /// </summary>
-    /// <remarks>
-    /// The image path is the location in which the image is stored on the server.
-    /// The path consists of a storage location which is set in the application configuration
-    /// and a file name which is randomly generated.
-    /// </remarks>
-    /// <value>
-    /// A string specifying the path to the image of the recipe or possibly null.
-    /// </value>
-    public string? ImagePath { get; set; }
 
     /// <summary>
     /// Gets or sets the <see cref="Api.Domain.Recipes.RecipeDetails"/> of the recipe.
@@ -96,12 +67,4 @@ public sealed class Recipe
     /// </value>
     /// <see cref="SubIngredient"/>
     public ICollection<SubIngredient> SubIngredients { get; } = new List<SubIngredient>();
-
-    /// <summary>
-    /// Gets or sets the application user id.
-    /// </summary>
-    /// <value>
-    /// An integer specifying the id of a user who the recipe belongs to.
-    /// </value>
-    public required int ApplicationUserId { get; set; }
 }
