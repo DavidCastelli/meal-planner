@@ -49,6 +49,7 @@ public sealed class GetMealByIdHandler
 {
     private readonly MealPlannerContext _dbContext;
     private readonly IUserContext _userContext;
+    private readonly IUrlGenerator _urlGenerator;
     private readonly IAuthorizationService _authorizationService;
 
     /// <summary>
@@ -56,11 +57,13 @@ public sealed class GetMealByIdHandler
     /// </summary>
     /// <param name="dbContext">The database context.</param>
     /// <param name="userContext">The user context.</param>
+    /// <param name="urlGenerator">A URL generator.</param>
     /// <param name="authorizationService">The authorization service.</param>
-    public GetMealByIdHandler(MealPlannerContext dbContext, IUserContext userContext, IAuthorizationService authorizationService)
+    public GetMealByIdHandler(MealPlannerContext dbContext, IUserContext userContext, IUrlGenerator urlGenerator, IAuthorizationService authorizationService)
     {
         _dbContext = dbContext;
         _userContext = userContext;
+        _urlGenerator = urlGenerator;
         _authorizationService = authorizationService;
     }
 
@@ -94,7 +97,12 @@ public sealed class GetMealByIdHandler
 
         if (authorizationResult.Succeeded)
         {
-            return ToDto(meal);
+            // Query parameter is needed to refresh the browser cache.
+            // Images are cached and only refetched if the url changes.
+            // Query param makes the url unique given the filename and changes on update to force browser to redownload the new image.
+            var imageUrl = meal.ImagePath == null ? null 
+                : $"{_urlGenerator.GenerateUrl("GetMealImageById", new { id = meal.Id })}?refresh={Path.GetFileName(meal.ImagePath)}";
+            return ToDto(meal, imageUrl);
         }
         else if (_userContext.IsAuthenticated)
         {
@@ -106,7 +114,7 @@ public sealed class GetMealByIdHandler
         }
     }
 
-    private static GetByIdMealDto ToDto(Meal meal)
+    private static GetByIdMealDto ToDto(Meal meal, string? imageUrl)
     {
         var tagDtos = new List<GetByIdTagDto>();
 
@@ -126,7 +134,7 @@ public sealed class GetMealByIdHandler
             recipeDtos.Add(recipeDto);
         }
 
-        return new GetByIdMealDto(meal.Id, meal.Title, tagDtos, recipeDtos, meal.ApplicationUserId);
+        return new GetByIdMealDto(meal.Id, meal.Title, imageUrl, tagDtos, recipeDtos, meal.ApplicationUserId);
     }
 }
 
@@ -135,10 +143,11 @@ public sealed class GetMealByIdHandler
 /// </summary>
 /// <param name="Id">The id of the meal.</param>
 /// <param name="Title">The title of the meal.</param>
+/// <param name="ImageUrl">The URL of the meals image.</param>
 /// <param name="Tags">A collection of tags belonging to the meal.</param>
 /// <param name="Recipes">A collection of recipes belonging to the meal.</param>
 /// <param name="ApplicationUserId">The id of the user who the meal belongs to.</param>
-public sealed record GetByIdMealDto(int Id, string Title, ICollection<GetByIdTagDto> Tags, ICollection<GetByIdMealRecipeDto> Recipes, int ApplicationUserId);
+public sealed record GetByIdMealDto(int Id, string Title, string? ImageUrl, ICollection<GetByIdTagDto> Tags, ICollection<GetByIdMealRecipeDto> Recipes, int ApplicationUserId);
 
 /// <summary>
 /// The DTO for a tag to return to the client.

@@ -72,7 +72,8 @@ public sealed class GetRecipesHandler
             .AsNoTracking()
             .Where(r => r.ApplicationUserId == _userContext.UserId)
             .Select(r =>
-                new GetRecipesDto(r.Id, r.Title, r.ImagePath == null ? null : _urlGenerator.GenerateUrl("GetRecipeImageById", new { id = r.Id }))
+                new GetRecipesDto(r.Id, r.Title, r.ImagePath == null ? null :
+                    $"{_urlGenerator.GenerateUrl("GetRecipeImageById", new { id = r.Id })}?refresh={Path.GetFileName(r.ImagePath)}") // Query param needed to refresh browser cache.
             )
             .ToListAsync(cancellationToken);
 

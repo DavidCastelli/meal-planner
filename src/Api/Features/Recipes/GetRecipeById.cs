@@ -50,6 +50,7 @@ public sealed class GetRecipeByIdHandler
 {
     private readonly MealPlannerContext _dbContext;
     private readonly IUserContext _userContext;
+    private readonly IUrlGenerator _urlGenerator;
     private readonly IAuthorizationService _authorizationService;
 
     /// <summary>
@@ -57,11 +58,13 @@ public sealed class GetRecipeByIdHandler
     /// </summary>
     /// <param name="dbContext">The database context.</param>
     /// <param name="userContext">The user context.</param>
+    /// <param name="urlGenerator">A URL generator.</param>
     /// <param name="authorizationService">The authorization service.</param>
-    public GetRecipeByIdHandler(MealPlannerContext dbContext, IUserContext userContext, IAuthorizationService authorizationService)
+    public GetRecipeByIdHandler(MealPlannerContext dbContext, IUserContext userContext, IUrlGenerator urlGenerator, IAuthorizationService authorizationService)
     {
         _dbContext = dbContext;
         _userContext = userContext;
+        _urlGenerator = urlGenerator;
         _authorizationService = authorizationService;
     }
 
@@ -93,7 +96,12 @@ public sealed class GetRecipeByIdHandler
 
         if (authorizationResult.Succeeded)
         {
-            return ToDto(recipe);
+            // Query parameter is needed to refresh the browser cache.
+            // Images are cached and only refetched if the url changes.
+            // Query param makes the url unique given the filename and changes on update to force browser to redownload the new image.
+            var imageUrl = recipe.ImagePath == null ? null :
+                $"{_urlGenerator.GenerateUrl("GetRecipeImageById", new { id = recipe.Id })}?refresh={Path.GetFileName(recipe.ImagePath)}";
+            return ToDto(recipe, imageUrl);
         }
         else if (_userContext.IsAuthenticated)
         {
@@ -105,7 +113,7 @@ public sealed class GetRecipeByIdHandler
         }
     }
 
-    private static GetByIdRecipeDto ToDto(Recipe recipe)
+    private static GetByIdRecipeDto ToDto(Recipe recipe, string? imageUrl = null)
     {
         var recipeDetailsDto = new GetByIdRecipeDetailsDto(recipe.RecipeDetails.PrepTime, recipe.RecipeDetails.CookTime, recipe.RecipeDetails.Servings);
         var recipeNutritionDto = new GetByIdRecipeNutritionDto(recipe.RecipeNutrition.Calories, recipe.RecipeNutrition.Fat, recipe.RecipeNutrition.Carbs, recipe.RecipeNutrition.Protein);
@@ -150,7 +158,7 @@ public sealed class GetRecipeByIdHandler
             subIngredientDtos.Add(subIngredientDto);
         }
 
-        return new GetByIdRecipeDto(recipe.Id, recipe.Title, recipe.Description, recipeDetailsDto, recipeNutritionDto, directionDtos, tipDtos, mealDtos, subIngredientDtos, recipe.ApplicationUserId);
+        return new GetByIdRecipeDto(recipe.Id, recipe.Title, imageUrl, recipe.Description, recipeDetailsDto, recipeNutritionDto, directionDtos, tipDtos, mealDtos, subIngredientDtos, recipe.ApplicationUserId);
     }
 }
 
@@ -159,6 +167,7 @@ public sealed class GetRecipeByIdHandler
 /// </summary>
 /// <param name="Id">The id of the recipe.</param>
 /// <param name="Title">The title of the recipe.</param>
+/// <param name="ImageUrl">The URL of the recipes image.</param>
 /// <param name="Description">The description of the recipe.</param>
 /// <param name="Details">The recipe details.</param>
 /// <param name="Nutrition">The recipe nutrition.</param>
@@ -167,7 +176,7 @@ public sealed class GetRecipeByIdHandler
 /// <param name="Meals">A collections of meals which the recipe belongs to.</param>
 /// <param name="SubIngredients">A collection of sub ingredients belonging to the recipe.</param>
 /// <param name="ApplicationUserId">The id of the user who the meal belongs to.</param>
-public sealed record GetByIdRecipeDto(int Id, String Title, String? Description, GetByIdRecipeDetailsDto Details, GetByIdRecipeNutritionDto Nutrition, IList<GetByIdDirectionDto> Directions, ICollection<GetByIdTipDto> Tips, ICollection<GetByIdRecipeMealDto> Meals, ICollection<GetByIdSubIngredientDto> SubIngredients, int ApplicationUserId);
+public sealed record GetByIdRecipeDto(int Id, String Title, string? ImageUrl, String? Description, GetByIdRecipeDetailsDto Details, GetByIdRecipeNutritionDto Nutrition, IList<GetByIdDirectionDto> Directions, ICollection<GetByIdTipDto> Tips, ICollection<GetByIdRecipeMealDto> Meals, ICollection<GetByIdSubIngredientDto> SubIngredients, int ApplicationUserId);
 
 /// <summary>
 /// The DTO for recipe details to return to the client.

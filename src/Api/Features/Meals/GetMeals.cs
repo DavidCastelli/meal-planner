@@ -73,7 +73,8 @@ public sealed class GetMealsHandler
             .AsNoTracking()
             .Where(m => m.ApplicationUserId == _userContext.UserId)
             .Select(m =>
-                new GetMealsDto(m.Id, m.Title, m.ImagePath == null ? null : _urlGenerator.GenerateUrl("GetMealImageById", new { id = m.Id }))
+                new GetMealsDto(m.Id, m.Title, m.ImagePath == null ? null 
+                    : $"{_urlGenerator.GenerateUrl("GetMealImageById", new { id = m.Id })}?refresh={Path.GetFileName(m.ImagePath)}") // Query param needed to refresh browser cache.
             )
             .ToListAsync(cancellationToken);
 

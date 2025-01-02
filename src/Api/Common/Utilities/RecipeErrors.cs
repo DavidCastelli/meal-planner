@@ -1,5 +1,3 @@
-using Api.Domain.Ingredients;
-
 namespace Api.Domain.Recipes;
 
 /// <summary>

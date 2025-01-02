@@ -5,9 +5,9 @@ import {
   HttpStatusCode,
 } from '@angular/common/http';
 import { catchError, throwError } from 'rxjs';
-import { ValidationProblemDetails } from '../../shared/models/validation-problem-details.model';
+import { ValidationProblemDetails } from './models/validation-problem-details.model';
 import { inject } from '@angular/core';
-import { ErrorService } from '../errors/error.service';
+import { ErrorService } from './error.service';
 import { Router } from '@angular/router';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
@@ -37,6 +37,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
           break;
         case HttpStatusCode.Forbidden:
           console.error(`Forbidden: ${error.message}`);
+          void router.navigate(['/404'], { skipLocationChange: true });
           break;
         case HttpStatusCode.NotFound:
           console.error(`Not Found: ${error.message}`);

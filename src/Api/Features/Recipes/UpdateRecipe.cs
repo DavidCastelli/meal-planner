@@ -363,11 +363,14 @@ public sealed class UpdateRecipeHandler
             {
                 if (recipe.ImagePath != null)
                 {
-                    var tempFilePath = Path.Combine(_imageProcessingOptions.TempImageStoragePath,
-                        Path.GetFileName(recipe.ImagePath));
+                    var randomFileName = Path.GetRandomFileName();
+                    var tempFilePath = Path.Combine(_imageProcessingOptions.TempImageStoragePath, randomFileName);
+                    var filePath = Path.Combine(_imageProcessingOptions.ImageStoragePath, randomFileName);
+                    var originalFilePath = recipe.ImagePath;
+                    recipe.ImagePath = filePath;
 
-                    var imageProcessingErrors = await FileHelpers.ProcessFormFileAsync(image, tempFilePath, recipe.ImagePath,
-                        _imageProcessingOptions.PermittedExtensions, _imageProcessingOptions.ImageSizeLimit, true);
+                    var imageProcessingErrors = await FileHelpers.ProcessFormFileAsync(image, tempFilePath, filePath,
+                        _imageProcessingOptions.PermittedExtensions, _imageProcessingOptions.ImageSizeLimit, originalFilePath);
 
                     if (imageProcessingErrors.Length != 0)
                     {

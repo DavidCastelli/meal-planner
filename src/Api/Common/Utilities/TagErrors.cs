@@ -10,5 +10,5 @@ public static class TagErrors
     /// </summary>
     /// <returns>An <see cref="Error"/> which contains an error code and description.</returns>
     public static Error NotFound() => new(
-        "Tags.NotFound", "One or more tags does not exist");
+        "Tags.NotFound", "One or more tags do not exist");
 }

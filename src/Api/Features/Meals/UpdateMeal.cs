@@ -216,11 +216,14 @@ public sealed class UpdateMealHandler
             {
                 if (meal.ImagePath != null)
                 {
-                    var tempFilePath = Path.Combine(_imageProcessingOptions.TempImageStoragePath,
-                        Path.GetFileName(meal.ImagePath));
+                    var randomFileName = Path.GetRandomFileName();
+                    var tempFilePath = Path.Combine(_imageProcessingOptions.TempImageStoragePath, randomFileName);
+                    var filePath = Path.Combine(_imageProcessingOptions.ImageStoragePath, randomFileName);
+                    var originalFilePath = meal.ImagePath;
+                    meal.ImagePath = filePath;
 
-                    var imageProcessingErrors = await FileHelpers.ProcessFormFileAsync(image, tempFilePath, meal.ImagePath,
-                        _imageProcessingOptions.PermittedExtensions, _imageProcessingOptions.ImageSizeLimit, true);
+                    var imageProcessingErrors = await FileHelpers.ProcessFormFileAsync(image, tempFilePath, filePath,
+                        _imageProcessingOptions.PermittedExtensions, _imageProcessingOptions.ImageSizeLimit, originalFilePath);
 
                     if (imageProcessingErrors.Length != 0)
                     {
