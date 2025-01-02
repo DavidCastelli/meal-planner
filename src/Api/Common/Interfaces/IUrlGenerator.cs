@@ -11,5 +11,5 @@ public interface IUrlGenerator
     /// <param name="endpointName">Name of the endpoint from which to generate a URL.</param>
     /// <param name="routeValues">Route values within the url.</param>
     /// <returns>A string representing a valid URL.</returns>
-    public string? GenerateUrl(string endpointName, object? routeValues);
+    public string GenerateUrl(string endpointName, object? routeValues);
 }

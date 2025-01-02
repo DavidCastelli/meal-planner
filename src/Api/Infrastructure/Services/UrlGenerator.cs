@@ -26,11 +26,12 @@ public sealed class UrlGenerator : IUrlGenerator
     }
 
     /// <inheritdoc/>
-    /// <exception cref="InvalidOperationException">Is thrown if the http context is not available.</exception>
-    public string? GenerateUrl(string endpointName, object? routeValues)
+    /// <exception cref="InvalidOperationException">Is thrown if the http context is not available, or the URL generation failed.</exception>
+    public string GenerateUrl(string endpointName, object? routeValues)
     {
         return _httpContextAccessor.HttpContext == null
             ? throw new InvalidOperationException("URL generator is unavailable")
-            : _linkGenerator.GetUriByName(_httpContextAccessor.HttpContext, endpointName, routeValues);
+            : _linkGenerator.GetUriByName(_httpContextAccessor.HttpContext, endpointName, routeValues)
+            ?? throw new InvalidOperationException("Failed to generate URL");
     }
 }
