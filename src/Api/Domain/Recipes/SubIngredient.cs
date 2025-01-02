@@ -1,4 +1,4 @@
-namespace Api.Domain.Ingredients;
+namespace Api.Domain.Recipes;
 
 /// <summary>
 /// Entity which represents a sub ingredient.
@@ -11,6 +11,14 @@ namespace Api.Domain.Ingredients;
 /// </remarks>
 public sealed class SubIngredient
 {
+    /// <summary>
+    /// Gets or sets the id of a sub ingredient.
+    /// </summary>
+    /// <value>
+    /// An integer specifying the id of a sub ingredient.
+    /// </value>
+    public int Id { get; set; }
+
     /// <summary>
     /// Gets or sets the name of a sub ingredient.
     /// </summary>

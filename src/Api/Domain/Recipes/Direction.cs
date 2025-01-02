@@ -5,6 +5,15 @@ namespace Api.Domain.Recipes;
 /// </summary>
 public sealed class Direction
 {
+
+    /// <summary>
+    /// Gets or sets the id of a direction.
+    /// </summary>
+    /// <value>
+    /// An integer specifying the id of a direction.
+    /// </value>
+    public int Id { get; set; }
+
     /// <summary>
     /// Gets or sets the number of the direction.
     /// </summary>
