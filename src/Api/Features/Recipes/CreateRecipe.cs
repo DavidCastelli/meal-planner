@@ -1,13 +1,14 @@
+using System.Net;
 using System.Net.Mime;
 using System.Text.Json;
 
 using Api.Common;
 using Api.Common.Exceptions;
+using Api.Common.Extensions;
 using Api.Common.Interfaces;
 using Api.Common.Options;
 using Api.Common.Utilities;
-using Api.Domain;
-using Api.Domain.Ingredients;
+using Api.Domain.Images;
 using Api.Domain.Recipes;
 using Api.Infrastructure;
 
@@ -20,7 +21,7 @@ using Microsoft.Extensions.Options;
 
 using Npgsql;
 
-namespace Api.Features.RecipeManagement;
+namespace Api.Features.Recipes;
 
 /// <summary>
 /// Controller that handles requests to create a recipe.
@@ -44,9 +45,9 @@ public sealed class CreateRecipeController : ApiControllerBase
     [Consumes(MediaTypeNames.Multipart.FormData)]
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
-    [ProducesResponseType(typeof(CreateRecipeDto), StatusCodes.Status201Created, MediaTypeNames.Application.Json)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status201Created)]
     [Tags("Manage Recipes")]
-    public async Task<Results<UnauthorizedHttpResult, ValidationProblem, BadRequest<ValidationProblemDetails>, Created<CreateRecipeDto>>> CreateAsync(
+    public async Task<Results<UnauthorizedHttpResult, ValidationProblem, BadRequest<ValidationProblemDetails>, Created>> CreateAsync(
         IValidator<CreateRecipeRequest> validator, CreateRecipeHandler handler, IFormFile data, IFormFile? image,
         IOptions<JsonOptions> jsonOptions, CancellationToken cancellationToken)
     {
@@ -77,10 +78,10 @@ public sealed class CreateRecipeController : ApiControllerBase
             return TypedResults.ValidationProblem(result.ToDictionary());
         }
 
-        var createRecipeDto = await handler.HandleAsync(request, image, cancellationToken);
+        var recipeId = await handler.HandleAsync(request, image, cancellationToken);
 
-        var location = Url.Action(nameof(CreateAsync), new { id = createRecipeDto.Id }) ?? $"/{createRecipeDto.Id}";
-        return TypedResults.Created(location, createRecipeDto);
+        var location = Url.Link("GetRecipeById", new { id = recipeId });
+        return TypedResults.Created(location);
     }
 }
 
@@ -94,7 +95,7 @@ public sealed class CreateRecipeController : ApiControllerBase
 /// <param name="Directions">A list of directions belonging to the recipe.</param>
 /// <param name="Tips">A list of tips belonging to the recipe.</param>
 /// <param name="SubIngredients">A list of sub ingredients belonging to the recipe.</param>
-public sealed record CreateRecipeRequest(string Title, string? Description, CreateRecipeRequestRecipeDetails Details, CreateRecipeRequestRecipeNutrition Nutrition, IList<CreateRecipeRequestDirection> Directions, ICollection<CreateRecipeRequestTip> Tips, ICollection<CreateRecipeRequestSubIngredient> SubIngredients);
+public sealed record CreateRecipeRequest(string Title, string? Description, CreateRecipeRequestDetails Details, CreateRecipeRequestNutrition Nutrition, IList<CreateRecipeRequestDirection> Directions, ICollection<CreateRecipeRequestTip> Tips, ICollection<CreateRecipeRequestSubIngredient> SubIngredients);
 
 /// <summary>
 /// The DTO for the recipe details in a create recipe request.
@@ -102,7 +103,7 @@ public sealed record CreateRecipeRequest(string Title, string? Description, Crea
 /// <param name="PrepTime">The prep time.</param>
 /// <param name="CookTime">The cook time.</param>
 /// <param name="Servings">The number of servings.</param>
-public sealed record CreateRecipeRequestRecipeDetails(int? PrepTime, int? CookTime, int? Servings);
+public sealed record CreateRecipeRequestDetails(int? PrepTime, int? CookTime, int? Servings);
 
 /// <summary>
 /// The DTO for the recipe nutrition in a create recipe request.
@@ -111,7 +112,7 @@ public sealed record CreateRecipeRequestRecipeDetails(int? PrepTime, int? CookTi
 /// <param name="Fat">The amount of fat.</param>
 /// <param name="Carbs">The amount of carbs.</param>
 /// <param name="Protein">The amount of protein.</param>
-public sealed record CreateRecipeRequestRecipeNutrition(int? Calories, int? Fat, int? Carbs, int? Protein);
+public sealed record CreateRecipeRequestNutrition(int? Calories, int? Fat, int? Carbs, int? Protein);
 
 /// <summary>
 /// The DTO for a direction in a create recipe request.
@@ -140,7 +141,7 @@ public sealed record CreateRecipeRequestSubIngredient(string? Name, ICollection<
 /// <param name="Measurement">The ingredient measurement.</param>
 public sealed record CreateRecipeRequestIngredient(string Name, string Measurement);
 
-internal sealed class CreateRecipeRequestRecipeDetailsValidator : AbstractValidator<CreateRecipeRequestRecipeDetails>
+internal sealed class CreateRecipeRequestRecipeDetailsValidator : AbstractValidator<CreateRecipeRequestDetails>
 {
     public CreateRecipeRequestRecipeDetailsValidator()
     {
@@ -161,7 +162,7 @@ internal sealed class CreateRecipeRequestRecipeDetailsValidator : AbstractValida
     }
 }
 
-internal sealed class CreateRecipeRequestRecipeNutritionValidator : AbstractValidator<CreateRecipeRequestRecipeNutrition>
+internal sealed class CreateRecipeRequestRecipeNutritionValidator : AbstractValidator<CreateRecipeRequestNutrition>
 {
     public CreateRecipeRequestRecipeNutritionValidator()
     {
@@ -237,7 +238,8 @@ internal sealed class CreateRecipeRequestValidator : AbstractValidator<CreateRec
         RuleForEach(request => request.Directions).ChildRules(direction =>
         {
             direction.RuleFor(d => d.Number)
-                .GreaterThanOrEqualTo(1);
+                .GreaterThanOrEqualTo(1)
+                .LessThanOrEqualTo(6);
 
             direction.RuleFor(d => d.Description)
                 .NotEmpty()
@@ -269,6 +271,7 @@ public sealed class CreateRecipeHandler
 {
     private readonly MealPlannerContext _dbContext;
     private readonly IUserContext _userContext;
+    private readonly IUrlGenerator _urlGenerator;
     private readonly ImageProcessingOptions _imageProcessingOptions;
 
     /// <summary>
@@ -276,11 +279,14 @@ public sealed class CreateRecipeHandler
     /// </summary>
     /// <param name="dbContext">The database context.</param>
     /// <param name="userContext">The user context.</param>
+    /// <param name="urlGenerator">A URL generator.</param>
     /// <param name="imageProcessingOptions">The image processing configuration of the application.</param>
-    public CreateRecipeHandler(MealPlannerContext dbContext, IUserContext userContext, IOptions<ImageProcessingOptions> imageProcessingOptions)
+    public CreateRecipeHandler(MealPlannerContext dbContext, IUserContext userContext, IUrlGenerator urlGenerator,
+        IOptions<ImageProcessingOptions> imageProcessingOptions)
     {
         _dbContext = dbContext;
         _userContext = userContext;
+        _urlGenerator = urlGenerator;
         _imageProcessingOptions = imageProcessingOptions.Value;
     }
 
@@ -292,13 +298,16 @@ public sealed class CreateRecipeHandler
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <returns>
     /// A task which represents the asynchronous write operation.
-    /// The result of the task upon completion returns a <see cref="CreateRecipeDto"/>.
+    /// The result of the task upon completion returns an integer specifying the id of the created recipe.
     /// </returns>
     /// <exception cref="RecipeValidationException">Is thrown if validation fails on the <paramref name="request"/>.</exception>
     /// <exception cref="UniqueConstraintViolationException">Is thrown if a unique constraint violation occurs.</exception>
-    public async Task<CreateRecipeDto> HandleAsync(CreateRecipeRequest request, IFormFile? image, CancellationToken cancellationToken)
+    public async Task<int> HandleAsync(CreateRecipeRequest request, IFormFile? image, CancellationToken cancellationToken)
     {
-        var validationErrors = ValidateRecipe(request);
+        var recipeCount = await _dbContext.Recipe
+            .CountAsync(r => r.ApplicationUserId == _userContext.UserId, cancellationToken);
+
+        var validationErrors = ValidateRecipe(request, recipeCount);
 
         if (validationErrors.Length != 0)
         {
@@ -307,63 +316,84 @@ public sealed class CreateRecipeHandler
 
         var recipe = FromDto(request, _userContext.UserId);
 
-        bool isCancellable = true;
         if (image != null)
         {
             var randomFileName = Path.GetRandomFileName();
             var tempFilePath = Path.Combine(_imageProcessingOptions.TempImageStoragePath, randomFileName);
             var filePath = Path.Combine(_imageProcessingOptions.ImageStoragePath, randomFileName);
-            recipe.ImagePath = filePath;
 
-            var imageProcessingErrors = await FileHelpers.ProcessFormFileAsync(image, tempFilePath, filePath,
-                _imageProcessingOptions.PermittedExtensions, _imageProcessingOptions.ImageSizeLimit);
-
-            if (imageProcessingErrors.Length != 0)
+            var recipeImage = new Image
             {
-                throw new ImageProcessingException(imageProcessingErrors);
-            }
+                StorageFileName = randomFileName,
+                DisplayFileName = WebUtility.HtmlEncode(image.FileName),
+                ImagePath = filePath,
+                ImageUrl = _urlGenerator.GenerateUrl("GetImageByFileName", new { fileName = randomFileName }),
+                ManageableEntityId = recipe.Id,
+                ManageableEntity = recipe
+            };
+            recipe.Image = recipeImage;
 
-            isCancellable = false;
+            _dbContext.Recipe.Add(recipe);
+            await _dbContext.SaveChangesSaveImageAsync(image, tempFilePath, filePath,
+                _imageProcessingOptions.PermittedExtensions, _imageProcessingOptions.ImageSizeLimit, cancellationToken);
+
+            return recipe.Id;
         }
 
-        _dbContext.Recipes.Add(recipe);
+        _dbContext.Recipe.Add(recipe);
         try
         {
-            await _dbContext.SaveChangesAsync(isCancellable ? cancellationToken : CancellationToken.None);
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
         catch (DbUpdateException ex)
         {
-            if (ex.GetBaseException() is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } postgresException)
+            if (ex.GetBaseException() is PostgresException
+                {
+                    SqlState: PostgresErrorCodes.UniqueViolation
+                } postgresException)
             {
-                throw new UniqueConstraintViolationException(postgresException.ConstraintName);
+                var cause = postgresException.ConstraintName switch
+                {
+                    "IX_ManageableEntity_ApplicationUserId_Title" => "Title",
+                    "IX_SubIngredient_RecipeId_Name" => "SubIngredient names",
+                    "IX_Direction_RecipeId_Number" => "Direction numbers",
+                    _ => null
+                };
+
+                throw new UniqueConstraintViolationException(cause);
             }
 
             throw;
         }
 
-        return ToDto(recipe);
+        return recipe.Id;
     }
 
-    private static Error[] ValidateRecipe(CreateRecipeRequest request)
+    private static Error[] ValidateRecipe(CreateRecipeRequest request, int recipeCount)
     {
         List<Error> errors = [];
 
-        if (request.Directions.Count > 6)
+        if (recipeCount > RecipeErrors.MaxRecipesCount)
+        {
+            errors.Add(RecipeErrors.MaxRecipes());
+        }
+
+        if (request.Directions.Count > RecipeErrors.MaxDirectionsCount)
         {
             errors.Add(RecipeErrors.MaxDirections());
         }
 
-        if (request.Tips.Count > 3)
+        if (request.Tips.Count > RecipeErrors.MaxTipsCount)
         {
             errors.Add(RecipeErrors.MaxTips());
         }
 
-        if (request.SubIngredients.Count > 5)
+        if (request.SubIngredients.Count > RecipeErrors.MaxSubIngredientsCount)
         {
             errors.Add(RecipeErrors.MaxSubIngredients());
         }
 
-        var maxIngredients = request.SubIngredients.Any(si => si.Ingredients.Count > 10);
+        var maxIngredients = request.SubIngredients.Any(si => si.Ingredients.Count > RecipeErrors.MaxIngredientsCount);
         if (maxIngredients)
         {
             errors.Add(RecipeErrors.MaxIngredients());
@@ -422,7 +452,7 @@ public sealed class CreateRecipeHandler
             Protein = request.Nutrition.Protein
         };
 
-        var recipe = new Recipe()
+        var recipe = new Recipe
         {
             Title = request.Title,
             Description = request.Description,
@@ -461,14 +491,4 @@ public sealed class CreateRecipeHandler
 
         return recipe;
     }
-
-    private static CreateRecipeDto ToDto(Recipe recipe) =>
-        new(recipe.Id, recipe.Title);
 }
-
-/// <summary>
-/// The DTO to return to the client after recipe creation.
-/// </summary>
-/// <param name="Id">The id of the recipe.</param>
-/// <param name="Title">The title of the recipe.</param>
-public sealed record CreateRecipeDto(int Id, string Title);

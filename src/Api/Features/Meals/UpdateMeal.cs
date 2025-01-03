@@ -1,15 +1,16 @@
+using System.Net;
 using System.Net.Mime;
 using System.Text.Json;
 
 using Api.Common;
 using Api.Common.Exceptions;
+using Api.Common.Extensions;
 using Api.Common.Interfaces;
 using Api.Common.Options;
 using Api.Common.Utilities;
-using Api.Domain;
+using Api.Domain.Images;
 using Api.Domain.Meals;
 using Api.Domain.Recipes;
-using Api.Domain.Tags;
 using Api.Infrastructure;
 
 using FluentValidation;
@@ -22,7 +23,7 @@ using Microsoft.Extensions.Options;
 
 using Npgsql;
 
-namespace Api.Features.MealManagement;
+namespace Api.Features.Meals;
 
 /// <summary>
 /// Controller that handles requests to update a meal.
@@ -48,9 +49,9 @@ public sealed class UpdateMealController : ApiControllerBase
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
     [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(UpdateMealDto), StatusCodes.Status200OK, MediaTypeNames.Application.Json)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
     [Tags("Manage Meals")]
-    public async Task<Results<UnauthorizedHttpResult, BadRequest<ValidationProblemDetails>, ValidationProblem, NotFound, Ok<UpdateMealDto>>> UpdateAsync(
+    public async Task<Results<UnauthorizedHttpResult, BadRequest<ValidationProblemDetails>, ValidationProblem, NotFound, Ok>> UpdateAsync(
         int id, IValidator<UpdateMealRequest> validator, IFormFile data, IFormFile? image, UpdateMealHandler handler,
         IOptions<JsonOptions> jsonOptions, CancellationToken cancellationToken)
     {
@@ -88,9 +89,9 @@ public sealed class UpdateMealController : ApiControllerBase
             return TypedResults.ValidationProblem(result.ToDictionary());
         }
 
-        var updateMealDto = await handler.HandleAsync(request, image, cancellationToken);
+        await handler.HandleAsync(request, image, cancellationToken);
 
-        return TypedResults.Ok(updateMealDto);
+        return TypedResults.Ok();
     }
 }
 
@@ -107,6 +108,10 @@ internal sealed class UpdateMealRequestValidator : AbstractValidator<UpdateMealR
 {
     public UpdateMealRequestValidator()
     {
+        RuleFor(request => request.Id)
+            .GreaterThanOrEqualTo(int.MinValue)
+            .LessThanOrEqualTo(int.MaxValue);
+
         RuleFor(request => request.Title)
             .NotEmpty()
             .MaximumLength(20);
@@ -114,8 +119,16 @@ internal sealed class UpdateMealRequestValidator : AbstractValidator<UpdateMealR
         RuleFor(request => request.TagIds)
             .NotNull();
 
+        RuleForEach(request => request.TagIds)
+            .GreaterThanOrEqualTo(int.MinValue)
+            .LessThanOrEqualTo(int.MaxValue);
+
         RuleFor(request => request.RecipeIds)
             .NotEmpty();
+
+        RuleForEach(request => request.RecipeIds)
+            .GreaterThanOrEqualTo(int.MinValue)
+            .LessThanOrEqualTo(int.MaxValue);
     }
 }
 
@@ -126,6 +139,7 @@ public sealed class UpdateMealHandler
 {
     private readonly MealPlannerContext _dbContext;
     private readonly IUserContext _userContext;
+    private readonly IUrlGenerator _urlGenerator;
     private readonly IAuthorizationService _authorizationService;
     private readonly ImageProcessingOptions _imageProcessingOptions;
 
@@ -134,12 +148,15 @@ public sealed class UpdateMealHandler
     /// </summary>
     /// <param name="dbContext">The database context.</param>
     /// <param name="userContext">The user context.</param>
+    /// <param name="urlGenerator">A URL generator.</param>
     /// <param name="authorizationService">The authorization service.</param>
     /// <param name="imageProcessingOptions">The image processing configuration of the application.</param>
-    public UpdateMealHandler(MealPlannerContext dbContext, IUserContext userContext, IAuthorizationService authorizationService, IOptions<ImageProcessingOptions> imageProcessingOptions)
+    public UpdateMealHandler(MealPlannerContext dbContext, IUserContext userContext, IUrlGenerator urlGenerator,
+        IAuthorizationService authorizationService, IOptions<ImageProcessingOptions> imageProcessingOptions)
     {
         _dbContext = dbContext;
         _userContext = userContext;
+        _urlGenerator = urlGenerator;
         _authorizationService = authorizationService;
         _imageProcessingOptions = imageProcessingOptions.Value;
     }
@@ -152,129 +169,194 @@ public sealed class UpdateMealHandler
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <returns>
     /// A task which represents the asynchronous write operation.
-    /// The result of the task upon completion returns a <see cref="UpdateMealDto"/>.
     /// </returns>
     /// <exception cref="MealNotFoundException">Is thrown if the meal could not be found in the data store.</exception>
-    /// <exception cref="UpdateMealValidationException">Is thrown if validation fails on the <paramref name="request"/>.</exception>
+    /// <exception cref="MealValidationException">Is thrown if validation fails on the <paramref name="request"/>.</exception>
     /// <exception cref="ForbiddenException">Is thrown if the user is authenticated but lacks permission to access the resource.</exception>
     /// <exception cref="UnauthorizedException">Is thrown if the user lacks the necessary authentication credentials.</exception>
     /// <exception cref="UniqueConstraintViolationException">Is thrown if a unique constraint violation occurs.</exception>
-    public async Task<UpdateMealDto> HandleAsync(UpdateMealRequest request, IFormFile? image, CancellationToken cancellationToken)
+    public async Task HandleAsync(UpdateMealRequest request, IFormFile? image, CancellationToken cancellationToken)
     {
-        var meal = await _dbContext.Meals
-            .Include(m => m.Recipes)
-            .Include(m => m.Tags)
-            .AsSplitQuery()
-            .SingleOrDefaultAsync(m => m.Id == request.Id, cancellationToken);
+        var newMeal = FromDto(request, _userContext.UserId);
 
-        if (meal == null)
+        var oldMeal = await _dbContext.Meal
+            .Where(m => m.Id == newMeal.Id)
+            .Select(m => new Meal(m.Tags, m.Recipes.Select(r => new Recipe
+            {
+                Id = r.Id,
+                Title = r.Title,
+                RecipeDetails = r.RecipeDetails,
+                RecipeNutrition = r.RecipeNutrition,
+                ApplicationUserId = r.ApplicationUserId
+            }).ToList())
+            {
+                Id = m.Id,
+                Title = m.Title,
+                Image = m.Image,
+                ApplicationUserId = m.ApplicationUserId
+            })
+            .AsSplitQuery()
+            .AsNoTracking()
+            .SingleOrDefaultAsync(cancellationToken);
+
+        if (oldMeal == null)
         {
-            throw new MealNotFoundException(request.Id);
+            throw new MealNotFoundException(newMeal.Id);
         }
 
-        var authorizationResult = await _authorizationService.AuthorizeAsync(_userContext.User, meal, "SameUserPolicy");
+        var authorizationResult = await _authorizationService.AuthorizeAsync(_userContext.User, oldMeal, "SameUserPolicy");
 
         if (authorizationResult.Succeeded)
         {
-            var tags = await _dbContext.Tags
+            var tags = await _dbContext.Tag
+                .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
-            var userRecipes = await _dbContext.Recipes
+            var userRecipes = await _dbContext.Recipe
                 .Where(r => r.ApplicationUserId == _userContext.UserId)
+                .Select(r => new Recipe
+                {
+                    Id = r.Id,
+                    Title = r.Title,
+                    RecipeDetails = r.RecipeDetails,
+                    RecipeNutrition = r.RecipeNutrition,
+                    ApplicationUserId = r.ApplicationUserId
+                })
+                .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
-            var validRecipeIds = userRecipes.Select(r => r.Id);
             var validTagIds = tags.Select(t => t.Id);
+            var validRecipeIds = userRecipes.Select(r => r.Id);
 
-            var validationErrors = ValidateIds(request, validTagIds, validRecipeIds, _userContext.UserId);
+            var validationErrors = ValidateMeal(request, validTagIds, validRecipeIds, _userContext.UserId);
 
             if (validationErrors.Length != 0)
             {
-                throw new UpdateMealValidationException(validationErrors);
+                throw new MealValidationException(validationErrors);
             }
 
-            var recipesToAdd = userRecipes.Where(r => request.RecipeIds.Contains(r.Id));
-            var tagsToAdd = tags.Where(t => request.TagIds.Contains(t.Id));
+            var newTags = tags
+                .Where(t => request.TagIds.Contains(t.Id))
+                .ToList();
+            var newRecipes = userRecipes
+                .Where(r => request.RecipeIds.Contains(r.Id))
+                .ToList();
 
-            meal.Title = request.Title;
+            var tagsToAdd = newTags
+                .ExceptBy(oldMeal.Tags.Select(t => t.Id), t => t.Id)
+                .ToList();
+            var recipesToAdd = newRecipes
+                .ExceptBy(oldMeal.Recipes.Select(r => r.Id), r => r.Id)
+                .ToList();
 
-            meal.Tags.Clear();
-            meal.Recipes.Clear();
+            _dbContext.Attach(oldMeal);
+            _dbContext.AttachRange(tagsToAdd);
+            _dbContext.AttachRange(recipesToAdd);
 
-            foreach (var tag in tagsToAdd)
+            _dbContext.Entry(oldMeal).CurrentValues.SetValues(newMeal);
+
+            foreach (var tagToAdd in tagsToAdd)
             {
-                meal.Tags.Add(tag);
+                oldMeal.Tags.Add(tagToAdd);
             }
 
-            foreach (var recipe in recipesToAdd)
+            foreach (var oldTag in oldMeal.Tags.ToList())
             {
-                meal.Recipes.Add(recipe);
+                if (newTags.All(t => t.Id != oldTag.Id))
+                {
+                    oldMeal.Tags.Remove(oldTag);
+                }
             }
 
-            bool isCancellable = true;
+            foreach (var recipeToAdd in recipesToAdd)
+            {
+                oldMeal.Recipes.Add(recipeToAdd);
+            }
+
+            foreach (var oldRecipe in oldMeal.Recipes.ToList())
+            {
+                if (newRecipes.All(r => r.Id != oldRecipe.Id))
+                {
+                    oldMeal.Recipes.Remove(oldRecipe);
+                }
+            }
+
             if (image != null)
             {
-                if (meal.ImagePath != null)
+                if (oldMeal.Image != null)
                 {
                     var randomFileName = Path.GetRandomFileName();
                     var tempFilePath = Path.Combine(_imageProcessingOptions.TempImageStoragePath, randomFileName);
                     var filePath = Path.Combine(_imageProcessingOptions.ImageStoragePath, randomFileName);
-                    var originalFilePath = meal.ImagePath;
-                    meal.ImagePath = filePath;
+                    var originalFilePath = oldMeal.Image.ImagePath;
+                    oldMeal.Image.StorageFileName = randomFileName;
+                    oldMeal.Image.DisplayFileName = WebUtility.HtmlEncode(image.FileName);
+                    oldMeal.Image.ImagePath = filePath;
+                    oldMeal.Image.ImageUrl =
+                        _urlGenerator.GenerateUrl("GetImageByFileName", new { fileName = randomFileName });
 
-                    var imageProcessingErrors = await FileHelpers.ProcessFormFileAsync(image, tempFilePath, filePath,
-                        _imageProcessingOptions.PermittedExtensions, _imageProcessingOptions.ImageSizeLimit, originalFilePath);
-
-                    if (imageProcessingErrors.Length != 0)
-                    {
-                        throw new ImageProcessingException(imageProcessingErrors);
-                    }
-
-                    isCancellable = false;
+                    await _dbContext.SaveChangesSaveImageAsync(image, tempFilePath, filePath,
+                        _imageProcessingOptions.PermittedExtensions, _imageProcessingOptions.ImageSizeLimit,
+                        cancellationToken, originalFilePath);
                 }
                 else
                 {
                     var randomFileName = Path.GetRandomFileName();
                     var tempFilePath = Path.Combine(_imageProcessingOptions.TempImageStoragePath, randomFileName);
                     var filePath = Path.Combine(_imageProcessingOptions.ImageStoragePath, randomFileName);
-                    meal.ImagePath = filePath;
 
-                    var imageProcessingErrors = await FileHelpers.ProcessFormFileAsync(image, tempFilePath, filePath,
-                        _imageProcessingOptions.PermittedExtensions, _imageProcessingOptions.ImageSizeLimit);
-
-                    if (imageProcessingErrors.Length != 0)
+                    var mealImage = new Image
                     {
-                        throw new ImageProcessingException(imageProcessingErrors);
-                    }
+                        StorageFileName = randomFileName,
+                        DisplayFileName = WebUtility.HtmlEncode(image.FileName),
+                        ImagePath = filePath,
+                        ImageUrl = _urlGenerator.GenerateUrl("GetImageByFileName",
+                            new { fileName = randomFileName }),
+                        ManageableEntityId = oldMeal.Id,
+                        ManageableEntity = oldMeal
+                    };
+                    oldMeal.Image = mealImage;
 
-                    isCancellable = false;
+                    await _dbContext.SaveChangesSaveImageAsync(image, tempFilePath, filePath,
+                        _imageProcessingOptions.PermittedExtensions, _imageProcessingOptions.ImageSizeLimit,
+                        cancellationToken);
                 }
+
+                return;
             }
-            else
+
+            if (image == null)
             {
-                if (meal.ImagePath != null)
+                if (oldMeal.Image != null)
                 {
-                    File.Delete(meal.ImagePath);
-                    meal.ImagePath = null;
-                    isCancellable = false;
+                    var imagePath = oldMeal.Image.ImagePath;
+                    oldMeal.Image = null;
+                    await _dbContext.SaveChangesDeleteImageAsync(imagePath, cancellationToken);
+                    return;
                 }
             }
 
             try
             {
-                await _dbContext.SaveChangesAsync(isCancellable ? cancellationToken : CancellationToken.None);
+                await _dbContext.SaveChangesAsync(cancellationToken);
             }
             catch (DbUpdateException ex)
             {
                 if (ex.GetBaseException() is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } postgresException)
                 {
-                    throw new UniqueConstraintViolationException(postgresException.ConstraintName);
+                    var cause = postgresException.ConstraintName switch
+                    {
+                        "IX_ManageableEntity_ApplicationUserId_Title" => "Title",
+                        "IX_SubIngredient_RecipeId_Name" => "SubIngredient names",
+                        "IX_Direction_RecipeId_Number" => "Direction numbers",
+                        _ => null
+                    };
+
+                    throw new UniqueConstraintViolationException(cause);
                 }
 
                 throw;
             }
-
-            return ToDto(meal);
         }
         else if (_userContext.IsAuthenticated)
         {
@@ -286,9 +368,19 @@ public sealed class UpdateMealHandler
         }
     }
 
-    private static Error[] ValidateIds(UpdateMealRequest request, IEnumerable<int> validTagIds, IEnumerable<int> validRecipeIds, int currentUserId)
+    private static Error[] ValidateMeal(UpdateMealRequest request, IEnumerable<int> validTagIds, IEnumerable<int> validRecipeIds, int currentUserId)
     {
         List<Error> errors = [];
+
+        if (request.TagIds.Count > MealErrors.MaxTagsCount)
+        {
+            errors.Add(MealErrors.MaxTags());
+        }
+
+        if (request.RecipeIds.Count > MealErrors.MaxRecipesCount)
+        {
+            errors.Add(MealErrors.MaxRecipes());
+        }
 
         if (!request.RecipeIds.All(validRecipeIds.Contains))
         {
@@ -303,51 +395,5 @@ public sealed class UpdateMealHandler
         return [.. errors];
     }
 
-    private static UpdateMealDto ToDto(Meal meal)
-    {
-        var tagDtos = new List<UpdateTagDto>();
-
-        foreach (var tag in meal.Tags)
-        {
-            var tagDto = new UpdateTagDto(tag.Id, tag.Type);
-
-            tagDtos.Add(tagDto);
-        }
-
-        var recipeDtos = new List<UpdateMealRecipeDto>();
-
-        foreach (var recipe in meal.Recipes)
-        {
-            var recipeDto = new UpdateMealRecipeDto(recipe.Id, recipe.Title, recipe.Description);
-
-            recipeDtos.Add(recipeDto);
-        }
-
-        return new UpdateMealDto(meal.Id, meal.Title, tagDtos, recipeDtos, meal.ApplicationUserId);
-    }
+    private static Meal FromDto(UpdateMealRequest request, int userId) => new() { Id = request.Id, Title = request.Title, ApplicationUserId = userId };
 }
-
-/// <summary>
-/// The DTO to return to the client after updating a meal.
-/// </summary>
-/// <param name="Id">The id of the meal.</param>
-/// <param name="Title">The title of the meal.</param>
-/// <param name="Tags">A collection of tags belonging to the meal.</param>
-/// <param name="Recipes">A collection of recipes belonging to the meal.</param>
-/// <param name="ApplicationUserId">The id of the user who the meal belongs to.</param>
-public sealed record UpdateMealDto(int Id, string Title, ICollection<UpdateTagDto> Tags, ICollection<UpdateMealRecipeDto> Recipes, int ApplicationUserId);
-
-/// <summary>
-/// The DTO for a tag to return to the client.
-/// </summary>
-/// <param name="Id">The id of the tag.</param>
-/// <param name="TagType">The type of tag.</param>
-public sealed record UpdateTagDto(int Id, TagType TagType);
-
-/// <summary>
-/// The DTO for a recipe to return to the client.
-/// </summary>
-/// <param name="Id">The id of the recipe.</param>
-/// <param name="Title">The title of the recipe.</param>
-/// <param name="Description">The description of the recipe.</param>
-public sealed record UpdateMealRecipeDto(int Id, string Title, string? Description);

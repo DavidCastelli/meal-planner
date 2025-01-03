@@ -1,13 +1,14 @@
+using System.Net;
 using System.Net.Mime;
 using System.Text.Json;
 
 using Api.Common;
 using Api.Common.Exceptions;
+using Api.Common.Extensions;
 using Api.Common.Interfaces;
 using Api.Common.Options;
 using Api.Common.Utilities;
-using Api.Domain;
-using Api.Domain.Ingredients;
+using Api.Domain.Images;
 using Api.Domain.Recipes;
 using Api.Infrastructure;
 
@@ -21,7 +22,7 @@ using Microsoft.Extensions.Options;
 
 using Npgsql;
 
-namespace Api.Features.RecipeManagement;
+namespace Api.Features.Recipes;
 
 /// <summary>
 /// Controller that handles requests to update a recipe.
@@ -47,9 +48,9 @@ public sealed class UpdateRecipeController : ApiControllerBase
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
     [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(UpdateRecipeDto), StatusCodes.Status200OK, MediaTypeNames.Application.Json)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
     [Tags("Manage Recipes")]
-    public async Task<Results<UnauthorizedHttpResult, BadRequest<ValidationProblemDetails>, ValidationProblem, NotFound, Ok<UpdateRecipeDto>>> UpdateAsync(
+    public async Task<Results<UnauthorizedHttpResult, BadRequest<ValidationProblemDetails>, ValidationProblem, NotFound, Ok>> UpdateAsync(
         int id, IValidator<UpdateRecipeRequest> validator, UpdateRecipeHandler handler, IFormFile data, IFormFile? image,
         IOptions<JsonOptions> jsonOptions, CancellationToken cancellationToken)
     {
@@ -87,9 +88,9 @@ public sealed class UpdateRecipeController : ApiControllerBase
             return TypedResults.ValidationProblem(result.ToDictionary());
         }
 
-        var updateRecipeDto = await handler.HandleAsync(request, image, cancellationToken);
+        await handler.HandleAsync(request, image, cancellationToken);
 
-        return TypedResults.Ok(updateRecipeDto);
+        return TypedResults.Ok();
     }
 }
 
@@ -104,7 +105,7 @@ public sealed class UpdateRecipeController : ApiControllerBase
 /// <param name="Directions">A list of directions belonging to the recipe.</param>
 /// <param name="Tips">A list of tips belonging to the recipe.</param>
 /// <param name="SubIngredients">A list of sub ingredients belonging to the recipe.</param>
-public sealed record UpdateRecipeRequest(int Id, string Title, string? Description, UpdateRecipeRequestRecipeDetails Details, UpdateRecipeRequestRecipeNutrition Nutrition, IList<UpdateRecipeRequestDirection> Directions, ICollection<UpdateRecipeRequestTip> Tips, ICollection<UpdateRecipeRequestSubIngredient> SubIngredients);
+public sealed record UpdateRecipeRequest(int Id, string Title, string? Description, UpdateRecipeRequestDetails Details, UpdateRecipeRequestNutrition Nutrition, IList<UpdateRecipeRequestDirection> Directions, ICollection<UpdateRecipeRequestTip> Tips, ICollection<UpdateRecipeRequestSubIngredient> SubIngredients);
 
 /// <summary>
 /// The DTO for the recipe details in an update recipe request.
@@ -112,7 +113,7 @@ public sealed record UpdateRecipeRequest(int Id, string Title, string? Descripti
 /// <param name="PrepTime">The prep time.</param>
 /// <param name="CookTime">The cook time.</param>
 /// <param name="Servings">The number of servings.</param>
-public sealed record UpdateRecipeRequestRecipeDetails(int? PrepTime, int? CookTime, int? Servings);
+public sealed record UpdateRecipeRequestDetails(int? PrepTime, int? CookTime, int? Servings);
 
 /// <summary>
 /// The DTO for the recipe nutrition in an update recipe request.
@@ -121,36 +122,40 @@ public sealed record UpdateRecipeRequestRecipeDetails(int? PrepTime, int? CookTi
 /// <param name="Fat">The amount of fat.</param>
 /// <param name="Carbs">The amount of carbs.</param>
 /// <param name="Protein">The amount of protein.</param>
-public sealed record UpdateRecipeRequestRecipeNutrition(int? Calories, int? Fat, int? Carbs, int? Protein);
+public sealed record UpdateRecipeRequestNutrition(int? Calories, int? Fat, int? Carbs, int? Protein);
 
 /// <summary>
 /// The DTO for a direction in an update recipe request.
 /// </summary>
+/// <param name="Id">The direction id.</param>
 /// <param name="Number">The direction number.</param>
 /// <param name="Description">The direction description.</param>
-public sealed record UpdateRecipeRequestDirection(int Number, string Description);
+public sealed record UpdateRecipeRequestDirection(int Id, int Number, string Description);
 
 /// <summary>
 /// The DTO for a tip in an update recipe request.
 /// </summary>
+/// <param name="Id">The tip id.</param>
 /// <param name="Description">The tip description.</param>
-public sealed record UpdateRecipeRequestTip(string Description);
+public sealed record UpdateRecipeRequestTip(int Id, string Description);
 
 /// <summary>
 /// The DTO for a sub ingredient in an update recipe request.
 /// </summary>
+/// <param name="Id">The sub ingredient id.</param>
 /// <param name="Name">The sub ingredient name.</param>
 /// <param name="Ingredients">A collection of ingredients belonging to the sub ingredient.</param>
-public sealed record UpdateRecipeRequestSubIngredient(string? Name, ICollection<UpdateRecipeRequestIngredient> Ingredients);
+public sealed record UpdateRecipeRequestSubIngredient(int Id, string? Name, ICollection<UpdateRecipeRequestIngredient> Ingredients);
 
 /// <summary>
 /// The DTO for an ingredient in an update recipe request.
 /// </summary>
+/// <param name="Id">The ingredient id.</param>
 /// <param name="Name">The ingredient name.</param>
 /// <param name="Measurement">The ingredient measurement.</param>
-public sealed record UpdateRecipeRequestIngredient(string Name, string Measurement);
+public sealed record UpdateRecipeRequestIngredient(int Id, string Name, string Measurement);
 
-internal sealed class UpdateRecipeRequestRecipeDetailsValidator : AbstractValidator<UpdateRecipeRequestRecipeDetails>
+internal sealed class UpdateRecipeRequestRecipeDetailsValidator : AbstractValidator<UpdateRecipeRequestDetails>
 {
     public UpdateRecipeRequestRecipeDetailsValidator()
     {
@@ -171,7 +176,7 @@ internal sealed class UpdateRecipeRequestRecipeDetailsValidator : AbstractValida
     }
 }
 
-internal sealed class UpdateRecipeRequestRecipeNutritionValidator : AbstractValidator<UpdateRecipeRequestRecipeNutrition>
+internal sealed class UpdateRecipeRequestRecipeNutritionValidator : AbstractValidator<UpdateRecipeRequestNutrition>
 {
     public UpdateRecipeRequestRecipeNutritionValidator()
     {
@@ -225,6 +230,10 @@ internal sealed class UpdateRecipeRequestValidator : AbstractValidator<UpdateRec
 {
     public UpdateRecipeRequestValidator()
     {
+        RuleFor(request => request.Id)
+            .GreaterThanOrEqualTo(int.MinValue)
+            .LessThanOrEqualTo(int.MaxValue);
+
         RuleFor(request => request.Title)
             .NotEmpty()
             .MaximumLength(20);
@@ -247,7 +256,8 @@ internal sealed class UpdateRecipeRequestValidator : AbstractValidator<UpdateRec
         RuleForEach(request => request.Directions).ChildRules(direction =>
         {
             direction.RuleFor(d => d.Number)
-                .GreaterThanOrEqualTo(1);
+                .GreaterThanOrEqualTo(1)
+                .LessThanOrEqualTo(6);
 
             direction.RuleFor(d => d.Description)
                 .NotEmpty()
@@ -279,6 +289,7 @@ public sealed class UpdateRecipeHandler
 {
     private readonly MealPlannerContext _dbContext;
     private readonly IUserContext _userContext;
+    private readonly IUrlGenerator _urlGenerator;
     private readonly IAuthorizationService _authorizationService;
     private readonly ImageProcessingOptions _imageProcessingOptions;
 
@@ -287,12 +298,15 @@ public sealed class UpdateRecipeHandler
     /// </summary>
     /// <param name="dbContext">The database context.</param>
     /// <param name="userContext">The user context.</param>
+    /// <param name="urlGenerator">A URL generator.</param>
     /// <param name="authorizationService">The authorization service.</param>
     /// <param name="imageProcessingOptions">The image processing configuration of the application.</param>
-    public UpdateRecipeHandler(MealPlannerContext dbContext, IUserContext userContext, IAuthorizationService authorizationService, IOptions<ImageProcessingOptions> imageProcessingOptions)
+    public UpdateRecipeHandler(MealPlannerContext dbContext, IUserContext userContext, IUrlGenerator urlGenerator,
+        IAuthorizationService authorizationService, IOptions<ImageProcessingOptions> imageProcessingOptions)
     {
         _dbContext = dbContext;
         _userContext = userContext;
+        _urlGenerator = urlGenerator;
         _authorizationService = authorizationService;
         _imageProcessingOptions = imageProcessingOptions.Value;
     }
@@ -305,14 +319,13 @@ public sealed class UpdateRecipeHandler
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <returns>
     /// A task which represents the asynchronous write operation.
-    /// The result of the task upon completion returns a <see cref="UpdateRecipeDto"/>.
     /// </returns>
     /// <exception cref="RecipeNotFoundException">Is thrown if the recipe could not be found in the data store.</exception>
     /// <exception cref="RecipeValidationException">Is thrown if validation fails on the <paramref name="request"/>.</exception>
     /// <exception cref="ForbiddenException">Is thrown if the user is authenticated but lacks permission to access the resource.</exception>
     /// <exception cref="UnauthorizedException">Is thrown if the user lacks the necessary authentication credentials.</exception>
     /// <exception cref="UniqueConstraintViolationException">Is thrown if a unique constraint violation occurs.</exception>
-    public async Task<UpdateRecipeDto> HandleAsync(UpdateRecipeRequest request, IFormFile? image, CancellationToken cancellationToken)
+    public async Task HandleAsync(UpdateRecipeRequest request, IFormFile? image, CancellationToken cancellationToken)
     {
         var validationErrors = ValidateRecipe(request);
 
@@ -321,107 +334,209 @@ public sealed class UpdateRecipeHandler
             throw new RecipeValidationException(validationErrors);
         }
 
-        var recipeUpdate = FromDto(request, _userContext.UserId);
+        var newRecipe = FromDto(request, _userContext.UserId);
 
-        var recipe = await _dbContext.Recipes.FindAsync([recipeUpdate.Id], cancellationToken);
+        var oldRecipe = await _dbContext.Recipe
+            .Include(r => r.Image)
+            .AsSplitQuery()
+            .SingleOrDefaultAsync(r => r.Id == newRecipe.Id, cancellationToken);
 
-        if (recipe == null)
+        if (oldRecipe == null)
         {
-            throw new RecipeNotFoundException(request.Id);
+            throw new RecipeNotFoundException(newRecipe.Id);
         }
 
-        var authorizationResult = await _authorizationService.AuthorizeAsync(_userContext.User, recipe, "SameUserPolicy");
+        var authorizationResult = await _authorizationService.AuthorizeAsync(_userContext.User, oldRecipe, "SameUserPolicy");
 
         if (authorizationResult.Succeeded)
         {
-            recipe.Title = request.Title;
-            recipe.Description = request.Description;
-            recipe.RecipeDetails = recipeUpdate.RecipeDetails;
-            recipe.RecipeNutrition = recipeUpdate.RecipeNutrition;
+            _dbContext.Entry(oldRecipe).CurrentValues.SetValues(newRecipe);
+            _dbContext.Entry(oldRecipe.RecipeDetails).CurrentValues.SetValues(newRecipe.RecipeDetails);
+            _dbContext.Entry(oldRecipe.RecipeNutrition).CurrentValues.SetValues(newRecipe.RecipeNutrition);
 
-            recipe.Directions.Clear();
-            recipe.Tips.Clear();
-            recipe.SubIngredients.Clear();
-
-            foreach (var directionUpdate in recipeUpdate.Directions)
+            foreach (var newDirection in newRecipe.Directions)
             {
-                recipe.Directions.Add(directionUpdate);
+                if (newDirection.Id == 0)
+                {
+                    oldRecipe.Directions.Add(newDirection);
+                }
+                else
+                {
+                    var oldDirection = oldRecipe.Directions.SingleOrDefault(d => d.Id == newDirection.Id);
+                    if (oldDirection == null)
+                    {
+                        var error = RecipeErrors.DoesNotBelongToRecipe(oldRecipe.Id, newDirection.Id, nameof(Direction));
+                        throw new RecipeValidationException([error]);
+                    }
+                    _dbContext.Entry(oldDirection).CurrentValues.SetValues(newDirection);
+                }
             }
 
-            foreach (var tipUpdate in recipeUpdate.Tips)
+            foreach (var oldDirection in oldRecipe.Directions)
             {
-                recipe.Tips.Add(tipUpdate);
+                if (newRecipe.Directions.All(d => d.Id != oldDirection.Id))
+                {
+                    _dbContext.Remove(oldDirection);
+                }
             }
 
-            foreach (var subIngredientUpdate in recipeUpdate.SubIngredients)
+            foreach (var newTip in newRecipe.Tips)
             {
-                recipe.SubIngredients.Add(subIngredientUpdate);
+                if (newTip.Id == 0)
+                {
+                    oldRecipe.Tips.Add(newTip);
+                }
+                else
+                {
+                    var oldTip = oldRecipe.Tips.SingleOrDefault(t => t.Id == newTip.Id);
+                    if (oldTip == null)
+                    {
+                        var error = RecipeErrors.DoesNotBelongToRecipe(oldRecipe.Id, newTip.Id, nameof(Tip));
+                        throw new RecipeValidationException([error]);
+                    }
+                    _dbContext.Entry(oldTip).CurrentValues.SetValues(newTip);
+                }
             }
 
-            bool isCancellable = true;
+            foreach (var oldTip in oldRecipe.Tips)
+            {
+                if (newRecipe.Tips.All(t => t.Id != oldTip.Id))
+                {
+                    _dbContext.Remove(oldTip);
+                }
+            }
+
+            foreach (var newSubIngredient in newRecipe.SubIngredients)
+            {
+                if (newSubIngredient.Id == 0)
+                {
+                    oldRecipe.SubIngredients.Add(newSubIngredient);
+                }
+                else
+                {
+                    var oldSubIngredient = oldRecipe.SubIngredients.SingleOrDefault(si => si.Id == newSubIngredient.Id);
+                    if (oldSubIngredient == null)
+                    {
+                        var error = RecipeErrors.DoesNotBelongToRecipe(oldRecipe.Id, newSubIngredient.Id, nameof(SubIngredient));
+                        throw new RecipeValidationException([error]);
+                    }
+                    _dbContext.Entry(oldSubIngredient).CurrentValues.SetValues(newSubIngredient);
+
+                    foreach (var newIngredient in newSubIngredient.Ingredients)
+                    {
+                        if (newIngredient.Id == 0)
+                        {
+                            oldSubIngredient.Ingredients.Add(newIngredient);
+                        }
+                        else
+                        {
+                            var oldIngredient = oldSubIngredient.Ingredients.SingleOrDefault(i => i.Id == newIngredient.Id);
+                            if (oldIngredient == null)
+                            {
+                                var error = RecipeErrors.DoesNotBelongToRecipe(oldRecipe.Id, newIngredient.Id, nameof(Ingredient));
+                                throw new RecipeValidationException([error]);
+                            }
+                            _dbContext.Entry(oldIngredient).CurrentValues.SetValues(newIngredient);
+                        }
+                    }
+
+                    foreach (var oldIngredient in oldSubIngredient.Ingredients)
+                    {
+                        if (newSubIngredient.Ingredients.All(i => i.Id != oldIngredient.Id))
+                        {
+                            _dbContext.Remove(oldIngredient);
+                        }
+                    }
+                }
+            }
+
+            foreach (var oldSubIngredient in oldRecipe.SubIngredients)
+            {
+                if (newRecipe.SubIngredients.All(i => i.Id != oldSubIngredient.Id))
+                {
+                    _dbContext.Remove(oldSubIngredient);
+                }
+            }
+
             if (image != null)
             {
-                if (recipe.ImagePath != null)
+                if (oldRecipe.Image != null)
                 {
                     var randomFileName = Path.GetRandomFileName();
                     var tempFilePath = Path.Combine(_imageProcessingOptions.TempImageStoragePath, randomFileName);
                     var filePath = Path.Combine(_imageProcessingOptions.ImageStoragePath, randomFileName);
-                    var originalFilePath = recipe.ImagePath;
-                    recipe.ImagePath = filePath;
+                    var originalFilePath = oldRecipe.Image.ImagePath;
+                    oldRecipe.Image.StorageFileName = randomFileName;
+                    oldRecipe.Image.DisplayFileName = WebUtility.HtmlEncode(image.FileName);
+                    oldRecipe.Image.ImagePath = filePath;
+                    oldRecipe.Image.ImageUrl =
+                        _urlGenerator.GenerateUrl("GetImageByFileName", new { fileName = randomFileName });
 
-                    var imageProcessingErrors = await FileHelpers.ProcessFormFileAsync(image, tempFilePath, filePath,
-                        _imageProcessingOptions.PermittedExtensions, _imageProcessingOptions.ImageSizeLimit, originalFilePath);
-
-                    if (imageProcessingErrors.Length != 0)
-                    {
-                        throw new ImageProcessingException(imageProcessingErrors);
-                    }
-
-                    isCancellable = false;
+                    await _dbContext.SaveChangesSaveImageAsync(image, tempFilePath, filePath,
+                        _imageProcessingOptions.PermittedExtensions, _imageProcessingOptions.ImageSizeLimit,
+                        cancellationToken, originalFilePath);
                 }
                 else
                 {
                     var randomFileName = Path.GetRandomFileName();
                     var tempFilePath = Path.Combine(_imageProcessingOptions.TempImageStoragePath, randomFileName);
                     var filePath = Path.Combine(_imageProcessingOptions.ImageStoragePath, randomFileName);
-                    recipe.ImagePath = filePath;
 
-                    var imageProcessingErrors = await FileHelpers.ProcessFormFileAsync(image, tempFilePath, filePath,
-                        _imageProcessingOptions.PermittedExtensions, _imageProcessingOptions.ImageSizeLimit);
-
-                    if (imageProcessingErrors.Length != 0)
+                    var recipeImage = new Image
                     {
-                        throw new ImageProcessingException(imageProcessingErrors);
-                    }
+                        StorageFileName = randomFileName,
+                        DisplayFileName = WebUtility.HtmlEncode(image.FileName),
+                        ImagePath = filePath,
+                        ImageUrl = _urlGenerator.GenerateUrl("GetImageByFileName",
+                            new { fileName = randomFileName }),
+                        ManageableEntityId = oldRecipe.Id,
+                        ManageableEntity = oldRecipe
+                    };
+                    oldRecipe.Image = recipeImage;
 
-                    isCancellable = false;
+                    await _dbContext.SaveChangesSaveImageAsync(image, tempFilePath, filePath,
+                        _imageProcessingOptions.PermittedExtensions, _imageProcessingOptions.ImageSizeLimit,
+                        cancellationToken);
                 }
+
+                return;
             }
-            else
+
+            if (image == null)
             {
-                if (recipe.ImagePath != null)
+                if (oldRecipe.Image != null)
                 {
-                    File.Delete(recipe.ImagePath);
-                    recipe.ImagePath = null;
-                    isCancellable = false;
+                    var imagePath = oldRecipe.Image.ImagePath;
+                    oldRecipe.Image = null;
+                    await _dbContext.SaveChangesDeleteImageAsync(imagePath, cancellationToken);
+                    return;
                 }
             }
 
             try
             {
-                await _dbContext.SaveChangesAsync(isCancellable ? cancellationToken : CancellationToken.None);
+                await _dbContext.SaveChangesAsync(cancellationToken);
             }
             catch (DbUpdateException ex)
             {
-                if (ex.GetBaseException() is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } postgresException)
+                if (ex.GetBaseException() is PostgresException
+                    {
+                        SqlState: PostgresErrorCodes.UniqueViolation
+                    } postgresException)
                 {
-                    throw new UniqueConstraintViolationException(postgresException.ConstraintName);
+                    var cause = postgresException.ConstraintName switch
+                    {
+                        "IX_ManageableEntity_ApplicationUserId_Title" => "Title",
+                        "IX_SubIngredient_RecipeId_Name" => "SubIngredient names",
+                        "IX_Direction_RecipeId_Number" => "Direction numbers",
+                        _ => null
+                    };
+
+                    throw new UniqueConstraintViolationException(cause);
                 }
 
                 throw;
             }
-
-            return ToDto(recipe);
         }
         else if (_userContext.IsAuthenticated)
         {
@@ -437,22 +552,22 @@ public sealed class UpdateRecipeHandler
     {
         List<Error> errors = [];
 
-        if (request.Directions.Count > 6)
+        if (request.Directions.Count > RecipeErrors.MaxDirectionsCount)
         {
             errors.Add(RecipeErrors.MaxDirections());
         }
 
-        if (request.Tips.Count > 3)
+        if (request.Tips.Count > RecipeErrors.MaxTipsCount)
         {
             errors.Add(RecipeErrors.MaxTips());
         }
 
-        if (request.SubIngredients.Count > 5)
+        if (request.SubIngredients.Count > RecipeErrors.MaxSubIngredientsCount)
         {
             errors.Add(RecipeErrors.MaxSubIngredients());
         }
 
-        var maxIngredients = request.SubIngredients.Any(si => si.Ingredients.Count > 10);
+        var maxIngredients = request.SubIngredients.Any(si => si.Ingredients.Count > RecipeErrors.MaxIngredientsCount);
         if (maxIngredients)
         {
             errors.Add(RecipeErrors.MaxIngredients());
@@ -523,25 +638,25 @@ public sealed class UpdateRecipeHandler
 
         foreach (var directionDto in request.Directions)
         {
-            var direction = new Direction() { Number = directionDto.Number, Description = directionDto.Description };
+            var direction = new Direction { Id = directionDto.Id, Number = directionDto.Number, Description = directionDto.Description };
 
             recipe.Directions.Add(direction);
         }
 
         foreach (var tipDto in request.Tips)
         {
-            var tip = new Tip() { Description = tipDto.Description };
+            var tip = new Tip { Id = tipDto.Id, Description = tipDto.Description };
 
             recipe.Tips.Add(tip);
         }
 
         foreach (var subIngredientDto in request.SubIngredients)
         {
-            var subIngredient = new SubIngredient() { Name = subIngredientDto.Name };
+            var subIngredient = new SubIngredient { Id = subIngredientDto.Id, Name = subIngredientDto.Name };
 
             foreach (var ingredientDto in subIngredientDto.Ingredients)
             {
-                var ingredient = new Ingredient() { Name = ingredientDto.Name, Measurement = ingredientDto.Measurement };
+                var ingredient = new Ingredient { Id = ingredientDto.Id, Name = ingredientDto.Name, Measurement = ingredientDto.Measurement };
 
                 subIngredient.Ingredients.Add(ingredient);
             }
@@ -551,101 +666,4 @@ public sealed class UpdateRecipeHandler
 
         return recipe;
     }
-
-    private static UpdateRecipeDto ToDto(Recipe recipe)
-    {
-        var recipeDetailsDto = new UpdateRecipeDetailsDto(recipe.RecipeDetails.PrepTime, recipe.RecipeDetails.CookTime, recipe.RecipeDetails.Servings);
-        var recipeNutritionDto = new UpdateRecipeNutritionDto(recipe.RecipeNutrition.Calories, recipe.RecipeNutrition.Fat, recipe.RecipeNutrition.Carbs, recipe.RecipeNutrition.Protein);
-
-        var directionDtos = new List<UpdateDirectionDto>();
-
-        foreach (var direction in recipe.Directions)
-        {
-            var directionDto = new UpdateDirectionDto(direction.Number, direction.Description);
-            directionDtos.Add(directionDto);
-        }
-
-        var tipDtos = new List<UpdateTipDto>();
-
-        foreach (var tip in recipe.Tips)
-        {
-            var tipDto = new UpdateTipDto(tip.Description);
-            tipDtos.Add(tipDto);
-        }
-
-        var subIngredientDtos = new List<UpdateSubIngredientDto>();
-
-        foreach (var subIngredient in recipe.SubIngredients)
-        {
-            var ingredientDtos = new List<UpdateIngredientDto>();
-            foreach (var ingredient in subIngredient.Ingredients)
-            {
-                var ingredientDto = new UpdateIngredientDto(ingredient.Name, ingredient.Measurement);
-                ingredientDtos.Add(ingredientDto);
-            }
-
-            var subIngredientDto = new UpdateSubIngredientDto(subIngredient.Name, ingredientDtos);
-
-            subIngredientDtos.Add(subIngredientDto);
-        }
-
-        return new UpdateRecipeDto(recipe.Id, recipe.Title, recipe.Description, recipeDetailsDto, recipeNutritionDto, directionDtos, tipDtos, subIngredientDtos);
-    }
 }
-
-/// <summary>
-/// The DTO to return to the client after updating a recipe.
-/// </summary>
-/// <param name="Id">The id of the recipe.</param>
-/// <param name="Title">The title of the recipe.</param>
-/// <param name="Description">The description of the recipe.</param>
-/// <param name="Details">The recipe details.</param>
-/// <param name="Nutrition">The recipe nutrition.</param>
-/// <param name="Directions">A list of directions belonging to the recipe</param>
-/// <param name="Tips">A collection of tips belonging to the recipe.</param>
-/// <param name="SubIngredients">A collection of sub ingredients belonging to the recipe.</param>
-public sealed record UpdateRecipeDto(int Id, string Title, string? Description, UpdateRecipeDetailsDto Details, UpdateRecipeNutritionDto Nutrition, IList<UpdateDirectionDto> Directions, ICollection<UpdateTipDto> Tips, ICollection<UpdateSubIngredientDto> SubIngredients);
-
-/// <summary>
-/// The DTO for recipe details to return to the client.
-/// </summary>
-/// <param name="PrepTime">The prep time.</param>
-/// <param name="CookTime">The cook time.</param>
-/// <param name="Servings">The number of servings.</param>
-public sealed record UpdateRecipeDetailsDto(int? PrepTime, int? CookTime, int? Servings);
-
-/// <summary>
-/// The DTO for the recipe nutrition to return to the client.
-/// </summary>
-/// <param name="Calories">The number of calories.</param>
-/// <param name="Fat">The amount of fat.</param>
-/// <param name="Carbs">The amount of carbs.</param>
-/// <param name="Protein">The amount of protein.</param>
-public sealed record UpdateRecipeNutritionDto(int? Calories, int? Fat, int? Carbs, int? Protein);
-
-/// <summary>
-/// The DTO for a direction to return to the client.
-/// </summary>
-/// <param name="Number">The direction number.</param>
-/// <param name="Description">The direction description.</param>
-public sealed record UpdateDirectionDto(int Number, string Description);
-
-/// <summary>
-/// The DTO for a tip to return to the client.
-/// </summary>
-/// <param name="Description">The tip description.</param>
-public sealed record UpdateTipDto(string Description);
-
-/// <summary>
-/// The DTO for a sub ingredient to return to the client.
-/// </summary>
-/// <param name="Name">The name of the sub ingredient.</param>
-/// <param name="Ingredients">A collection of ingredients belonging to the sub ingredient.</param>
-public sealed record UpdateSubIngredientDto(string? Name, ICollection<UpdateIngredientDto> Ingredients);
-
-/// <summary>
-/// The DTO for an ingredient to return to the client.
-/// </summary>
-/// <param name="Name">The name of the ingredient.</param>
-/// <param name="Measurement">The measurement of the ingredient.</param>
-public sealed record UpdateIngredientDto(string Name, string Measurement);

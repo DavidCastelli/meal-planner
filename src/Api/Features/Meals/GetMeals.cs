@@ -3,13 +3,12 @@ using System.Net.Mime;
 using Api.Common;
 using Api.Common.Interfaces;
 using Api.Infrastructure;
-using Api.Infrastructure.Services;
 
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace Api.Features.MealManagement;
+namespace Api.Features.Meals;
 
 /// <summary>
 /// Controller that handles requests to get all meals belonging to the current user.
@@ -44,19 +43,16 @@ public sealed class GetMealsHandler
 {
     private readonly MealPlannerContext _dbContext;
     private readonly IUserContext _userContext;
-    private readonly IUrlGenerator _urlGenerator;
 
     /// <summary>
     /// Creates a <see cref="GetMealsHandler"/>.
     /// </summary>
     /// <param name="dbContext">The database context.</param>
     /// <param name="userContext">The user context.</param>
-    /// <param name="urlGenerator">A URL generator.</param>
-    public GetMealsHandler(MealPlannerContext dbContext, IUserContext userContext, IUrlGenerator urlGenerator)
+    public GetMealsHandler(MealPlannerContext dbContext, IUserContext userContext)
     {
         _dbContext = dbContext;
         _userContext = userContext;
-        _urlGenerator = urlGenerator;
     }
 
     /// <summary>
@@ -69,12 +65,11 @@ public sealed class GetMealsHandler
     /// </returns>
     public async Task<IEnumerable<GetMealsDto>> HandleAsync(CancellationToken cancellationToken)
     {
-        var meals = await _dbContext.Meals
-            .AsNoTracking()
+        var meals = await _dbContext.Meal
             .Where(m => m.ApplicationUserId == _userContext.UserId)
             .Select(m =>
-                new GetMealsDto(m.Id, m.Title, m.ImagePath == null ? null 
-                    : $"{_urlGenerator.GenerateUrl("GetMealImageById", new { id = m.Id })}?refresh={Path.GetFileName(m.ImagePath)}") // Query param needed to refresh browser cache.
+                new GetMealsDto(m.Id, m.Title, m.Image == null ? null
+                    : new GetMealsImageDto(m.Image.Id, m.Image.StorageFileName, m.Image.DisplayFileName, m.Image.ImageUrl))
             )
             .ToListAsync(cancellationToken);
 
@@ -87,5 +82,14 @@ public sealed class GetMealsHandler
 /// </summary>
 /// <param name="Id">The id of the meal.</param>
 /// <param name="Title">The title of the meal.</param>
-/// <param name="ImageUrl">The URL of the meals image.</param>
-public sealed record GetMealsDto(int Id, string Title, string? ImageUrl);
+/// <param name="Image">The image of the meal.</param>
+public sealed record GetMealsDto(int Id, string Title, GetMealsImageDto? Image);
+
+/// <summary>
+/// The DTO for an image to return to the client when getting all meals belonging to the current user.
+/// </summary>
+/// <param name="Id">The id of the image.</param>
+/// <param name="StorageFileName">The storage file name of the image.</param>
+/// <param name="DisplayFileName">The display file name of the image.</param>
+/// <param name="ImageUrl">A valid URL for the image.</param>
+public sealed record GetMealsImageDto(int Id, string StorageFileName, string DisplayFileName, string ImageUrl);

@@ -1,15 +1,16 @@
+using System.Net;
 using System.Net.Mime;
 using System.Text.Json;
 
 using Api.Common;
 using Api.Common.Exceptions;
+using Api.Common.Extensions;
 using Api.Common.Interfaces;
 using Api.Common.Options;
 using Api.Common.Utilities;
-using Api.Domain;
+using Api.Domain.Images;
 using Api.Domain.Meals;
 using Api.Domain.Recipes;
-using Api.Domain.Tags;
 using Api.Infrastructure;
 
 using FluentValidation;
@@ -21,7 +22,7 @@ using Microsoft.Extensions.Options;
 
 using Npgsql;
 
-namespace Api.Features.MealManagement;
+namespace Api.Features.Meals;
 
 /// <summary>
 /// Controller that handles requests to create a meal.
@@ -45,9 +46,9 @@ public sealed class CreateMealController : ApiControllerBase
     [Consumes(MediaTypeNames.Multipart.FormData)]
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
-    [ProducesResponseType(typeof(CreateMealDto), StatusCodes.Status201Created, MediaTypeNames.Application.Json)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status201Created)]
     [Tags("Manage Meals")]
-    public async Task<Results<UnauthorizedHttpResult, ValidationProblem, BadRequest<ValidationProblemDetails>, Created<CreateMealDto>>> CreateAsync(
+    public async Task<Results<UnauthorizedHttpResult, ValidationProblem, BadRequest<ValidationProblemDetails>, Created>> CreateAsync(
         IValidator<CreateMealRequest> validator, CreateMealHandler handler, IFormFile data, IFormFile? image,
         IOptions<JsonOptions> jsonOptions, CancellationToken cancellationToken)
     {
@@ -78,10 +79,10 @@ public sealed class CreateMealController : ApiControllerBase
             return TypedResults.ValidationProblem(result.ToDictionary());
         }
 
-        var createMealDto = await handler.HandleAsync(request, image, cancellationToken);
+        var mealId = await handler.HandleAsync(request, image, cancellationToken);
 
-        var location = Url.Action(nameof(CreateAsync), new { id = createMealDto.Id }) ?? $"/{createMealDto.Id}";
-        return TypedResults.Created(location, createMealDto);
+        var location = Url.Link("GetMealById", new { id = mealId });
+        return TypedResults.Created(location);
     }
 }
 
@@ -104,8 +105,16 @@ internal sealed class CreateMealRequestValidator : AbstractValidator<CreateMealR
         RuleFor(request => request.TagIds)
             .NotNull();
 
+        RuleForEach(request => request.TagIds)
+            .GreaterThanOrEqualTo(int.MinValue)
+            .LessThanOrEqualTo(int.MaxValue);
+
         RuleFor(request => request.RecipeIds)
             .NotEmpty();
+
+        RuleForEach(request => request.RecipeIds)
+            .GreaterThanOrEqualTo(int.MinValue)
+            .LessThanOrEqualTo(int.MaxValue);
     }
 }
 
@@ -116,6 +125,7 @@ public sealed class CreateMealHandler
 {
     private readonly MealPlannerContext _dbContext;
     private readonly IUserContext _userContext;
+    private readonly IUrlGenerator _urlGenerator;
     private readonly ImageProcessingOptions _imageProcessingOptions;
 
     /// <summary>
@@ -123,11 +133,14 @@ public sealed class CreateMealHandler
     /// </summary>
     /// <param name="dbContext">The database context.</param>
     /// <param name="userContext">The user context.</param>
+    /// <param name="urlGenerator">A URL generator.</param>
     /// <param name="imageProcessingOptions">The image processing configuration of the application.</param>
-    public CreateMealHandler(MealPlannerContext dbContext, IUserContext userContext, IOptions<ImageProcessingOptions> imageProcessingOptions)
+    public CreateMealHandler(MealPlannerContext dbContext, IUserContext userContext, IUrlGenerator urlGenerator,
+        IOptions<ImageProcessingOptions> imageProcessingOptions)
     {
         _dbContext = dbContext;
         _userContext = userContext;
+        _urlGenerator = urlGenerator;
         _imageProcessingOptions = imageProcessingOptions.Value;
     }
 
@@ -139,37 +152,49 @@ public sealed class CreateMealHandler
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <returns>
     /// A task which represents the asynchronous write operation.
-    /// The result of the task upon completion returns a <see cref="CreateMealDto"/>.
+    /// The result of the task upon completion returns an integer specifying the id of the created meal.
     /// </returns>
-    /// <exception cref="CreateMealValidationException">Is thrown if validation fails on the <paramref name="request"/>.</exception>
+    /// <exception cref="MealValidationException">Is thrown if validation fails on the <paramref name="request"/>.</exception>
     /// <exception cref="UniqueConstraintViolationException">Is thrown if a unique constraint violation occurs.</exception>
-    public async Task<CreateMealDto> HandleAsync(CreateMealRequest request, IFormFile? image, CancellationToken cancellationToken)
+    public async Task<int> HandleAsync(CreateMealRequest request, IFormFile? image, CancellationToken cancellationToken)
     {
-        var tags = await _dbContext.Tags
+        var mealCount = await _dbContext.Meal
+            .CountAsync(m => m.ApplicationUserId == _userContext.UserId, cancellationToken);
+
+        var tags = await _dbContext.Tag
+            .AsNoTracking()
             .ToListAsync(cancellationToken);
 
-        var userRecipes = await _dbContext.Recipes
+        var userRecipes = await _dbContext.Recipe
             .Where(r => r.ApplicationUserId == _userContext.UserId)
+            .Select(r => new Recipe
+            {
+                Id = r.Id,
+                Title = r.Title,
+                RecipeDetails = r.RecipeDetails,
+                RecipeNutrition = r.RecipeNutrition,
+                ApplicationUserId = r.ApplicationUserId
+            })
+            .AsNoTracking()
             .ToListAsync(cancellationToken);
 
-        var validRecipeIds = userRecipes.Select(r => r.Id);
         var validTagIds = tags.Select(t => t.Id);
+        var validRecipeIds = userRecipes.Select(r => r.Id);
 
-        var validationErrors = ValidateIds(request, validTagIds, validRecipeIds, _userContext.UserId);
+        var validationErrors = ValidateMeal(request, mealCount, validTagIds, validRecipeIds, _userContext.UserId);
 
         if (validationErrors.Length != 0)
         {
-            throw new CreateMealValidationException(validationErrors);
+            throw new MealValidationException(validationErrors);
         }
 
-        var recipesToAdd = userRecipes.Where(r => request.RecipeIds.Contains(r.Id));
-        var tagsToAdd = tags.Where(t => request.TagIds.Contains(t.Id));
+        var tagsToAdd = tags.Where(t => request.TagIds.Contains(t.Id)).ToList();
+        var recipesToAdd = userRecipes.Where(r => request.RecipeIds.Contains(r.Id)).ToList();
 
-        var meal = new Meal
-        {
-            Title = request.Title,
-            ApplicationUserId = _userContext.UserId
-        };
+        _dbContext.AttachRange(tagsToAdd);
+        _dbContext.AttachRange(recipesToAdd);
+
+        var meal = FromDto(request, _userContext.UserId);
 
         foreach (var recipe in recipesToAdd)
         {
@@ -181,46 +206,78 @@ public sealed class CreateMealHandler
             meal.Tags.Add(tag);
         }
 
-        bool isCancellable = true;
         if (image != null)
         {
             var randomFileName = Path.GetRandomFileName();
             var tempFilePath = Path.Combine(_imageProcessingOptions.TempImageStoragePath, randomFileName);
             var filePath = Path.Combine(_imageProcessingOptions.ImageStoragePath, randomFileName);
-            meal.ImagePath = filePath;
 
-            var imageProcessingErrors = await FileHelpers.ProcessFormFileAsync(image, tempFilePath, filePath,
-                _imageProcessingOptions.PermittedExtensions, _imageProcessingOptions.ImageSizeLimit);
-
-            if (imageProcessingErrors.Length != 0)
+            var mealImage = new Image
             {
-                throw new ImageProcessingException(imageProcessingErrors);
-            }
+                StorageFileName = randomFileName,
+                DisplayFileName = WebUtility.HtmlEncode(image.FileName),
+                ImagePath = filePath,
+                ImageUrl = _urlGenerator.GenerateUrl("GetImageByFileName",
+                    new { fileName = randomFileName }),
+                ManageableEntityId = meal.Id,
+                ManageableEntity = meal
+            };
+            meal.Image = mealImage;
 
-            isCancellable = false;
+            _dbContext.Meal.Add(meal);
+            await _dbContext.SaveChangesSaveImageAsync(image, tempFilePath, filePath,
+                _imageProcessingOptions.PermittedExtensions, _imageProcessingOptions.ImageSizeLimit, cancellationToken);
+
+            return meal.Id;
         }
 
-        _dbContext.Meals.Add(meal);
+        _dbContext.Meal.Add(meal);
         try
         {
-            await _dbContext.SaveChangesAsync(isCancellable ? cancellationToken : CancellationToken.None);
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
         catch (DbUpdateException ex)
         {
-            if (ex.GetBaseException() is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } postgresException)
+            if (ex.GetBaseException() is PostgresException
+                {
+                    SqlState: PostgresErrorCodes.UniqueViolation
+                } postgresException)
             {
-                throw new UniqueConstraintViolationException(postgresException.ConstraintName);
+                var cause = postgresException.ConstraintName switch
+                {
+                    "IX_ManageableEntity_ApplicationUserId_Title" => "Title",
+                    "IX_SubIngredient_RecipeId_Name" => "SubIngredient names",
+                    "IX_Direction_RecipeId_Number" => "Direction numbers",
+                    _ => null
+                };
+
+                throw new UniqueConstraintViolationException(cause);
             }
 
             throw;
         }
 
-        return ToDto(meal);
+        return meal.Id;
     }
 
-    private static Error[] ValidateIds(CreateMealRequest request, IEnumerable<int> validTagIds, IEnumerable<int> validRecipeIds, int currentUserId)
+    private static Error[] ValidateMeal(CreateMealRequest request, int mealCount, IEnumerable<int> validTagIds, IEnumerable<int> validRecipeIds, int currentUserId)
     {
         List<Error> errors = [];
+
+        if (mealCount > MealErrors.MaxMealsCount)
+        {
+            errors.Add(MealErrors.MaxMeals());
+        }
+
+        if (request.TagIds.Count > MealErrors.MaxTagsCount)
+        {
+            errors.Add(MealErrors.MaxTags());
+        }
+
+        if (request.RecipeIds.Count > MealErrors.MaxRecipesCount)
+        {
+            errors.Add(MealErrors.MaxRecipes());
+        }
 
         if (!request.RecipeIds.All(validRecipeIds.Contains))
         {
@@ -235,13 +292,5 @@ public sealed class CreateMealHandler
         return [.. errors];
     }
 
-    private static CreateMealDto ToDto(Meal meal) =>
-        new(meal.Id, meal.Title);
+    private static Meal FromDto(CreateMealRequest request, int userId) => new() { Title = request.Title, ApplicationUserId = userId };
 }
-
-/// <summary>
-/// The DTO to return to the client after meal creation.
-/// </summary>
-/// <param name="Id">The id of the meal.</param>
-/// <param name="Title">The title of the meal.</param>
-public sealed record CreateMealDto(int Id, string Title);

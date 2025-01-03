@@ -1,13 +1,15 @@
 using Api.Common;
 using Api.Common.Exceptions;
 using Api.Common.Interfaces;
+using Api.Domain.ManageableEntities;
 using Api.Infrastructure;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
-namespace Api.Features.RecipeManagement;
+namespace Api.Features.Recipes;
 
 /// <summary>
 /// Controller that handles requests to delete a recipe.
@@ -27,9 +29,10 @@ public sealed class DeleteRecipeController : ApiControllerBase
     [HttpDelete("/api/manage/recipes/{id:int}")]
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status409Conflict)]
     [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
     [Tags("Manage Recipes")]
-    public async Task<Results<UnauthorizedHttpResult, NotFound, Ok>> DeleteAsync(int id, DeleteRecipeHandler handler, CancellationToken cancellationToken)
+    public async Task<Results<UnauthorizedHttpResult, NotFound, Conflict, Ok>> DeleteAsync(int id, DeleteRecipeHandler handler, CancellationToken cancellationToken)
     {
         await handler.HandleAsync(id, cancellationToken);
 
@@ -65,11 +68,22 @@ public sealed class DeleteRecipeHandler
     /// <param name="id">The id of the recipe.</param>
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <exception cref="RecipeNotFoundException">Is thrown if the recipe could not be found in the data store.</exception>
+    /// <exception cref="LastMealRecipeException">Is thrown if the recipe is the last recipe belonging to a meal.</exception>
     /// <exception cref="ForbiddenException">Is thrown if the user is authenticated but lacks permission to access the resource.</exception>
     /// <exception cref="UnauthorizedException">Is thrown if the user lacks the necessary authentication credentials.</exception>
     public async Task HandleAsync(int id, CancellationToken cancellationToken)
     {
-        var recipe = await _dbContext.Recipes.FindAsync([id], cancellationToken);
+        var recipe = await _dbContext.ManageableEntity
+            .Where(r => r.Id == id)
+            .Select(r => new ManageableEntity
+            {
+                Id = r.Id,
+                Title = r.Title,
+                Image = r.Image,
+                ApplicationUserId = r.ApplicationUserId,
+            })
+            .AsNoTracking()
+            .SingleOrDefaultAsync(cancellationToken);
 
         if (recipe == null)
         {
@@ -80,14 +94,27 @@ public sealed class DeleteRecipeHandler
 
         if (authorizationResult.Succeeded)
         {
-            bool isCancellable = true;
-            if (recipe.ImagePath != null)
+            var mealGroup = await _dbContext.MealRecipe
+                .GroupBy(mr => mr.MealId)
+                .Select(g => new { recipeId = g.First().RecipeId, recipeCount = g.Count() })
+                .Where(g => g.recipeCount == 1 && g.recipeId == id)
+                .ToListAsync(cancellationToken);
+
+            var isNotDeletable = mealGroup.Count > 0;
+
+            if (isNotDeletable)
             {
-                File.Delete(recipe.ImagePath);
+                throw new LastMealRecipeException();
+            }
+
+            bool isCancellable = true;
+            if (recipe.Image != null)
+            {
+                File.Delete(recipe.Image.ImagePath);
                 isCancellable = false;
             }
 
-            _dbContext.Recipes.Remove(recipe);
+            _dbContext.ManageableEntity.Remove(recipe);
             await _dbContext.SaveChangesAsync(isCancellable ? cancellationToken : CancellationToken.None);
         }
         else if (_userContext.IsAuthenticated)

@@ -1,13 +1,16 @@
 using Api.Common;
 using Api.Common.Exceptions;
 using Api.Common.Interfaces;
+using Api.Domain;
+using Api.Domain.ManageableEntities;
 using Api.Infrastructure;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
-namespace Api.Features.MealManagement;
+namespace Api.Features.Meals;
 
 /// <summary>
 /// Controller that handles requests to delete a meal.
@@ -69,7 +72,17 @@ public sealed class DeleteMealHandler
     /// <exception cref="UnauthorizedException">Is thrown if the user lacks the necessary authentication credentials.</exception>
     public async Task HandleAsync(int id, CancellationToken cancellationToken)
     {
-        var meal = await _dbContext.Meals.FindAsync([id], cancellationToken);
+        var meal = await _dbContext.ManageableEntity
+            .Where(m => m.Id == id)
+            .Select(m => new ManageableEntity
+            {
+                Id = m.Id,
+                Title = m.Title,
+                Image = m.Image,
+                ApplicationUserId = m.ApplicationUserId
+            })
+            .AsNoTracking()
+            .SingleOrDefaultAsync(cancellationToken);
 
         if (meal == null)
         {
@@ -81,13 +94,13 @@ public sealed class DeleteMealHandler
         if (authorizationResult.Succeeded)
         {
             bool isCancellable = true;
-            if (meal.ImagePath != null)
+            if (meal.Image != null)
             {
-                File.Delete(meal.ImagePath);
+                File.Delete(meal.Image.ImagePath);
                 isCancellable = false;
             }
 
-            _dbContext.Meals.Remove(meal);
+            _dbContext.ManageableEntity.Remove(meal);
             await _dbContext.SaveChangesAsync(isCancellable ? cancellationToken : CancellationToken.None);
         }
         else if (_userContext.IsAuthenticated)
