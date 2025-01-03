@@ -43,10 +43,10 @@ internal sealed class ExceptionHandler : IExceptionHandler
                 Type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
                 Status = StatusCodes.Status404NotFound
             },
-            UniqueConstraintViolationException ucve => new ProblemDetails
+            ConflictException ce => new ProblemDetails
             {
                 Title = "Conflict",
-                Detail = ucve.Message,
+                Detail = ce.Message,
                 Type = "https://tools.ietf.org/html/rfc7231#section-6.5.8",
                 Status = StatusCodes.Status409Conflict
             },

@@ -1,5 +1,3 @@
-using Api.Domain;
-
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Common.Exceptions;

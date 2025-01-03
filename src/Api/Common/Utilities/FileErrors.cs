@@ -1,5 +1,3 @@
-using Api.Domain;
-
 namespace Api.Common.Utilities;
 
 /// <summary>
@@ -7,6 +5,19 @@ namespace Api.Common.Utilities;
 /// </summary>
 public static class FileErrors
 {
+    /// <summary>
+    /// Constant defining the maximum number of a characters a file name can contain.
+    /// </summary>
+    public const int MaxFileNameLength = 255;
+
+    /// <summary>
+    /// Error message that is used when a file name exceeds the maximum permitted character length.
+    /// </summary>
+    /// <param name="trustedFileNameForDisplay">The html encoded file name.</param>
+    /// <returns>An <see cref="Error"/> which contains an error code and description.</returns>
+    public static Error MaxFileName(string trustedFileNameForDisplay) => new(
+        "File.MaxFileName", $"The file name {trustedFileNameForDisplay} cannot exceed {MaxFileNameLength} characters.");
+
     /// <summary>
     /// Error message that is used when a file is empty.
     /// </summary>

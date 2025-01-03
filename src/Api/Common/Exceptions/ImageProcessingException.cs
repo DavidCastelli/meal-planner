@@ -1,5 +1,3 @@
-using Api.Domain;
-
 namespace Api.Common.Exceptions;
 
 /// <summary>

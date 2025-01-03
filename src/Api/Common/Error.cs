@@ -1,4 +1,4 @@
-namespace Api.Domain;
+namespace Api.Common;
 
 #pragma warning disable CA1716
 /// <summary>
