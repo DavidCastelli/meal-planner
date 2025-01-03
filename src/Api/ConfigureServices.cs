@@ -1,4 +1,3 @@
-using Api.Common;
 using Api.Common.Interfaces;
 using Api.Common.Options;
 using Api.Infrastructure;
@@ -27,7 +26,9 @@ public static class ConfigureServiceCollectionExtensions
     public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
     {
         foreach (var type in typeof(Program).Assembly.GetTypes()
-                     .Where(type => type.Name.EndsWith("Handler", StringComparison.Ordinal) && type is { IsInterface: false, IsAbstract: false }))
+                     .Where(type => type.Name.EndsWith("Handler", StringComparison.Ordinal)
+                                    && (type.Namespace?.Contains("Features") ?? false)
+                                    && type is { IsInterface: false, IsAbstract: false }))
         {
             services.AddScoped(type);
         }
@@ -51,8 +52,7 @@ public static class ConfigureServiceCollectionExtensions
         services.AddDbContext<MealPlannerContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
 
-        services.AddSingleton<IAuthorizationHandler, MealAuthorizationHandler>();
-        services.AddSingleton<IAuthorizationHandler, RecipeAuthorizationHandler>();
+        services.AddSingleton<IAuthorizationHandler, AuthorizationHandler>();
 
         services.AddIdentityApiEndpoints<ApplicationUser>()
             .AddEntityFrameworkStores<MealPlannerContext>();
