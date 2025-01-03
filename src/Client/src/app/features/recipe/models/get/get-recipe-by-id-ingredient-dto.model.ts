@@ -1,4 +1,4 @@
-export interface UpdateRecipeRequestIngredient {
+export interface GetRecipeByIdIngredientDto {
   id: number;
   name: string;
   measurement: string;

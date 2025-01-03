@@ -1,4 +1,4 @@
-export interface UpdateRecipeRequestDirection {
+export interface GetRecipeByIdDirectionDto {
   id: number;
   number: number;
   description: string;

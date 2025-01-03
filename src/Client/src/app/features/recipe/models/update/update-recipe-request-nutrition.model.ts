@@ -1,4 +1,4 @@
-export interface UpdateRecipeRequestRecipeNutrition {
+export interface UpdateRecipeRequestNutrition {
   calories?: number;
   fat?: number;
   carbs?: number;

@@ -1,4 +1,4 @@
-export interface UpdateRecipeRequestRecipeDetails {
+export interface UpdateRecipeRequestDetails {
   prepTime?: number;
   cookTime?: number;
   servings?: number;
