@@ -92,7 +92,7 @@ namespace Api.Infrastructure.Migrations
                     b.UseTptMappingStrategy();
                 });
 
-            modelBuilder.Entity("Api.Domain.MealRecipe.MealRecipe", b =>
+            modelBuilder.Entity("Api.Domain.MealRecipes.MealRecipe", b =>
                 {
                     b.Property<int>("MealId")
                         .HasColumnType("integer");
@@ -375,7 +375,7 @@ namespace Api.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Api.Domain.MealRecipe.MealRecipe", b =>
+            modelBuilder.Entity("Api.Domain.MealRecipes.MealRecipe", b =>
                 {
                     b.HasOne("Api.Domain.Meals.Meal", null)
                         .WithMany()
@@ -563,7 +563,8 @@ namespace Api.Infrastructure.Migrations
 
                             b1.Property<string>("Name")
                                 .HasMaxLength(20)
-                                .HasColumnType("character varying(20)");
+                                .HasColumnType("character varying(20)")
+                                .UseCollation("case_insensitive");
 
                             b1.HasKey("RecipeId", "Id");
 

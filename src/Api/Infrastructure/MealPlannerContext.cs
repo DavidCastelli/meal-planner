@@ -137,7 +137,8 @@ public sealed class MealPlannerContext : IdentityDbContext<ApplicationUser, Iden
                     .IsUnique();
 
                 sib.Property(si => si.Name)
-                    .HasMaxLength(20);
+                    .HasMaxLength(20)
+                    .UseCollation("case_insensitive");
 
                 sib.OwnsMany(si => si.Ingredients, ib =>
                 {
