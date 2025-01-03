@@ -1,2 +1,491 @@
-<p>edit-recipe works!</p>
-<p>Recipe has id: {{ recipe.id }}</p>
+<div
+  class="form-container"
+  [@slide]="(isSideBarOpen$ | async) ? 'right' : 'left'"
+>
+  <form [formGroup]="editRecipeForm" (ngSubmit)="submit()">
+    <h1>Edit Recipe</h1>
+
+    <section class="info">
+      <h2>Info</h2>
+      <p>
+        <label for="title">Title: </label>
+        <input id="title" type="text" formControlName="title" required />
+        <app-control-error class="title-error-position" controlPath="title" />
+      </p>
+      <p>
+        @if (image.value) {
+          <span>
+            <span class="span-label">Image: </span>
+            <button class="remove-button" type="button" (click)="removeImage()">
+              -
+            </button>
+            @if (image.invalid) {
+              <br />
+              @if (image.getError("empty")) {
+                <small>Invalid image, file is empty.</small>
+              } @else if (image.getError("max")) {
+                <small>Max upload size 5mb.</small>
+              } @else if (image.getError("permitted")) {
+                <small
+                  >Image must end in one of the following extensions: jpeg,
+                  jpg.</small
+                >
+              }
+            }
+          </span>
+        } @else {
+          <span>
+            <span class="span-label">Image: </span>
+            <label id="file-picker" class="add-button" for="image" tabindex="0"
+              >+</label
+            >
+            <input
+              id="image"
+              type="file"
+              accept="image/jpeg"
+              (change)="onImagePicked($event)"
+            />
+          </span>
+        }
+        <span class="image-preview-container">
+          <img [ngSrc]="previewSrc" alt="Recipe image preview." fill priority />
+        </span>
+        <span class="image-preview-name">{{ previewFileName }}</span>
+      </p>
+      <p>
+        @if (description) {
+          <span>
+            <label for="description">Description: </label>
+            <button
+              class="remove-button"
+              type="button"
+              (click)="removeDescription()"
+            >
+              -
+            </button>
+          </span>
+          <textarea
+            id="description"
+            formControlName="description"
+            required
+          ></textarea>
+          <app-control-error controlPath="description" />
+        } @else {
+          <span>
+            <span class="span-label">Description: </span
+            ><button
+              class="add-button"
+              type="button"
+              (click)="addDescription()"
+            >
+              +
+            </button>
+          </span>
+        }
+      </p>
+    </section>
+
+    <section class="extra-info details-position" formGroupName="details">
+      <h2>Details</h2>
+      <p>
+        @if (details.controls.prepTime) {
+          <label for="prep-time">Prep Time: </label>
+          <input
+            class="number-input"
+            id="prep-time"
+            type="text"
+            inputmode="numeric"
+            formControlName="prepTime"
+            required
+          />
+          <button
+            class="remove-button"
+            type="button"
+            (click)="removePrepTime()"
+          >
+            -
+          </button>
+          <app-control-error
+            controlPath="details.prepTime"
+            [customErrors]="{ pattern: 'Field must be an integer.' }"
+          />
+        } @else {
+          <span class="span-label">Prep Time: </span
+          ><button class="add-button" type="button" (click)="addPrepTime()">
+            +
+          </button>
+        }
+      </p>
+      <p>
+        @if (details.controls.cookTime) {
+          <label for="cook-time">Cook Time: </label>
+          <input
+            class="number-input"
+            id="cook-time"
+            type="text"
+            inputmode="numeric"
+            formControlName="cookTime"
+            required
+          />
+          <button
+            class="remove-button"
+            type="button"
+            (click)="removeCookTime()"
+          >
+            -
+          </button>
+          <app-control-error
+            controlPath="details.cookTime"
+            [customErrors]="{ pattern: 'Field must be an integer.' }"
+          />
+        } @else {
+          <span class="span-label">Cook Time: </span
+          ><button class="add-button" type="button" (click)="addCookTime()">
+            +
+          </button>
+        }
+      </p>
+      <p>
+        @if (details.controls.servings) {
+          <label for="servings">Servings: </label>
+          <input
+            class="number-input"
+            id="servings"
+            type="text"
+            inputmode="numeric"
+            formControlName="servings"
+            required
+          />
+          <button
+            class="remove-button"
+            type="button"
+            (click)="removeServings()"
+          >
+            -
+          </button>
+          <app-control-error
+            controlPath="details.servings"
+            [customErrors]="{ pattern: 'Field must be an integer.' }"
+          />
+        } @else {
+          <span class="span-label">Servings: </span
+          ><button class="add-button" type="button" (click)="addServings()">
+            +
+          </button>
+        }
+      </p>
+    </section>
+
+    <section class="extra-info nutrition-position" formGroupName="nutrition">
+      <h2>Nutrition</h2>
+      <p>
+        @if (nutrition.controls.calories) {
+          <label for="calories">Calories: </label>
+          <input
+            class="number-input"
+            id="calories"
+            type="text"
+            inputmode="numeric"
+            formControlName="calories"
+            required
+          />
+          <button
+            class="remove-button"
+            type="button"
+            (click)="removeCalories()"
+          >
+            -
+          </button>
+          <app-control-error
+            controlPath="nutrition.calories"
+            [customErrors]="{ pattern: 'Field must be an integer.' }"
+          />
+        } @else {
+          <span class="span-label">Calories: </span
+          ><button class="add-button" type="button" (click)="addCalories()">
+            +
+          </button>
+        }
+      </p>
+      <p>
+        @if (nutrition.controls.fat) {
+          <label for="fat">Fat: </label>
+          <input
+            class="number-input"
+            id="fat"
+            type="text"
+            inputmode="numeric"
+            formControlName="fat"
+            required
+          />
+          <button class="remove-button" type="button" (click)="removeFat()">
+            -
+          </button>
+          <app-control-error
+            controlPath="nutrition.fat"
+            [customErrors]="{ pattern: 'Field must be an integer.' }"
+          />
+        } @else {
+          <span class="span-label">Fat: </span
+          ><button class="add-button" type="button" (click)="addFat()">
+            +
+          </button>
+        }
+      </p>
+      <p>
+        @if (nutrition.controls.carbs) {
+          <label for="carbs">Carbs: </label>
+          <input
+            class="number-input"
+            id="carbs"
+            type="text"
+            inputmode="numeric"
+            formControlName="carbs"
+            required
+          />
+          <button class="remove-button" type="button" (click)="removeCarbs()">
+            -
+          </button>
+          <app-control-error
+            controlPath="nutrition.carbs"
+            [customErrors]="{ pattern: 'Field must be an integer.' }"
+          />
+        } @else {
+          <span class="span-label">Carbs: </span
+          ><button class="add-button" type="button" (click)="addCarbs()">
+            +
+          </button>
+        }
+      </p>
+      <p>
+        @if (nutrition.controls.protein) {
+          <label for="protein">Protein: </label>
+          <input
+            class="number-input"
+            id="protein"
+            type="text"
+            inputmode="numeric"
+            formControlName="protein"
+            required
+          />
+          <button class="remove-button" type="button" (click)="removeProtein()">
+            -
+          </button>
+          <app-control-error
+            controlPath="nutrition.protein"
+            [customErrors]="{ pattern: 'Field must be an integer.' }"
+          />
+        } @else {
+          <span class="span-label">Protein: </span
+          ><button class="add-button" type="button" (click)="addProtein()">
+            +
+          </button>
+        }
+      </p>
+    </section>
+
+    <section class="directions" formArrayName="directions">
+      <h2>Directions</h2>
+      @if (directions.length < 6) {
+        <button class="add-button" type="button" (click)="addDirection()">
+          +
+        </button>
+      }
+
+      <div class="directions-container">
+        @for (
+          direction of directions.controls;
+          track direction;
+          let i = $index
+        ) {
+          <div [formGroupName]="i">
+            <section>
+              <h3>Direction {{ direction.controls.number.value }}</h3>
+              <p>
+                <span>
+                  <label for="description-{{ i }}">Description: </label>
+                  @if (directions.length > 1) {
+                    <button
+                      class="remove-button"
+                      type="button"
+                      (click)="removeDirection(i)"
+                    >
+                      -
+                    </button>
+                  }
+                </span>
+                <textarea
+                  id="description-{{ i }}"
+                  formControlName="description"
+                  required
+                ></textarea>
+                <app-control-error
+                  controlPath="directions.{{ i }}.description"
+                />
+              </p>
+            </section>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="tips" formArrayName="tips">
+      <h2>Tips</h2>
+      @if (tips.length < 3) {
+        <button class="add-button" type="button" (click)="addTip()">+</button>
+      }
+
+      @for (tip of tips.controls; track tip; let i = $index) {
+        <div [formGroupName]="i">
+          <section>
+            <h3>Tip</h3>
+            <p>
+              <span>
+                <label for="description-{{ i }}">Description: </label>
+                <button
+                  class="remove-button"
+                  type="button"
+                  (click)="removeTip(i)"
+                >
+                  -
+                </button>
+              </span>
+              <textarea
+                id="description-{{ i }}"
+                formControlName="description"
+                required
+              ></textarea>
+              <app-control-error controlPath="tips.{{ i }}.description" />
+            </p>
+          </section>
+        </div>
+      }
+    </section>
+
+    <section class="sub-ingredients" formArrayName="subIngredients">
+      <div>
+        <h2>SubIngredients</h2>
+        @if (subIngredients.length < 5) {
+          <button class="add-button" type="button" (click)="addSubIngredient()">
+            +
+          </button>
+        }
+      </div>
+
+      <div class="sub-ingredients-container">
+        @for (
+          subIngredient of subIngredients.controls;
+          track subIngredient;
+          let i = $index
+        ) {
+          <div class="sub-ingredients-content-container" [formGroupName]="i">
+            <section>
+              <div>
+                <h3>SubIngredient</h3>
+                @if (subIngredients.length > 1) {
+                  <button
+                    class="remove-button"
+                    type="button"
+                    (click)="removeSubIngredient(i)"
+                  >
+                    -
+                  </button>
+                }
+              </div>
+              <p class="sub-ingredient-name">
+                @if (subIngredients.length > 1) {
+                  <label for="name">Name: </label>
+                  <input
+                    id="name"
+                    type="text"
+                    formControlName="name"
+                    required
+                  />
+                  <app-control-error
+                    controlPath="subIngredients.{{ i }}.name"
+                  />
+                }
+              </p>
+            </section>
+            <section class="ingredients" formArrayName="ingredients">
+              <h2>Ingredients</h2>
+              @if (subIngredient.controls.ingredients.length < 10) {
+                <button
+                  class="add-button"
+                  type="button"
+                  (click)="addIngredient(i)"
+                >
+                  +
+                </button>
+              }
+              @for (
+                ingredient of subIngredient.controls.ingredients.controls;
+                track ingredient;
+                let j = $index
+              ) {
+                <div [formGroupName]="j">
+                  <div>
+                    <h3>Ingredient</h3>
+                    @if (subIngredient.controls.ingredients.length > 1) {
+                      <button
+                        class="remove-button"
+                        type="button"
+                        (click)="removeIngredient(i, j)"
+                      >
+                        -
+                      </button>
+                    }
+                  </div>
+                  <section>
+                    <p>
+                      <label for="name-{{ j }}">Name: </label>
+                      <input
+                        id="name-{{ j }}"
+                        type="text"
+                        formControlName="name"
+                        required
+                      />
+                      <app-control-error
+                        controlPath="subIngredients.{{ i }}.ingredients.{{
+                          j
+                        }}.name"
+                      />
+                    </p>
+                    <p>
+                      <label for="measurement-{{ j }}">Measurement: </label>
+                      <input
+                        id="measurement-{{ j }}"
+                        type="text"
+                        formControlName="measurement"
+                        required
+                      />
+                      <app-control-error
+                        controlPath="subIngredients.{{ i }}.ingredients.{{
+                          j
+                        }}.measurement"
+                      />
+                    </p>
+                  </section>
+                </div>
+              }
+            </section>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="submit">
+      <p>
+        <button class="submit-button" type="submit" [disabled]="isSubmitting">
+          Save
+        </button>
+      </p>
+    </section>
+
+    @if (errorService.messages.length > 0) {
+      <app-form-errors class="errors-position"></app-form-errors>
+    }
+
+    <div class="form-bottom" #bottom></div>
+  </form>
+</div>
