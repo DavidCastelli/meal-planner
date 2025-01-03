@@ -300,11 +300,11 @@
         ) {
           <div [formGroupName]="i">
             <section>
-              <h3>Direction {{ i + 1 }}</h3>
+              <h3>Direction {{ direction.controls.number.value }}</h3>
               <p>
                 <span>
                   <label for="description-{{ i }}">Description: </label>
-                  @if (i !== 0) {
+                  @if (directions.length > 1) {
                     <button
                       class="remove-button"
                       type="button"
@@ -382,7 +382,7 @@
             <section>
               <div>
                 <h3>SubIngredient</h3>
-                @if (i !== 0) {
+                @if (subIngredients.length > 1) {
                   <button
                     class="remove-button"
                     type="button"
@@ -426,7 +426,7 @@
                 <div [formGroupName]="j">
                   <div>
                     <h3>Ingredient</h3>
-                    @if (j !== 0) {
+                    @if (subIngredient.controls.ingredients.length > 1) {
                       <button
                         class="remove-button"
                         type="button"

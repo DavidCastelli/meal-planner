@@ -22,8 +22,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AsyncPipe, NgOptimizedImage } from '@angular/common';
 import { ControlErrorComponent } from '../../../../shared/components/control-error/control-error.component';
 import { ImageValidator } from '../../../../shared/validators/image.validator';
-import { CanComponentDeactivate } from '../../../../shared/interfaces/can-component-deactivate';
-import { ModalService } from '../../../../shared/services/modal.service';
+import { CanComponentDeactivate } from '../../../../core/interfaces/can-component-deactivate';
+import { ModalService } from '../../../../core/services/modal.service';
 import { map, Observable } from 'rxjs';
 import { SidebarService } from '../../../../core/layout/sidebar.service';
 import { slideAnimation } from '../../../../shared/animations/slide.animation';
@@ -228,6 +228,7 @@ export class CreateRecipeComponent implements CanComponentDeactivate {
       Validators.maxLength(255),
     ]);
     this.createRecipeForm.addControl('description', description);
+    this.createRecipeForm.markAsDirty();
   }
 
   addPrepTime() {
@@ -238,6 +239,7 @@ export class CreateRecipeComponent implements CanComponentDeactivate {
       Validators.pattern('[0-9]*'),
     ]);
     this.details.addControl('prepTime', prepTime);
+    this.details.markAsDirty();
   }
 
   addCookTime() {
@@ -248,6 +250,7 @@ export class CreateRecipeComponent implements CanComponentDeactivate {
       Validators.pattern('[0-9]*'),
     ]);
     this.details.addControl('cookTime', cookTime);
+    this.details.markAsDirty();
   }
 
   addServings() {
@@ -258,6 +261,7 @@ export class CreateRecipeComponent implements CanComponentDeactivate {
       Validators.pattern('[0-9]*'),
     ]);
     this.details.addControl('servings', servings);
+    this.details.markAsDirty();
   }
 
   addCalories() {
@@ -268,6 +272,7 @@ export class CreateRecipeComponent implements CanComponentDeactivate {
       Validators.pattern('[0-9]*'),
     ]);
     this.nutrition.addControl('calories', calories);
+    this.nutrition.markAsDirty();
   }
 
   addFat() {
@@ -278,6 +283,7 @@ export class CreateRecipeComponent implements CanComponentDeactivate {
       Validators.pattern('[0-9]*'),
     ]);
     this.nutrition.addControl('fat', fat);
+    this.nutrition.markAsDirty();
   }
 
   addCarbs() {
@@ -288,6 +294,7 @@ export class CreateRecipeComponent implements CanComponentDeactivate {
       Validators.pattern('[0-9]*'),
     ]);
     this.nutrition.addControl('carbs', carbs);
+    this.nutrition.markAsDirty();
   }
 
   addProtein() {
@@ -298,6 +305,7 @@ export class CreateRecipeComponent implements CanComponentDeactivate {
       Validators.pattern('[0-9]*'),
     ]);
     this.nutrition.addControl('protein', protein);
+    this.nutrition.markAsDirty();
   }
 
   addDirection() {
@@ -310,6 +318,7 @@ export class CreateRecipeComponent implements CanComponentDeactivate {
       ],
     });
     this.directions.push(direction);
+    this.directions.markAsDirty();
   }
 
   addTip() {
@@ -318,6 +327,7 @@ export class CreateRecipeComponent implements CanComponentDeactivate {
       Validators.maxLength(255),
     ]);
     this.tips.push(tip);
+    this.tips.markAsDirty();
   }
 
   addSubIngredient() {
@@ -350,6 +360,7 @@ export class CreateRecipeComponent implements CanComponentDeactivate {
       },
     );
     this.subIngredients.push(subIngredient);
+    this.subIngredients.markAsDirty();
   }
 
   addIngredient(index: number) {
@@ -363,7 +374,9 @@ export class CreateRecipeComponent implements CanComponentDeactivate {
         { validators: [Validators.required, Validators.maxLength(20)] },
       ],
     });
-    this.subIngredients.at(index).controls.ingredients.push(ingredient);
+    const ingredients = this.subIngredients.at(index).controls.ingredients;
+    ingredients.push(ingredient);
+    ingredients.markAsDirty();
   }
 
   removeImage() {
@@ -407,6 +420,10 @@ export class CreateRecipeComponent implements CanComponentDeactivate {
   removeDirection(index: number) {
     this.directionCount -= 1;
     this.directions.removeAt(index);
+    for (let i = index; i < this.directions.length; i++) {
+      const currentDirectionNumber = this.directions.at(i).controls.number;
+      currentDirectionNumber.setValue(currentDirectionNumber.value - 1);
+    }
   }
 
   removeTip(index: number) {
@@ -440,6 +457,7 @@ export class CreateRecipeComponent implements CanComponentDeactivate {
 
       this.createRecipeForm.patchValue({ image: image });
       this.image.updateValueAndValidity();
+      this.image.markAsDirty();
     }
   }
 
@@ -465,8 +483,7 @@ export class CreateRecipeComponent implements CanComponentDeactivate {
     this.recipeService
       .createRecipe(request, image)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((recipe) => {
-        const success = recipe && Object.keys(recipe).length > 0;
+      .subscribe((success) => {
         if (success) {
           void this.router.navigate(['/manage/recipes/']);
         } else {
