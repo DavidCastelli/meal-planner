@@ -10,13 +10,7 @@ export const recipesResolver: ResolveFn<GetRecipesDto[]> = () => {
     .pipe(
       map((recipes: GetRecipesDto[]) => {
         return recipes.sort((recipeA, recipeB) => {
-          if (recipeA > recipeB) {
-            return 1;
-          } else if (recipeA < recipeB) {
-            return -1;
-          } else {
-            return 0;
-          }
+          return recipeA.title.localeCompare(recipeB.title);
         });
       }),
     );

@@ -2,10 +2,10 @@ import { TestBed } from '@angular/core/testing';
 import { ResolveFn } from '@angular/router';
 
 import { recipeResolver } from './recipe.resolver';
-import { GetByIdRecipeDto } from '../models/get/get-by-id-recipe-dto.model';
+import { GetRecipeByIdDto } from '../models/get/get-recipe-by-id-dto.model';
 
 describe('recipeResolver', () => {
-  const executeResolver: ResolveFn<GetByIdRecipeDto> = (
+  const executeResolver: ResolveFn<GetRecipeByIdDto> = (
     ...resolverParameters
   ) =>
     TestBed.runInInjectionContext(() => recipeResolver(...resolverParameters));
