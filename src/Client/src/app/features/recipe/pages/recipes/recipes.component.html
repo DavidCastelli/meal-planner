@@ -7,8 +7,8 @@
         [type]="CardType.RECIPE"
         [id]="recipe.id"
         [title]="recipe.title"
-        [imageUrl]="recipe.imageUrl"
-        (recipeDeleted)="deleteRecipe($event)"
+        [imageUrl]="recipe.image?.imageUrl"
+        (deleted)="deleteRecipe($event)"
       ></app-card>
     } @empty {
       <p class="empty">No recipes found... Create your first!</p>
