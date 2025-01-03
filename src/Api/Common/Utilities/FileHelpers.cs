@@ -1,7 +1,5 @@
 using System.Net;
 
-using Api.Domain;
-
 namespace Api.Common.Utilities;
 
 /// <summary>
@@ -33,25 +31,33 @@ public static class FileHelpers
     /// Processes a file by validating its correctness and writing it to the target <paramref name="storagePath"/>.
     /// </summary>
     /// <remarks>
-    /// The file validation checks against empty files, files larger than the maximum allowed size, files whose file extension is not permitted,
-    /// and files whose signature does not match the file extension. Overwrite should be set to true when updating existing files, false otherwise.
+    /// The file validation checks against file name length, empty files, files larger than the maximum allowed size, files whose file extension is not permitted,
+    /// and files whose signature does not match the file extension. originalStoragePath should be provided when updating an existing file.
+    /// When provided, the original file is deleted and replaced by the new file at the given storagePath.
     /// </remarks>
     /// <param name="formFile">The file to process.</param>
     /// <param name="tempStoragePath">The path to temporarily store the file before validation is complete.</param>
     /// <param name="storagePath">The path to store the file.</param>
     /// <param name="permittedExtensions">The permitted file extensions.</param>
     /// <param name="sizeLimit">The maximum allowed file size.</param>
-    /// <param name="overwrite">true to overwrite files in storage path, false otherwise.</param>
+    /// <param name="originalStoragePath">The original storage to be replaced if the image is updated.</param>
     /// <returns>
     /// A task which represents the asynchronous write operation.
     /// The result of the task upon completion returns a list of <see cref="Error"/> messages on failure,
     /// or an empty list on success.
     /// </returns>
-    public static async Task<Error[]> ProcessFormFileAsync(IFormFile formFile, string tempStoragePath, string storagePath, string[] permittedExtensions, long sizeLimit, bool overwrite = false)
+    public static async Task<Error[]> ProcessFormFileAsync(IFormFile formFile, string tempStoragePath, string storagePath, string[] permittedExtensions, long sizeLimit, string? originalStoragePath = null)
     {
         List<Error> errors = [];
 
         var trustedFileNameForDisplay = WebUtility.HtmlEncode(formFile.FileName);
+
+        if (trustedFileNameForDisplay.Length > FileErrors.MaxFileNameLength)
+        {
+            errors.Add(FileErrors.MaxFileName(trustedFileNameForDisplay));
+
+            return [.. errors];
+        }
 
         if (formFile.Length == 0)
         {
@@ -86,7 +92,11 @@ public static class FileHelpers
             }
             else
             {
-                File.Move(tempStoragePath, storagePath, overwrite);
+                if (originalStoragePath != null && File.Exists(originalStoragePath))
+                {
+                    File.Delete(originalStoragePath);
+                }
+                File.Move(tempStoragePath, storagePath);
                 return [];
             }
         }
