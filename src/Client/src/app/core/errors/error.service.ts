@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ValidationProblemDetails } from '../../shared/models/validation-problem-details.model';
+import { ValidationProblemDetails } from './models/validation-problem-details.model';
 
 @Injectable({
   providedIn: 'root',

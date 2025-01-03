@@ -18,7 +18,7 @@ import { UserInfo } from './user-info.model';
 import {
   SKIP_ERROR_INTERCEPTOR,
   SKIP_UNAUTHORIZED_REDIRECT,
-} from '../interceptors/error.interceptor';
+} from '../errors/error.interceptor';
 import { ErrorService } from '../errors/error.service';
 
 @Injectable({

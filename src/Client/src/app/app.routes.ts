@@ -11,7 +11,7 @@ import { RecipesComponent } from './features/recipe/pages/recipes/recipes.compon
 import { CreateMealComponent } from './features/meal/pages/create-meal/create-meal.component';
 import { CreateRecipeComponent } from './features/recipe/pages/create-recipe/create-recipe.component';
 import { PrivateLayoutComponent } from './core/layout/private-layout/private-layout.component';
-import { exitGuard } from './shared/guards/exit.guard';
+import { exitGuard } from './core/guards/exit.guard';
 import { PublicLayoutComponent } from './core/layout/public-layout/public-layout.component';
 import { LogoutComponent } from './core/pages/logout/logout.component';
 import { EditRecipeComponent } from './features/recipe/pages/edit-recipe/edit-recipe.component';
@@ -114,6 +114,7 @@ export const routes: Routes = [
             path: 'manage/recipes/:id/edit',
             component: EditRecipeComponent,
             title: 'Edit Recipe',
+            canDeactivate: [exitGuard],
             resolve: { recipe: recipeResolver },
           },
         ],

@@ -1,6 +1,6 @@
 import { Component, inject, Input } from '@angular/core';
 import { RecipeService } from '../../recipe.service';
-import { GetByIdRecipeDto } from '../../models/get/get-by-id-recipe-dto.model';
+import { GetRecipeByIdDto } from '../../models/get/get-recipe-by-id-dto.model';
 
 @Component({
   selector: 'app-recipe-details',
@@ -12,5 +12,5 @@ import { GetByIdRecipeDto } from '../../models/get/get-by-id-recipe-dto.model';
 export class RecipeDetailsComponent {
   private readonly recipeService = inject(RecipeService);
 
-  @Input() recipe!: GetByIdRecipeDto;
+  @Input() recipe!: GetRecipeByIdDto;
 }

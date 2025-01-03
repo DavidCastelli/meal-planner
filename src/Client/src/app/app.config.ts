@@ -14,7 +14,7 @@ import {
 import { API_CONFIG, DEFAULT_API_CONFIG } from './shared/configs/api.config';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { apiInterceptor } from './core/interceptors/api.interceptor';
-import { errorInterceptor } from './core/interceptors/error.interceptor';
+import { errorInterceptor } from './core/errors/error.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
