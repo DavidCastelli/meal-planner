@@ -127,13 +127,15 @@ internal static class DbContextExtensions
             {
                 await transaction.RollbackAsync(CancellationToken.None);
 
-                var columnName = postgresException.ConstraintName switch
+                var cause = postgresException.ConstraintName switch
                 {
                     "IX_ManageableEntities_ApplicationUserId_Title" => "Title",
+                    "IX_SubIngredient_RecipeId_Name" => "SubIngredient names",
+                    "IX_Direction_RecipeId_Number" => "Direction numbers",
                     _ => null
                 };
 
-                throw new UniqueConstraintViolationException(columnName);
+                throw new UniqueConstraintViolationException(cause);
             }
 
             await transaction.RollbackAsync(CancellationToken.None);
