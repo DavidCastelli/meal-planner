@@ -1,2 +1,201 @@
-<p>recipe-details works!</p>
-<p>Recipe has id: {{ recipe.id }}</p>
+<div
+  class="recipe-details-container"
+  [@slide]="(isSideBarOpen$ | async) ? 'right' : 'left'"
+>
+  <section class="recipe-details">
+    <h1>Recipe Details</h1>
+
+    <div class="info-details-nutrition-container">
+      <section class="info">
+        <h2>Info</h2>
+        <h3>{{ recipe.title }}</h3>
+        <div class="info-img-container">
+          <img
+            class="info-img"
+            ngSrc="{{ recipe.image ? recipe.image.imageUrl : '/27002.jpg' }}"
+            alt="Recipe image."
+            fill
+            priority
+            crossorigin="use-credentials"
+          />
+        </div>
+        <span>Description:</span>
+        @if (recipe.description) {
+          <p class="info-description">{{ recipe.description }}</p>
+        } @else {
+          <span>N/A</span>
+        }
+      </section>
+
+      <section class="details">
+        <h2>Details</h2>
+        <div class="details-content">
+          <ul>
+            <li>
+              <span>Prep Time:</span>
+              @if (recipe.details.prepTime !== undefined) {
+                <span>{{ recipe.details.prepTime }} minutes</span>
+              } @else {
+                <span>N/A</span>
+              }
+            </li>
+            <li>
+              <span>Cook Time:</span>
+              @if (recipe.details.cookTime !== undefined) {
+                <span>{{ recipe.details.cookTime }} minutes</span>
+              } @else {
+                <span>N/A</span>
+              }
+            </li>
+            <li>
+              <span>Total Time:</span>
+              @if (
+                recipe.details.prepTime !== undefined ||
+                recipe.details.cookTime !== undefined
+              ) {
+                <span
+                  >{{
+                    (recipe.details.prepTime ?? 0) +
+                      (recipe.details.cookTime ?? 0)
+                  }}
+                  minutes</span
+                >
+              } @else {
+                <span>N/A</span>
+              }
+            </li>
+            <li>
+              <span>Servings:</span>
+              @if (recipe.details.servings !== undefined) {
+                <span>{{ recipe.details.servings }}</span>
+              } @else {
+                <span>N/A</span>
+              }
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="nutrition">
+        <h2>Nutrition</h2>
+        <div class="nutrition-content">
+          <ul>
+            <li>
+              <span>Calories:</span>
+              @if (recipe.nutrition.calories !== undefined) {
+                <span>{{ recipe.nutrition.calories }}</span>
+              } @else {
+                <span>N/A</span>
+              }
+            </li>
+            <li>
+              <span>Fat:</span>
+              @if (recipe.nutrition.fat !== undefined) {
+                <span>{{ recipe.nutrition.fat }} g</span>
+              } @else {
+                <span>N/A</span>
+              }
+            </li>
+            <li>
+              <span>Carbs:</span>
+              @if (recipe.nutrition.carbs) {
+                <span>{{ recipe.nutrition.carbs }} g</span>
+              } @else {
+                <span>N/A</span>
+              }
+            </li>
+            <li>
+              <span>Protein:</span>
+              @if (recipe.nutrition.protein) {
+                <span>{{ recipe.nutrition.protein }} g</span>
+              } @else {
+                <span>N/A</span>
+              }
+            </li>
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <section
+      class="sub-ingredients"
+      [style.grid-column]="subIngredientsGridColumnStyle"
+    >
+      @if (recipe.subIngredients.length > 1) {
+        <h2>SubIngredients</h2>
+      } @else {
+        <h2>Ingredients</h2>
+      }
+      <div class="sub-ingredients-content-container">
+        @for (subIngredient of recipe.subIngredients; track subIngredient.id) {
+          <div class="sub-ingredients-content">
+            @if (subIngredient.name !== undefined) {
+              <div class="sub-ingredients-content-name">
+                {{ subIngredient.name }}
+              </div>
+            }
+            <section class="ingredients">
+              @if (recipe.subIngredients.length > 1) {
+                <h3>Ingredients</h3>
+              }
+              <div class="ingredients-content-container">
+                @for (
+                  ingredient of subIngredient.ingredients;
+                  track ingredient.id
+                ) {
+                  <div class="ingredients-content">
+                    <span>{{ ingredient.name }}</span>
+                    <span>{{ ingredient.measurement }}</span>
+                  </div>
+                }
+              </div>
+            </section>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="directions">
+      <h2>Directions</h2>
+      <div class="directions-content-container">
+        @for (direction of recipe.directions; track direction.id) {
+          <div class="directions-content">
+            <span>{{ direction.number }}.</span>
+            <p>{{ direction.description }}</p>
+          </div>
+        }
+      </div>
+    </section>
+
+    <div class="tips-meals-container">
+      <section class="tips">
+        <h2>Tips</h2>
+        <div class="tips-content-container">
+          @for (tip of recipe.tips; track tip.id) {
+            <div class="tips-content">
+              <p>{{ tip.description }}</p>
+            </div>
+          } @empty {
+            <p>There are no tips for {{ recipe.title }}.</p>
+          }
+        </div>
+      </section>
+
+      <section class="meals">
+        <h2>Meals</h2>
+        <nav class="meals-content-container">
+          @for (meal of recipe.meals; track meal.id) {
+            <a
+              class="meals-content"
+              routerLink="/manage/meals/{{ meal.id }}/details"
+            >
+              <span>{{ meal.title }}</span>
+            </a>
+          } @empty {
+            <p>{{ recipe.title }} does not belong to any meals.</p>
+          }
+        </nav>
+      </section>
+    </div>
+  </section>
+</div>
