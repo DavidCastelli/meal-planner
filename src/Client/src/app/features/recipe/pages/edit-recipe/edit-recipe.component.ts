@@ -167,27 +167,27 @@ export class EditRecipeComponent implements OnInit, CanComponentDeactivate {
     }
 
     const recipeDetails = this.recipe.details;
-    if (recipeDetails.prepTime || recipeDetails.prepTime === 0) {
+    if (recipeDetails.prepTime != undefined) {
       this.addPrepTime();
     }
-    if (recipeDetails.cookTime || recipeDetails.cookTime === 0) {
+    if (recipeDetails.cookTime != undefined) {
       this.addCookTime();
     }
-    if (recipeDetails.servings || recipeDetails.servings === 0) {
+    if (recipeDetails.servings != undefined) {
       this.addServings();
     }
 
     const recipeNutrition = this.recipe.nutrition;
-    if (recipeNutrition.calories || recipeNutrition.calories === 0) {
+    if (recipeNutrition.calories != undefined) {
       this.addCalories();
     }
-    if (recipeNutrition.fat || recipeNutrition.fat === 0) {
+    if (recipeNutrition.fat != undefined) {
       this.addFat();
     }
-    if (recipeNutrition.carbs || recipeNutrition.carbs === 0) {
+    if (recipeNutrition.carbs != undefined) {
       this.addCarbs();
     }
-    if (recipeNutrition.protein || recipeNutrition.protein === 0) {
+    if (recipeNutrition.protein != undefined) {
       this.addProtein();
     }
 
