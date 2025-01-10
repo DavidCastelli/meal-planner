@@ -59,7 +59,7 @@ public sealed class UpdateMealController : ApiControllerBase
         try
         {
             request = await JsonSerializer.DeserializeAsync<UpdateMealRequest>(
-                data.OpenReadStream(), jsonOptions.Value.JsonSerializerOptions, cancellationToken: cancellationToken);
+                data.OpenReadStream(), jsonOptions.Value.JsonSerializerOptions, cancellationToken);
         }
         catch (JsonException)
         {

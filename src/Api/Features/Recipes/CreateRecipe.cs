@@ -55,7 +55,7 @@ public sealed class CreateRecipeController : ApiControllerBase
         try
         {
             request = await JsonSerializer.DeserializeAsync<CreateRecipeRequest>(
-                data.OpenReadStream(), jsonOptions.Value.JsonSerializerOptions, cancellationToken: cancellationToken);
+                data.OpenReadStream(), jsonOptions.Value.JsonSerializerOptions, cancellationToken);
         }
         catch (JsonException)
         {

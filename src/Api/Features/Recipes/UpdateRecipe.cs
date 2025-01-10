@@ -58,7 +58,7 @@ public sealed class UpdateRecipeController : ApiControllerBase
         try
         {
             request = await JsonSerializer.DeserializeAsync<UpdateRecipeRequest>(
-                data.OpenReadStream(), jsonOptions.Value.JsonSerializerOptions, cancellationToken: cancellationToken);
+                data.OpenReadStream(), jsonOptions.Value.JsonSerializerOptions, cancellationToken);
         }
         catch (JsonException)
         {
