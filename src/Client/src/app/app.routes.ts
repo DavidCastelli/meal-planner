@@ -20,6 +20,8 @@ import { MealDetailsComponent } from './features/meal/pages/meal-details/meal-de
 import { RecipeDetailsComponent } from './features/recipe/pages/recipe-details/recipe-details.component';
 import { recipeResolver } from './features/recipe/resolvers/recipe.resolver';
 import { recipesResolver } from './features/recipe/resolvers/recipes.resolver';
+import { mealResolver } from './features/meal/resolvers/meal.resolver';
+import { mealsResolver } from './features/meal/resolvers/meals.resolver';
 
 export const routes: Routes = [
   {
@@ -87,6 +89,7 @@ export const routes: Routes = [
             path: 'manage/meals',
             component: MealsComponent,
             title: 'Meals',
+            resolve: { meals: mealsResolver },
           },
           {
             path: 'manage/recipes',
@@ -98,6 +101,7 @@ export const routes: Routes = [
             path: 'manage/meals/:id/details',
             component: MealDetailsComponent,
             title: 'Meal Details',
+            resolve: { meal: mealResolver },
           },
           {
             path: 'manage/recipes/:id/details',
@@ -109,6 +113,7 @@ export const routes: Routes = [
             path: 'manage/meals/:id/edit',
             component: EditMealComponent,
             title: 'Edit Meal',
+            resolve: { meal: mealResolver },
           },
           {
             path: 'manage/recipes/:id/edit',
