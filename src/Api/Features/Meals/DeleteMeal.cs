@@ -27,7 +27,7 @@ public sealed class DeleteMealController : ApiControllerBase
     /// A task which represents the asynchronous write operation.
     /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3}"/> object.
     /// </returns>
-    [HttpDelete("/api/manage/meals{id:int}")]
+    [HttpDelete("/api/manage/meals/{id:int}")]
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
