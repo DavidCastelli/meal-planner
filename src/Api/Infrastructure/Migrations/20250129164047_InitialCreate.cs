@@ -1,10 +1,14 @@
 ﻿using System;
 
+using Api.Domain.Tags;
+
 using Microsoft.EntityFrameworkCore.Migrations;
 
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
+
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
 namespace Api.Infrastructure.Migrations
 {
@@ -15,7 +19,8 @@ namespace Api.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
-                .Annotation("Npgsql:CollationDefinition:case_insensitive", "en-u-ks-primary,en-u-ks-primary,icu,False");
+                .Annotation("Npgsql:CollationDefinition:case_insensitive", "en-u-ks-primary,en-u-ks-primary,icu,False")
+                .Annotation("Npgsql:Enum:tag_type", "carnivore,vegetarian,vegan,breakfast,lunch,dinner,supper");
 
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
@@ -64,7 +69,7 @@ namespace Api.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Type = table.Column<int>(type: "integer", nullable: false)
+                    Type = table.Column<TagType>(type: "tag_type", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -391,6 +396,20 @@ namespace Api.Infrastructure.Migrations
                         principalTable: "SubIngredient",
                         principalColumns: new[] { "RecipeId", "Id" },
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "Tag",
+                columns: new[] { "Id", "Type" },
+                values: new object[,]
+                {
+                    { 1, TagType.Carnivore },
+                    { 2, TagType.Vegetarian },
+                    { 3, TagType.Vegan },
+                    { 4, TagType.Breakfast },
+                    { 5, TagType.Lunch },
+                    { 6, TagType.Dinner },
+                    { 7, TagType.Supper }
                 });
 
             migrationBuilder.CreateIndex(

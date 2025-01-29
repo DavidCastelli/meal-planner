@@ -1,5 +1,6 @@
 using Api.Common.Interfaces;
 using Api.Common.Options;
+using Api.Domain.Tags;
 using Api.Infrastructure;
 using Api.Infrastructure.Authorization;
 using Api.Infrastructure.Identity;
@@ -9,6 +10,8 @@ using FluentValidation;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+
+using Npgsql;
 
 namespace Api;
 
@@ -49,8 +52,12 @@ public static class ConfigureServiceCollectionExtensions
     /// <returns>The modified service collection.</returns>
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        var dataSourceBuilder = new NpgsqlDataSourceBuilder(configuration.GetConnectionString("DefaultConnection"));
+        dataSourceBuilder.MapEnum<TagType>();
+        var dataSource = dataSourceBuilder.Build();
+
         services.AddDbContext<MealPlannerContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+            options.UseNpgsql(dataSource));
 
         services.AddSingleton<IAuthorizationHandler, AuthorizationHandler>();
 

@@ -80,6 +80,7 @@ public sealed class MealPlannerContext : IdentityDbContext<ApplicationUser, Iden
         base.OnModelCreating(builder);
 
         builder.HasCollation("case_insensitive", "en-u-ks-primary", "icu", false);
+        builder.HasPostgresEnum<TagType>();
 
         builder.Entity<ApplicationUser>(b =>
         {
@@ -148,6 +149,18 @@ public sealed class MealPlannerContext : IdentityDbContext<ApplicationUser, Iden
                         .HasMaxLength(20);
                 });
             });
+        });
+
+        builder.Entity<Tag>(b =>
+        {
+            b.HasData(
+                new Tag { Id = 1, Type = TagType.Carnivore },
+                new Tag { Id = 2, Type = TagType.Vegetarian },
+                new Tag { Id = 3, Type = TagType.Vegan },
+                new Tag { Id = 4, Type = TagType.Breakfast },
+                new Tag { Id = 5, Type = TagType.Lunch },
+                new Tag { Id = 6, Type = TagType.Dinner },
+                new Tag { Id = 7, Type = TagType.Supper });
         });
 
         builder.Entity<Image>(b =>
