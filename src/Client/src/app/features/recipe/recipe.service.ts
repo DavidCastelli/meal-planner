@@ -94,7 +94,7 @@ export class RecipeService {
             const message = this.errorService.messages.pop();
             this.modalService.openNotificationModal(title, message);
           }
-          return EMPTY;
+          return of(false);
         }),
       );
   }
