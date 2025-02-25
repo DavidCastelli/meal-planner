@@ -1,0 +1,144 @@
+<div
+  class="meal-details-container"
+  [@slide]="(isSideBarOpen$ | async) ? 'right' : 'left'"
+>
+  <section class="meal-details">
+    <h1>Meal Details</h1>
+
+    <section class="info">
+      <h2>Info</h2>
+      <h3>{{ meal.title }}</h3>
+      <div class="info-image-container">
+        <img
+          class="info-image"
+          ngSrc="{{ meal.image ? meal.image.imageUrl : '27002.jpg' }}"
+          alt="Meal image."
+          fill
+          priority
+          crossorigin="use-credentials"
+        />
+      </div>
+    </section>
+
+    @if (meal.tags.length > 0) {
+      <section class="tags">
+        <h2>Tags</h2>
+        <div class="tags-content-container">
+          @for (tag of meal.tags; track tag.id) {
+            <div class="tags-content">{{ TagType[tag.tagType] }}</div>
+          }
+        </div>
+      </section>
+    }
+
+    <section class="details">
+      <h2>Details</h2>
+      <div class="details-content">
+        <ul>
+          <li>
+            <span>Total Prep Time:</span>
+            @if (recipesDetails.prepTime !== undefined) {
+              <span>{{ recipesDetails.prepTime }} minutes</span>
+            } @else {
+              <span>N/A</span>
+            }
+          </li>
+          <li>
+            <span>Total Cook Time:</span>
+            @if (recipesDetails.cookTime !== undefined) {
+              <span>{{ recipesDetails.cookTime }} minutes</span>
+            } @else {
+              <span>N/A</span>
+            }
+          </li>
+          <li>
+            <span>Total Time:</span>
+            @if (
+              recipesDetails.prepTime !== undefined ||
+              recipesDetails.cookTime !== undefined
+            ) {
+              <span
+                >{{
+                  (recipesDetails.prepTime ?? 0) +
+                    (recipesDetails.cookTime ?? 0)
+                }}
+                minutes</span
+              >
+            } @else {
+              <span>N/A</span>
+            }
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="nutrition">
+      <h2>Nutrition</h2>
+      <div class="nutrition-content">
+        <ul>
+          <li>
+            <span>Total Calories:</span>
+            @if (recipesNutrition.calories !== undefined) {
+              <span>{{ recipesNutrition.calories }}</span>
+            } @else {
+              <span>N/A</span>
+            }
+          </li>
+          <li>
+            <span>Total Fat:</span>
+            @if (recipesNutrition.fat !== undefined) {
+              <span>{{ recipesNutrition.fat }} g</span>
+            } @else {
+              <span>N/A</span>
+            }
+          </li>
+          <li>
+            <span>Total Carbs:</span>
+            @if (recipesNutrition.carbs !== undefined) {
+              <span>{{ recipesNutrition.carbs }} g</span>
+            } @else {
+              <span>N/A</span>
+            }
+          </li>
+          <li>
+            <span>Total Protein:</span>
+            @if (recipesNutrition.protein !== undefined) {
+              <span>{{ recipesNutrition.protein }} g</span>
+            } @else {
+              <span>N/A</span>
+            }
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="recipes">
+      <h2>Recipes</h2>
+      <nav class="recipes-content-container">
+        @for (recipe of meal.recipes; track recipe.id) {
+          <a
+            class="recipes-content"
+            routerLink="/manage/recipes/{{ recipe.id }}/details"
+          >
+            <h3>{{ recipe.title }}</h3>
+            <div class="recipes-image-container">
+              <img
+                class="recipes-image"
+                ngSrc="{{ recipe.imageUrl ? recipe.imageUrl : '27002.jpg' }}"
+                alt="Recipe image."
+                fill
+                crossorigin="use-credentials"
+              />
+            </div>
+            <span class="recipe-description-label">Description:</span>
+            @if (recipe.description) {
+              <p>{{ recipe.description }}</p>
+            } @else {
+              <span>N/A</span>
+            }
+          </a>
+        }
+      </nav>
+    </section>
+  </section>
+</div>

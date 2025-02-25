@@ -176,7 +176,9 @@
               <p>{{ tip.description }}</p>
             </div>
           } @empty {
-            <p>There are no tips for {{ recipe.title }}.</p>
+            <p class="tips-content-empty">
+              There are no tips for {{ recipe.title }}.
+            </p>
           }
         </div>
       </section>
@@ -192,7 +194,9 @@
               <span>{{ meal.title }}</span>
             </a>
           } @empty {
-            <p>{{ recipe.title }} does not belong to any meals.</p>
+            <p class="meals-content-empty">
+              {{ recipe.title }} does not belong to any meals.
+            </p>
           }
         </nav>
       </section>

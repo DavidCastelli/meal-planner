@@ -5,6 +5,7 @@ using Api.Common.Exceptions;
 using Api.Common.Interfaces;
 using Api.Domain;
 using Api.Domain.Meals;
+using Api.Domain.Recipes;
 using Api.Domain.Tags;
 using Api.Infrastructure;
 
@@ -86,7 +87,10 @@ public sealed class GetMealByIdHandler
                 m.Title,
                 m.Image == null ? null : new GetMealByIdImageDto(m.Image.Id, m.Image.StorageFileName, m.Image.DisplayFileName, m.Image.ImageUrl),
                 m.Tags.Select(t => new GetMealByIdTagDto(t.Id, t.Type)).ToList(),
-                m.Recipes.Select(r => new GetMealByIdRecipeDto(r.Id, r.Title, r.Description)).ToList(),
+                m.Recipes.Select(r => new GetMealByIdRecipeDto(
+                    r.Id, r.Title, r.Description, r.Image == null ? null : r.Image.ImageUrl,
+                    new GetMealByIdRecipeDetailsDto(r.RecipeDetails.PrepTime, r.RecipeDetails.CookTime, r.RecipeDetails.Servings),
+                    new GetMealByIdRecipeNutritionDto(r.RecipeNutrition.Calories, r.RecipeNutrition.Fat, r.RecipeNutrition.Carbs, r.RecipeNutrition.Protein))).ToList(),
                 m.ApplicationUserId))
             .AsSplitQuery()
             .SingleOrDefaultAsync(cancellationToken);
@@ -146,4 +150,25 @@ public sealed record GetMealByIdTagDto(int Id, TagType TagType);
 /// <param name="Id">The id of the recipe.</param>
 /// <param name="Title">The title of the recipe.</param>
 /// <param name="Description">The description of the recipe.</param>
-public sealed record GetMealByIdRecipeDto(int Id, string Title, string? Description);
+/// <param name="ImageUrl">A valid URL for the recipe image.</param>
+/// <param name="Details">The recipe details.</param>
+/// <param name="Nutrition">The recipe nutrition.</param>
+public sealed record GetMealByIdRecipeDto(int Id, string Title, string? Description, string? ImageUrl,
+    GetMealByIdRecipeDetailsDto Details, GetMealByIdRecipeNutritionDto Nutrition);
+
+/// <summary>
+/// The DTO for the recipe details to return to the client when getting a meal by id.
+/// </summary>
+/// <param name="PrepTime">The prep time.</param>
+/// <param name="CookTime">The cook time.</param>
+/// <param name="Servings">The number of servings.</param>
+public sealed record GetMealByIdRecipeDetailsDto(int? PrepTime, int? CookTime, int? Servings);
+
+/// <summary>
+/// The DTO for the recipe nutrition to return to the client when getting a recipe by id.
+/// </summary>
+/// <param name="Calories">The number of calories.</param>
+/// <param name="Fat">The amount of fat.</param>
+/// <param name="Carbs">The amount of carbs.</param>
+/// <param name="Protein">The amount of protein.</param>
+public sealed record GetMealByIdRecipeNutritionDto(int? Calories, int? Fat, int? Carbs, int? Protein);

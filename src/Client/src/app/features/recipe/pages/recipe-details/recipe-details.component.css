@@ -38,7 +38,7 @@ h3 {
     rgba(23, 126, 137, 1) 60%,
     rgba(8, 96, 95, 1) 90%
   );
-  border-radius: 15px;
+  border-radius: 15px 15px 0 0;
   display: grid;
   grid-template-columns: repeat(12, minmax(100px, 1fr));
   grid-auto-rows: minmax(100px, auto);
@@ -129,9 +129,6 @@ li > span:first-child {
 
 .sub-ingredients {
   background-color: rgb(61, 59, 142);
-  box-shadow: inset 0 0 5px 1px rgb(19, 27, 35);
-  border-top-left-radius: 5px;
-  border-bottom-left-radius: 5px;
   grid-row: 3;
   padding: 10px;
 }
@@ -182,9 +179,7 @@ li > span:first-child {
 
 .directions {
   background-color: rgb(34, 116, 165);
-  border-top-right-radius: 5px;
-  border-bottom-right-radius: 5px;
-  box-shadow: inset 0 0 5px 1px rgb(19, 27, 35);
+  border-left: 3px solid rgb(19, 27, 35);
   grid-column: span 6;
   grid-row: 3;
   padding: 10px;
@@ -215,15 +210,14 @@ li > span:first-child {
 }
 
 .tips-meals-container {
-  background: rgb(142, 147, 109);
+  background: rgb(19, 37, 35);
   background: linear-gradient(
-    150deg,
-    rgba(142, 147, 109, 1) 1%,
-    rgba(129, 108, 97, 1) 30%,
-    rgba(131, 115, 99, 1) 70%,
-    rgba(142, 147, 109, 1) 100%
+    315deg,
+    rgba(19, 37, 35, 1) 1%,
+    rgba(23, 126, 137, 1) 60%,
+    rgba(8, 96, 95, 1) 90%
   );
-  border-radius: 15px;
+  border-radius: 0 0 15px 15px;
   display: grid;
   grid-template-columns: repeat(12, minmax(100px, 1fr));
   grid-auto-rows: minmax(100px, auto);
@@ -246,6 +240,10 @@ li > span:first-child {
   word-break: break-word;
 }
 
+.tips-content-empty {
+  text-align: center;
+}
+
 .meals {
   display: flex;
   flex-flow: column;
@@ -255,7 +253,7 @@ li > span:first-child {
 
 .meals-content-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   grid-auto-rows: minmax(100px, auto);
   align-items: center;
   gap: 25px;
@@ -265,11 +263,16 @@ li > span:first-child {
 .meals-content {
   display: block;
   border: 2px solid rgb(19, 27, 35);
-  background-color: rgb(142, 147, 109);
+  background-color: rgb(129, 108, 97);
   border-radius: 7px;
   width: 100%;
   padding: 5px;
   text-align: center;
+}
+
+.meals-content-empty {
+  text-align: center;
+  grid-column: 2;
 }
 
 .meals-content {
