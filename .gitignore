@@ -482,3 +482,9 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# File storage
+meal-planner-assets/
+mp-image-storage/
+mp-temp-image-storage/
+
