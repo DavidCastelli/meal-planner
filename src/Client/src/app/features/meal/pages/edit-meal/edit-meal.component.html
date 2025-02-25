@@ -1,0 +1,103 @@
+<div
+  class="form-container"
+  [@slide]="(isSideBarOpen$ | async) ? 'right' : 'left'"
+>
+  <form [formGroup]="editMealForm" (ngSubmit)="submit()">
+    <h1>Edit Meal</h1>
+
+    <section class="info">
+      <h2>Info</h2>
+      <p class="info-title-container">
+        <label class="info-title-label" for="title">Title: </label>
+        <input id="title" type="text" formControlName="title" required />
+        <app-control-error
+          class="info-title-error-position"
+          controlPath="title"
+        ></app-control-error>
+      </p>
+      <p>
+        @if (image.value) {
+          <span>
+            <span class="span-label">Image: </span>
+            <button class="remove-button" type="button" (click)="removeImage()">
+              -
+            </button>
+            @if (image.invalid) {
+              <br />
+              @if (image.getError("empty")) {
+                <small>Invalid image, file is empty.</small>
+              } @else if (image.getError("max")) {
+                <small>Max upload size 5mb.</small>
+              } @else if (image.getError("permitted")) {
+                <small
+                  >Image must end in one of the following extensions: jpeg,
+                  jpg.</small
+                >
+              }
+            }
+          </span>
+        } @else {
+          <span>
+            <span class="span-label">Image: </span>
+            <label id="file-picker" class="add-button" for="image" tabindex="0"
+              >+</label
+            >
+            <input
+              id="image"
+              type="file"
+              accept="image/jpeg"
+              (change)="onImagePicked($event)"
+            />
+          </span>
+        }
+      </p>
+      <div class="info-img-container">
+        <img
+          class="info-img"
+          [ngSrc]="previewSrc"
+          alt="Meal image preview."
+          fill
+          priority
+        />
+      </div>
+      <span class="info-img-name">{{ previewFileName }}</span>
+    </section>
+
+    <app-tag-list-box
+      class="tags-position"
+      [tags]="tags"
+      [tagIds]="tagIds"
+    ></app-tag-list-box>
+
+    <app-recipe-slots
+      class="recipe-slots-position"
+      [recipeIds]="recipeIds"
+      [initialRecipes]="meal.recipes"
+    ></app-recipe-slots>
+
+    <section class="submit">
+      <p>
+        <button class="submit-button" type="submit" [disabled]="isSubmitting">
+          Save
+        </button>
+      </p>
+    </section>
+
+    @if (errorService.messages.length > 0) {
+      <app-form-errors class="errors-position"></app-form-errors>
+    }
+
+    <div class="form-bottom" #bottom></div>
+
+    @if (isRecipeSelectOpen$ | async) {
+      <app-recipe-select
+        class="recipe-select-position"
+        [recipeIds]="recipeIds"
+        (viewChanged)="scrollToRecipeSelected($event)"
+        @upDown
+        (@upDown.start)="recipeSelectAnimationStart()"
+        (@upDown.done)="recipeSelectAnimationDone()"
+      ></app-recipe-select>
+    }
+  </form>
+</div>
