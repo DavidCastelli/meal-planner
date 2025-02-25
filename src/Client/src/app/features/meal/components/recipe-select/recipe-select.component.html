@@ -1,0 +1,35 @@
+<section class="recipes">
+  <div class="recipes-select-button-container">
+    <button class="recipes-select-button" type="button" (click)="close()">
+      X
+    </button>
+  </div>
+  <h3>Select Recipes</h3>
+
+  <div
+    class="recipes-content-container"
+    cdkDropList
+    cdkDropListOrientation="mixed"
+    cdkDropListSortingDisabled
+    [cdkDropListData]="recipes"
+    [cdkDropListConnectedTo]="[
+      'recipe-slot-drop-list1',
+      'recipe-slot-drop-list2',
+      'recipe-slot-drop-list3',
+    ]"
+  >
+    @for (recipe of recipes; track recipe.id) {
+      <app-recipe-select-card
+        [title]="recipe.title"
+        [imageUrl]="recipe.imageUrl ? recipe.imageUrl : '/27002.jpg'"
+        cdkDrag
+      ></app-recipe-select-card>
+    } @empty {
+      <p class="empty">
+        No recipes found... You must create a recipe before creating a meal.
+      </p>
+    }
+  </div>
+
+  <div #recipeSelectBottom></div>
+</section>

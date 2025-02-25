@@ -22,6 +22,7 @@ import { recipeResolver } from './features/recipe/resolvers/recipe.resolver';
 import { recipesResolver } from './features/recipe/resolvers/recipes.resolver';
 import { mealResolver } from './features/meal/resolvers/meal.resolver';
 import { mealsResolver } from './features/meal/resolvers/meals.resolver';
+import { tagsResolver } from './features/meal/resolvers/tags.resolver';
 
 export const routes: Routes = [
   {
@@ -78,6 +79,8 @@ export const routes: Routes = [
             path: 'manage/meals/create',
             component: CreateMealComponent,
             title: 'Create Meal',
+            canDeactivate: [exitGuard],
+            resolve: { tags: tagsResolver },
           },
           {
             path: 'manage/recipes/create',
@@ -113,7 +116,8 @@ export const routes: Routes = [
             path: 'manage/meals/:id/edit',
             component: EditMealComponent,
             title: 'Edit Meal',
-            resolve: { meal: mealResolver },
+            canDeactivate: [exitGuard],
+            resolve: { meal: mealResolver, tags: tagsResolver },
           },
           {
             path: 'manage/recipes/:id/edit',

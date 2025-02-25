@@ -1,0 +1,34 @@
+<section class="tags">
+  <h2>Tags</h2>
+
+  <label class="select-tags-list-box-label" id="select-tags-label" for="tags"
+    >Select up to 3 tags:</label
+  >
+  <ul
+    id="tags"
+    class="select-tags-list-box"
+    cdkListbox
+    [formControl]="tagIds"
+    cdkListboxMultiple
+    aria-labelledby="select-tags-label"
+  >
+    @for (tag of tags; track tag.id) {
+      <li
+        class="select-tags-option"
+        [cdkOption]="tag.id"
+        [cdkOptionDisabled]="
+          tagIds.value.length >= 3 && !tagIds.value.includes(tag.id)
+        "
+      >
+        {{ TagType[tag.tagType] }}
+      </li>
+    }
+  </ul>
+
+  <div class="selected-tags-container">
+    <span>Selected tags:</span>
+    @for (tag of getSelectedTags(); track tag.id) {
+      <div class="selected-tag">{{ TagType[tag.tagType] }}</div>
+    }
+  </div>
+</section>
