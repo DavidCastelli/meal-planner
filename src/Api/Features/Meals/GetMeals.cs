@@ -19,7 +19,7 @@ public sealed class GetMealsController : ApiControllerBase
     /// Action method responsible for getting all meals belonging to the current user.
     /// </summary>
     /// <param name="handler">The handler for the request.</param>
-    /// <param name="cancellationToken">The cancellation for the request.</param>
+    /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <returns>
     /// A task which represents the asynchronous read operation.
     /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2}"/> object.

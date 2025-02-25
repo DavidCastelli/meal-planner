@@ -1,0 +1,17 @@
+<section class="meals" [@slide]="(isSideBarOpen$ | async) ? 'right' : 'left'">
+  <h1>Meals</h1>
+  <button class="create-button" type="button" (click)="create()">Create</button>
+  <div class="meals-content-container">
+    @for (meal of meals; track meal.id) {
+      <app-card
+        [type]="CardType.MEAL"
+        [id]="meal.id"
+        [title]="meal.title"
+        [imageUrl]="meal.image?.imageUrl"
+        (deleted)="deleteMeal($event)"
+      ></app-card>
+    } @empty {
+      <p class="empty">No meals found... Create your first!</p>
+    }
+  </div>
+</section>

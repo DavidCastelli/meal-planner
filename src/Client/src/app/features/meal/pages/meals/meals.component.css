@@ -1,0 +1,52 @@
+:host {
+  display: block;
+  background-color: rgb(23, 126, 137);
+  min-height: 100svh;
+}
+
+.meals {
+  position: relative; /* Needed for animation */
+  overflow: hidden;
+  padding: 15px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.meals h1 {
+  display: inline-block;
+  color: rgb(250, 121, 33);
+  text-shadow: 1px 1px 1px rgb(19, 27, 35);
+  margin-right: 10px;
+}
+
+.meals-content-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-auto-rows: minmax(100px, auto);
+  gap: 25px;
+  margin-top: 15px;
+}
+
+.create-button {
+  background-color: rgb(61, 59, 142);
+  border: 2px solid rgb(252, 247, 255);
+  color: rgb(252, 247, 255);
+  border-radius: 15px;
+  font-size: 1.2em;
+  font-weight: bold;
+  padding: 5px 20px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.create-button:hover {
+  background-color: rgb(61, 59, 142, 0.8);
+  border: 2px solid rgb(252, 247, 255, 0.8);
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2em;
+}

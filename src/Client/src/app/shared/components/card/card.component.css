@@ -8,7 +8,8 @@
   align-items: center;
   background-color: rgb(3, 252, 186);
   border: 3px solid rgb(19, 27, 35);
-  border-radius: 15px;
+  border-radius: 25px;
+  box-shadow: inset 0 0 3px 1px rgb(19, 27, 35);
   padding: 10px;
 }
 
@@ -18,9 +19,11 @@
 }
 
 .card-title {
+  border-bottom: 1px solid rgb(19, 27, 35);
   margin-top: 0;
   color: rgb(252, 247, 255);
   text-shadow: 1px 1px 1px rgb(19, 27, 35);
+  font-style: italic;
 }
 
 .card-image-container {
