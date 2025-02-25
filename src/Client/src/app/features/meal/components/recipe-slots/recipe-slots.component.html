@@ -1,0 +1,57 @@
+<section class="recipes">
+  <div class="recipes-heading-container">
+    <h2>Recipes</h2>
+    <button
+      class="recipes-select-button"
+      type="button"
+      (click)="select()"
+      [disabled]="(isAnimationDone$ | async) === false"
+    >
+      Select
+    </button>
+  </div>
+
+  <div class="recipes-content-container">
+    <app-recipe-slot
+      id="recipe-slot-drop-list1"
+      [isEmpty]="recipeSlot1 === undefined"
+      [title]="recipeSlot1?.title ?? ''"
+      [imageUrl]="recipeSlot1?.imageUrl ?? '/27002.jpg'"
+      (removed)="remove(recipeSlots1)"
+      cdkDropList
+      [cdkDropListData]="recipeSlots1"
+      (cdkDropListDropped)="drop($event)"
+      [cdkDropListEnterPredicate]="emptyPredicate"
+    ></app-recipe-slot>
+
+    <app-recipe-slot
+      id="recipe-slot-drop-list2"
+      [isEmpty]="recipeSlot2 === undefined"
+      [title]="recipeSlot2?.title ?? ''"
+      [imageUrl]="recipeSlot2?.imageUrl ?? '/27002.jpg'"
+      (removed)="remove(recipeSlots2)"
+      cdkDropList
+      [cdkDropListData]="recipeSlots2"
+      (cdkDropListDropped)="drop($event)"
+      [cdkDropListEnterPredicate]="emptyPredicate"
+    ></app-recipe-slot>
+
+    <app-recipe-slot
+      id="recipe-slot-drop-list3"
+      [isEmpty]="recipeSlot3 === undefined"
+      [title]="recipeSlot3?.title ?? ''"
+      [imageUrl]="recipeSlot3?.imageUrl ?? '/27002.jpg'"
+      (removed)="remove(recipeSlots3)"
+      cdkDropList
+      [cdkDropListData]="recipeSlots3"
+      (cdkDropListDropped)="drop($event)"
+      [cdkDropListEnterPredicate]="emptyPredicate"
+    ></app-recipe-slot>
+
+    <app-control-error
+      class="recipes-error-position"
+      controlPath="recipeIds"
+      [customErrors]="{ required: 'A meal must contain at least one recipe.' }"
+    ></app-control-error>
+  </div>
+</section>

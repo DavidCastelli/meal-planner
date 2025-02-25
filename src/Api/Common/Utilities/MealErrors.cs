@@ -40,4 +40,18 @@ public static class MealErrors
     /// <returns>An <see cref="Error"/> which contains an error code and description.</returns>
     public static Error MaxRecipes() => new Error(
         "Meals.MaxRecipes", $"Meal cannot have more than {MaxRecipesCount} recipes.");
+
+    /// <summary>
+    /// Error message that is used when a meal is assigned to more than one recipe with the same id.
+    /// </summary>
+    /// <returns>An <see cref="Error"/> which contains an error code and description.</returns>
+    public static Error DuplicateRecipeId() => new Error(
+        "Meals.DuplicateRecipeId", $"Meal cannot be assigned the same recipe id more than once.");
+
+    /// <summary>
+    /// Error message that is used when a meal is assigned to more than one tag with the same id.
+    /// </summary>
+    /// <returns>An <see cref="Error"/> which contains an error code and description.</returns>
+    public static Error DuplicateTagId() => new Error(
+        "Meals.DuplicateTagId", $"Meal cannot be assigned the same tag id more than once.");
 }

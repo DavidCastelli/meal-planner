@@ -1,0 +1,21 @@
+<section class="recipe-slot-card">
+  <div class="recipe-slot-card-heading-container">
+    <h4>{{ title }}</h4>
+    <button
+      class="recipe-slot-card-remove-button"
+      type="button"
+      (click)="remove()"
+    >
+      X
+    </button>
+  </div>
+  <div class="recipe-slot-card-img-container">
+    <img
+      class="recipe-slot-card-img"
+      ngSrc="{{ imageUrl }}"
+      alt="Recipe image."
+      fill
+      crossorigin="use-credentials"
+    />
+  </div>
+</section>

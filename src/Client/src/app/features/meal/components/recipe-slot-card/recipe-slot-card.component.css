@@ -1,0 +1,59 @@
+:host {
+  display: block;
+  user-select: none;
+}
+
+.recipe-slot-card {
+  background-color: rgb(34, 116, 165);
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  width: 350px;
+  height: 350px;
+  padding: 25px;
+  box-sizing: border-box;
+}
+
+.recipe-slot-card-heading-container {
+  display: flex;
+  align-items: center;
+  margin: 0 0 10px;
+  padding: 5px;
+}
+
+.recipe-slot-card-heading-container > h4 {
+  display: inline-block;
+  font-style: italic;
+  margin: 0 10px 0 0;
+}
+
+.recipe-slot-card-remove-button {
+  background-color: rgb(250, 121, 33);
+  border: 2px solid rgb(250, 121, 33);
+  border-radius: 3px;
+  color: rgb(252, 247, 255);
+  box-shadow: 1px 1px 1px rgb(19, 27, 35);
+  margin-left: auto;
+  margin-top: 0;
+  padding: 1px 5px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.recipe-slot-card-remove-button:hover {
+  background-color: rgb(250, 121, 33, 0.8);
+  border: 2px solid rgb(250, 121, 33, 0.2);
+  box-shadow: 1px 1px 1px rgb(19, 27, 35, 0.8);
+}
+
+.recipe-slot-card-img-container {
+  position: relative;
+  border: 3px solid rgb(61, 59, 142);
+  width: 250px;
+  height: 250px;
+}
+
+.recipe-slot-card-img {
+  object-fit: cover;
+}

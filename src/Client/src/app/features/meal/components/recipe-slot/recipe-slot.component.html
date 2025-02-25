@@ -1,0 +1,15 @@
+<div class="recipe-slot">
+  @if (!isEmpty) {
+    <app-recipe-slot-card
+      [title]="title"
+      [imageUrl]="imageUrl"
+      (removed)="remove()"
+    ></app-recipe-slot-card>
+  } @else {
+    @if (isRecipeSelectOpen$ | async) {
+      <p class="empty">Drop here</p>
+    } @else {
+      <p class="empty">Select a recipe</p>
+    }
+  }
+</div>

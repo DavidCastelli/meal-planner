@@ -279,6 +279,16 @@ public sealed class CreateMealHandler
             errors.Add(MealErrors.MaxRecipes());
         }
 
+        if (request.RecipeIds.Distinct().Count() != request.RecipeIds.Count)
+        {
+            errors.Add(MealErrors.DuplicateRecipeId());
+        }
+
+        if (request.TagIds.Distinct().Count() != request.TagIds.Count)
+        {
+            errors.Add(MealErrors.DuplicateTagId());
+        }
+
         if (!request.RecipeIds.All(validRecipeIds.Contains))
         {
             errors.Add(RecipeErrors.DoesNotBelongToUser(currentUserId));
