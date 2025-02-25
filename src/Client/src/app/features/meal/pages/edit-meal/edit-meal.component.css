@@ -1,0 +1,170 @@
+:host {
+  display: block;
+  background-color: rgb(23, 126, 137);
+}
+
+.form-container {
+  position: relative; /* Needed for animation */
+  padding: 15px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+form {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(100px, 1fr));
+  grid-auto-rows: auto;
+}
+
+h1 {
+  color: rgb(250, 121, 33);
+  text-shadow: 1px 1px 1px rgb(19, 27, 35);
+  text-align: center;
+  grid-column: 1 / 13;
+  grid-row: 1;
+}
+
+.info {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  grid-column: 4 / 10;
+  grid-row: 2;
+}
+
+.info-title-container {
+  display: grid;
+  grid-template-columns: auto 1fr;
+}
+
+.info-title-label {
+  font-size: 1.2em;
+  margin-right: 5px;
+}
+
+.info-title-error-position {
+  grid-column: 2;
+}
+
+#file-picker {
+  font-family: system-ui;
+}
+
+.info-img-container {
+  position: relative;
+  border: 3px solid rgb(61, 59, 142);
+  width: 350px;
+  height: 350px;
+}
+
+.info-img {
+  object-fit: cover;
+  user-select: none;
+}
+
+.info-img-name {
+  text-align: center;
+}
+
+.tags-position {
+  grid-column: 1 / 13;
+  grid-row: 3;
+}
+
+.recipe-slots-position {
+  grid-column: 1 / 13;
+  grid-row: 4;
+}
+
+.submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  grid-column: 1 / 13;
+  grid-row: 5;
+}
+
+.submit-button {
+  background-color: rgb(61, 59, 142);
+  border: 2px solid;
+  color: rgb(252, 247, 255);
+  border-radius: 15px;
+  font-size: 1.2em;
+  padding: 10px 30px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.submit-button:hover {
+  background-color: rgb(61, 59, 142, 0.8);
+}
+
+.form-bottom {
+  grid-column: 1 / 13;
+  grid-row: 7;
+}
+
+.recipe-select-position {
+  grid-column: 1 / 13;
+  grid-row: 8;
+}
+
+.errors-position {
+  grid-column: 1 / 13;
+  grid-row: 6;
+}
+
+small {
+  color: rgb(255, 15, 35);
+  text-shadow: 1px 1px 1px rgb(19, 27, 35);
+}
+
+input[type="file"] {
+  display: none;
+}
+
+input[type="text"] {
+  border: 1px solid rgb(0, 0, 0);
+  text-align: center;
+  font-size: 1.2em;
+}
+
+.span-label {
+  font-size: 1.2em;
+}
+
+.add-button {
+  background-color: rgb(61, 59, 142);
+  border: 2px solid rgb(61, 59, 142);
+  border-radius: 3px;
+  color: rgb(252, 247, 255);
+  box-shadow: 2px 2px 2px rgb(8, 96, 95);
+  padding: 2px 7px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.add-button:hover {
+  background-color: rgb(61, 59, 142, 0.8);
+  border: 2px solid rgb(61, 59, 142, 0.2);
+  box-shadow: 2px 2px 2px rgb(8, 96, 95, 0.8);
+}
+
+.remove-button {
+  background-color: rgb(250, 121, 33);
+  border: 2px solid rgb(250, 121, 33);
+  border-radius: 3px;
+  color: rgb(252, 247, 255);
+  box-shadow: 2px 2px 2px rgb(8, 96, 95);
+  padding: 2px 9px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.remove-button:hover {
+  background-color: rgb(250, 121, 33, 0.8);
+  border: 2px solid rgb(250, 121, 33, 0.2);
+  box-shadow: 2px 2px 2px rgb(8, 96, 95, 0.8);
+}
