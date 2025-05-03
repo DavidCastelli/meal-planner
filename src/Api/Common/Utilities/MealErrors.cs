@@ -21,6 +21,11 @@ public static class MealErrors
     public const int MaxRecipesCount = 3;
 
     /// <summary>
+    /// Constant defining the maximum number of meals that can be scheduled to a specific day of the week.
+    /// </summary>
+    public const int MaxScheduleCount = 1;
+
+    /// <summary>
     /// Error message that is used when a user attempts to create a meal and exceeds the maximum number permitted <see cref="MaxMealsCount"/>.
     /// </summary>
     /// <returns>An <see cref="Error"/> which contains an error code and description.</returns>
@@ -40,6 +45,13 @@ public static class MealErrors
     /// <returns>An <see cref="Error"/> which contains an error code and description.</returns>
     public static Error MaxRecipes() => new Error(
         "Meals.MaxRecipes", $"Meal cannot have more than {MaxRecipesCount} recipes.");
+    
+    /// <summary>
+    /// Error message that is used when more than the maximum number of allowed meals <see cref="MaxScheduleCount"/> are scheduled on the same day.
+    /// </summary>
+    /// <returns>An <see cref="Error"/> which contains an error code and description.</returns>
+    public static Error MaxScheduled() => new Error(
+        "Meals.MaxScheduled", $"Cannot have more than {MaxScheduleCount} meals scheduled on the same day.");
 
     /// <summary>
     /// Error message that is used when a meal is assigned to more than one recipe with the same id.

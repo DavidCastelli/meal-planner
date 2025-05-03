@@ -2,6 +2,7 @@ using System.Net.Mime;
 
 using Api.Common;
 using Api.Common.Interfaces;
+using Api.Domain.Meals;
 using Api.Infrastructure;
 
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -20,6 +21,10 @@ public sealed class GetMealsController : ApiControllerBase
     /// </summary>
     /// <param name="handler">The handler for the request.</param>
     /// <param name="cancellationToken">The cancellation token for the request.</param>
+    /// <param name="scheduled">
+    /// Optional query parameter which filters results to show only meals belonging to the current user which have been schedule to a specific day of the week.
+    /// Is false by default.
+    /// </param>
     /// <returns>
     /// A task which represents the asynchronous read operation.
     /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2}"/> object.
@@ -28,9 +33,9 @@ public sealed class GetMealsController : ApiControllerBase
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(IEnumerable<GetMealsDto>), StatusCodes.Status200OK, MediaTypeNames.Application.Json)]
     [Tags("Manage Meals")]
-    public async Task<Results<UnauthorizedHttpResult, Ok<IEnumerable<GetMealsDto>>>> GetAsync(GetMealsHandler handler, CancellationToken cancellationToken)
+    public async Task<Results<UnauthorizedHttpResult, Ok<IEnumerable<GetMealsDto>>>> GetAsync(GetMealsHandler handler, CancellationToken cancellationToken, bool scheduled = false)
     {
-        var getMealsDtos = await handler.HandleAsync(cancellationToken);
+        var getMealsDtos = await handler.HandleAsync(scheduled, cancellationToken);
 
         return TypedResults.Ok(getMealsDtos);
     }
@@ -58,20 +63,26 @@ public sealed class GetMealsHandler
     /// <summary>
     /// Handles the database operations necessary to get all meals belonging to the current user.
     /// </summary>
+    /// <param name="scheduled">Flag which determines if results are filtered to show only meals belonging to the current user which have been schedule to a specific day of the week.</param>
     /// <param name="cancellationToken">The cancellation token of the request.</param>
     /// <returns>
     /// A task which represents the asynchronous read operation.
     /// The result of the task upon completion returns an enumerable <see cref="GetMealsDto"/>.
     /// </returns>
-    public async Task<IEnumerable<GetMealsDto>> HandleAsync(CancellationToken cancellationToken)
+    public async Task<IEnumerable<GetMealsDto>> HandleAsync(bool scheduled, CancellationToken cancellationToken)
     {
         var meals = await _dbContext.Meal
             .Where(m => m.ApplicationUserId == _userContext.UserId)
             .Select(m =>
                 new GetMealsDto(m.Id, m.Title, m.Image == null ? null
-                    : new GetMealsImageDto(m.Image.Id, m.Image.StorageFileName, m.Image.DisplayFileName, m.Image.ImageUrl))
+                    : new GetMealsImageDto(m.Image.Id, m.Image.StorageFileName, m.Image.DisplayFileName, m.Image.ImageUrl), m.Schedule)
             )
             .ToListAsync(cancellationToken);
+
+        if (scheduled)
+        {
+            meals = meals.Where(m => m.Schedule != Schedule.None).ToList();
+        }
 
         return meals;
     }
@@ -83,7 +94,8 @@ public sealed class GetMealsHandler
 /// <param name="Id">The id of the meal.</param>
 /// <param name="Title">The title of the meal.</param>
 /// <param name="Image">The image of the meal.</param>
-public sealed record GetMealsDto(int Id, string Title, GetMealsImageDto? Image);
+/// <param name="Schedule">The day of the week on which the meal is scheduled.</param>
+public sealed record GetMealsDto(int Id, string Title, GetMealsImageDto? Image, Schedule Schedule);
 
 /// <summary>
 /// The DTO for an image to return to the client when getting all meals belonging to the current user.

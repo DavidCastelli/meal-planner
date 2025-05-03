@@ -86,6 +86,7 @@ public sealed class GetMealByIdHandler
                 m.Id,
                 m.Title,
                 m.Image == null ? null : new GetMealByIdImageDto(m.Image.Id, m.Image.StorageFileName, m.Image.DisplayFileName, m.Image.ImageUrl),
+                m.Schedule,
                 m.Tags.Select(t => new GetMealByIdTagDto(t.Id, t.Type)).ToList(),
                 m.Recipes.Select(r => new GetMealByIdRecipeDto(
                     r.Id, r.Title, r.Description, r.Image == null ? null : r.Image.ImageUrl,
@@ -123,10 +124,11 @@ public sealed class GetMealByIdHandler
 /// <param name="Id">The id of the meal.</param>
 /// <param name="Title">The title of the meal.</param>
 /// <param name="Image">The image of the meal.</param>
+/// <param name="Schedule">The day of the week on which the meal is scheduled.</param>
 /// <param name="Tags">A collection of tags belonging to the meal.</param>
 /// <param name="Recipes">A collection of recipes belonging to the meal.</param>
 /// <param name="ApplicationUserId">The application user id of the user who the meal belongs to.</param>
-public sealed record GetMealByIdDto(int Id, string Title, GetMealByIdImageDto? Image, ICollection<GetMealByIdTagDto> Tags, ICollection<GetMealByIdRecipeDto> Recipes, int ApplicationUserId) : IAuthorizable;
+public sealed record GetMealByIdDto(int Id, string Title, GetMealByIdImageDto? Image, Schedule Schedule, ICollection<GetMealByIdTagDto> Tags, ICollection<GetMealByIdRecipeDto> Recipes, int ApplicationUserId) : IAuthorizable;
 
 /// <summary>
 /// The DTO for an image to return to the client when getting a meal by id.
