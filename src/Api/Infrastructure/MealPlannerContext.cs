@@ -81,6 +81,7 @@ public sealed class MealPlannerContext : IdentityDbContext<ApplicationUser, Iden
 
         builder.HasCollation("case_insensitive", "en-u-ks-primary", "icu", false);
         builder.HasPostgresEnum<TagType>();
+        builder.HasPostgresEnum<Schedule>();
 
         builder.Entity<ApplicationUser>(b =>
         {

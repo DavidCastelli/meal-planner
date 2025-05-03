@@ -1,5 +1,6 @@
 using Api.Common.Interfaces;
 using Api.Common.Options;
+using Api.Domain.Meals;
 using Api.Domain.Tags;
 using Api.Infrastructure;
 using Api.Infrastructure.Authorization;
@@ -54,6 +55,7 @@ public static class ConfigureServiceCollectionExtensions
     {
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(configuration.GetConnectionString("DefaultConnection"));
         dataSourceBuilder.MapEnum<TagType>();
+        dataSourceBuilder.MapEnum<Schedule>();
         var dataSource = dataSourceBuilder.Build();
 
         services.AddDbContext<MealPlannerContext>(options =>

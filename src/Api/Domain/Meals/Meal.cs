@@ -25,6 +25,15 @@ public sealed class Meal : ManageableEntity
         Tags = tags;
         Recipes = recipes;
     }
+    
+    /// <summary>
+    /// Gets or sets when the meal is scheduled for the week.
+    /// </summary>
+    /// <value>
+    /// A schedule enum.
+    /// </value>
+    /// <see cref="Meals.Schedule"/>
+    public Schedule Schedule { get; set; }
 
     /// <summary>
     /// Gets a list of tags belonging to the meal.
