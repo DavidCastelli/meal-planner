@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 
 using Api;
 using Api.Common.Exceptions;
+using Api.Common.Formatters;
 using Api.Infrastructure.Authorization;
 using Api.Infrastructure.Identity;
 
@@ -18,6 +19,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers(options =>
 {
+    options.InputFormatters.Insert(0, JsonPatchInputFormatter.GetJsonPatchInputFormatter());
+    
     var policy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
         .Build();
