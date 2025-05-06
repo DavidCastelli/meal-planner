@@ -100,9 +100,10 @@ public sealed class UpdateMealController : ApiControllerBase
 /// </summary>
 /// <param name="Id">The id of the meal to update.</param>
 /// <param name="Title">The title of the meal.</param>
+/// <param name="Schedule">The day of the week on which the meal is scheduled.</param>
 /// <param name="TagIds">A collection of tag ids to be included in the meal.</param>
 /// <param name="RecipeIds">A collection of recipe ids to be included in the meal.</param>
-public sealed record UpdateMealRequest(int Id, string Title, ICollection<int> TagIds, ICollection<int> RecipeIds);
+public sealed record UpdateMealRequest(int Id, string Title, Schedule Schedule, ICollection<int> TagIds, ICollection<int> RecipeIds);
 
 internal sealed class UpdateMealRequestValidator : AbstractValidator<UpdateMealRequest>
 {
@@ -405,5 +406,5 @@ public sealed class UpdateMealHandler
         return [.. errors];
     }
 
-    private static Meal FromDto(UpdateMealRequest request, int userId) => new() { Id = request.Id, Title = request.Title, ApplicationUserId = userId };
+    private static Meal FromDto(UpdateMealRequest request, int userId) => new() { Id = request.Id, Schedule = request.Schedule, Title = request.Title, ApplicationUserId = userId };
 }

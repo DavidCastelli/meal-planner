@@ -23,11 +23,8 @@ public sealed class ClearScheduledMealsController : ApiControllerBase
     /// Action method responsible for clearing the scheduled meals belonging to the current user.
     /// </summary>
     /// <remarks>
-    /// This action method only supports the remove operation when patching.
-    /// Further, it only supports a single operation at a time and may patch only the schedule property of a meal.
-    /// The patch is applied to all meals the current user owns which are currently scheduled.
+    /// This action method by default sets the schedule property of all scheduled meals belonging to the current user to Schedule.None.
     /// </remarks>
-    /// <param name="document">The patch document.</param>
     /// <param name="handler">The handler for the request.</param>
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <returns>
@@ -37,43 +34,16 @@ public sealed class ClearScheduledMealsController : ApiControllerBase
     [HttpPatch("/api/manage/meals/schedule")]
     [Consumes(MediaTypeNames.Application.JsonPatch)]
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(string), StatusCodes.Status422UnprocessableEntity, MediaTypeNames.Text.Plain)]
-    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
     [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
     [Tags("Manage Meals")]
-    public async Task<Results<UnauthorizedHttpResult, UnprocessableEntity<string>, BadRequest<ValidationProblemDetails>, Ok>> PatchAsync(
-        JsonPatchDocument<ClearScheduledMealsRequest> document, ClearScheduledMealsHandler handler, CancellationToken cancellationToken)
+    public async Task<Results<UnauthorizedHttpResult, Ok>> PatchAsync(
+         ClearScheduledMealsHandler handler, CancellationToken cancellationToken)
     {
-        if (document.Operations.Count != 1)
-        {
-            return TypedResults.UnprocessableEntity("Only one operation is allowed.");
-        }
-
-        if (document.Operations[0].OperationType != OperationType.Remove)
-        {
-            return TypedResults.UnprocessableEntity("Only the remove operation is allowed.");
-        }
-
-        var request = new ClearScheduledMealsRequest(Schedule.None);
-        document.ApplyTo(request, ModelState);
-
-        if (!ModelState.IsValid)
-        {
-            var validationProblemDetails = new ValidationProblemDetails(ModelState);
-            return TypedResults.BadRequest(validationProblemDetails);
-        }
-        
         await handler.HandleAsync(cancellationToken);
 
         return TypedResults.Ok();
     }
 }
-
-/// <summary>
-/// The request to clear the scheduled meals belonging to the current user.
-/// </summary>
-/// <param name="Schedule">The schedule of the meal to patch.</param>
-public sealed record ClearScheduledMealsRequest(Schedule Schedule);
 
 /// <summary>
 /// The handler that handles clearings the scheduled meals belonging to the current user.
@@ -100,15 +70,8 @@ public sealed class ClearScheduledMealsHandler
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     public async Task HandleAsync(CancellationToken cancellationToken)
     {
-        var meals = await _dbContext.Meal
+        await _dbContext.Meal
             .Where(m => m.Schedule != Schedule.None && m.ApplicationUserId == _userContext.UserId)
-            .ToListAsync(cancellationToken);
-
-        foreach (var meal in meals)
-        {
-            meal.Schedule = Schedule.None;
-        }
-        
-        await _dbContext.SaveChangesAsync(cancellationToken);
+            .ExecuteUpdateAsync(setters => setters.SetProperty(m => m.Schedule, Schedule.None), cancellationToken);
     }
 }

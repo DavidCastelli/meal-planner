@@ -44,7 +44,7 @@ public sealed class ScheduleMealByIdController : ApiControllerBase
     [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
     [Tags("Manage Meals")]
     public async
-        Task<Results<UnauthorizedHttpResult, UnprocessableEntity<string>,  BadRequest<ValidationProblemDetails>, NotFound, Ok>> PatchAsync(
+        Task<Results<UnauthorizedHttpResult, UnprocessableEntity<string>, BadRequest<ValidationProblemDetails>, NotFound, Ok>> PatchAsync(
             int id, JsonPatchDocument<ScheduleMealByIdRequest> document, ScheduleMealByIdHandler handler, CancellationToken cancellationToken)
     {
         if (document.Operations.Count != 1)
@@ -52,11 +52,11 @@ public sealed class ScheduleMealByIdController : ApiControllerBase
             return TypedResults.UnprocessableEntity("Only one operation is allowed.");
         }
 
-        if (document.Operations[0].OperationType != OperationType.Add || document.Operations[0].OperationType != OperationType.Remove)
+        if (document.Operations[0].OperationType != OperationType.Add && document.Operations[0].OperationType != OperationType.Remove)
         {
             return TypedResults.UnprocessableEntity("Only the add or remove operation is allowed.");
         }
-        
+
         var request = new ScheduleMealByIdRequest(Schedule.None);
         document.ApplyTo(request, ModelState);
 
@@ -65,7 +65,7 @@ public sealed class ScheduleMealByIdController : ApiControllerBase
             var validationProblemDetails = new ValidationProblemDetails(ModelState);
             return TypedResults.BadRequest(validationProblemDetails);
         }
-        
+
         await handler.HandleAsync(id, request, cancellationToken);
 
         return TypedResults.Ok();
@@ -100,18 +100,18 @@ public sealed class ScheduleMealByIdHandler
         _userContext = userContext;
         _authorizationService = authorizationService;
     }
-    
+
     /// <summary>
     /// Handles the database operations necessary to patch the schedule of a meal.
     /// </summary>
     /// <param name="id">The id of the meal to patch.</param>
-    /// <param name="byIdRequest">The request.</param>
+    /// <param name="request">The request.</param>
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <exception cref="MealNotFoundException">Is thrown if the meal could not be found in the data store.</exception>
-    /// <exception cref="MealValidationException">Is thrown if validation fails on the <paramref name="byIdRequest"/>.</exception>
+    /// <exception cref="MealValidationException">Is thrown if validation fails on the <paramref name="request"/>.</exception>
     /// <exception cref="ForbiddenException">Is thrown if the user is authenticated but lacks permission to access the resource.</exception>
     /// <exception cref="UnauthorizedException">Is thrown if the user lacks the necessary authentication credentials.</exception>
-    public async Task HandleAsync(int id, ScheduleMealByIdRequest byIdRequest,
+    public async Task HandleAsync(int id, ScheduleMealByIdRequest request,
         CancellationToken cancellationToken)
     {
         var meal = await _dbContext.Meal
@@ -126,34 +126,35 @@ public sealed class ScheduleMealByIdHandler
 
         if (authorizationResult.Succeeded)
         {
-            if (meal.Schedule == byIdRequest.Schedule)
+            if (meal.Schedule == request.Schedule)
             {
                 return;
             }
 
-            if (byIdRequest.Schedule == Schedule.None)
+            if (request.Schedule == Schedule.None)
             {
-                _dbContext.Entry(meal).CurrentValues.SetValues(byIdRequest);
-            
+                meal.Schedule = Schedule.None;
+
                 await _dbContext.SaveChangesAsync(cancellationToken);
-                
+
                 return;
             }
-            
+
             var scheduledCount = _dbContext.Meal
-                .Count(m => m.Schedule == byIdRequest.Schedule && m.ApplicationUserId == _userContext.UserId);
-            
+                .Count(m => m.Schedule == request.Schedule && m.ApplicationUserId == _userContext.UserId);
+
             var validationErrors = ValidateMeal(scheduledCount);
 
             if (validationErrors.Length != 0)
             {
                 throw new MealValidationException(validationErrors);
             }
-            
-            _dbContext.Entry(meal).CurrentValues.SetValues(byIdRequest);
-            
+
+            meal.Schedule = request.Schedule;
+
             await _dbContext.SaveChangesAsync(cancellationToken);
-        } else if (_userContext.IsAuthenticated)
+        }
+        else if (_userContext.IsAuthenticated)
         {
             throw new ForbiddenException();
         }
@@ -166,12 +167,12 @@ public sealed class ScheduleMealByIdHandler
     private static Error[] ValidateMeal(int scheduledCount)
     {
         List<Error> errors = [];
-        
+
         if (scheduledCount + 1 > MealErrors.MaxScheduleCount)
         {
             errors.Add(MealErrors.MaxScheduled());
         }
 
-        return [..errors];
+        return [.. errors];
     }
 }
