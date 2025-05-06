@@ -3,6 +3,7 @@ using Api.Domain.ManageableEntities;
 using Api.Domain.MealRecipes;
 using Api.Domain.Meals;
 using Api.Domain.Recipes;
+using Api.Domain.ShoppingItems;
 using Api.Domain.Tags;
 using Api.Infrastructure.Identity;
 
@@ -74,6 +75,14 @@ public sealed class MealPlannerContext : IdentityDbContext<ApplicationUser, Iden
     /// </value>
     public DbSet<Image> Image => Set<Image>();
 
+    /// <summary>
+    /// Gets the set of <see cref="Domain.ShoppingItems.ShoppingItem"/> entities.
+    /// </summary>
+    /// <value>
+    /// A set of shopping items.
+    /// </value>
+    public DbSet<ShoppingItem> ShoppingItem => Set<ShoppingItem>();
+
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -86,6 +95,9 @@ public sealed class MealPlannerContext : IdentityDbContext<ApplicationUser, Iden
         builder.Entity<ApplicationUser>(b =>
         {
             b.HasMany<ManageableEntity>()
+                .WithOne();
+
+            b.HasMany<ShoppingItem>()
                 .WithOne();
         });
 
@@ -177,6 +189,18 @@ public sealed class MealPlannerContext : IdentityDbContext<ApplicationUser, Iden
                 .HasMaxLength(255);
             b.Property(i => i.ImageUrl)
                 .HasMaxLength(255);
+        });
+
+        builder.Entity<ShoppingItem>(b =>
+        {
+            b.Property(si => si.Name)
+                .HasMaxLength(20);
+
+            b.Property(si => si.Measurement)
+                .HasMaxLength(20);
+
+            b.Property(si => si.Price)
+                .HasPrecision(12, 2);
         });
     }
 

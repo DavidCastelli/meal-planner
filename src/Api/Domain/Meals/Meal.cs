@@ -25,7 +25,7 @@ public sealed class Meal : ManageableEntity
         Tags = tags;
         Recipes = recipes;
     }
-    
+
     /// <summary>
     /// Gets or sets when the meal is scheduled for the week.
     /// </summary>
