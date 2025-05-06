@@ -45,7 +45,7 @@ public static class MealErrors
     /// <returns>An <see cref="Error"/> which contains an error code and description.</returns>
     public static Error MaxRecipes() => new Error(
         "Meals.MaxRecipes", $"Meal cannot have more than {MaxRecipesCount} recipes.");
-    
+
     /// <summary>
     /// Error message that is used when more than the maximum number of allowed meals <see cref="MaxScheduleCount"/> are scheduled on the same day.
     /// </summary>
