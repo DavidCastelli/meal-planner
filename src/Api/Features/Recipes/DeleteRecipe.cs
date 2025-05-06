@@ -1,5 +1,6 @@
 using Api.Common;
 using Api.Common.Exceptions;
+using Api.Common.Extensions;
 using Api.Common.Interfaces;
 using Api.Domain.ManageableEntities;
 using Api.Infrastructure;
@@ -107,15 +108,14 @@ public sealed class DeleteRecipeHandler
                 throw new LastMealRecipeException();
             }
 
-            bool isCancellable = true;
             if (recipe.Image != null)
             {
-                File.Delete(recipe.Image.ImagePath);
-                isCancellable = false;
+                await _dbContext.SaveChangesDeleteImageAsync(recipe.Image.ImagePath, cancellationToken);
+                return;
             }
 
             _dbContext.ManageableEntity.Remove(recipe);
-            await _dbContext.SaveChangesAsync(isCancellable ? cancellationToken : CancellationToken.None);
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
         else if (_userContext.IsAuthenticated)
         {

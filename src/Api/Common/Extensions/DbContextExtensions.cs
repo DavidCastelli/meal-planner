@@ -45,7 +45,7 @@ internal static class DbContextExtensions
                 throw new ImageProcessingException(imageProcessingErrors);
             }
 
-            await dbContext.Database.CommitTransactionAsync(cancellationToken);
+            await dbContext.Database.CommitTransactionAsync(CancellationToken.None);
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -111,7 +111,7 @@ internal static class DbContextExtensions
 
             File.Delete(filePath);
 
-            await dbContext.Database.CommitTransactionAsync(cancellationToken);
+            await dbContext.Database.CommitTransactionAsync(CancellationToken.None);
         }
         catch (DbUpdateConcurrencyException)
         {

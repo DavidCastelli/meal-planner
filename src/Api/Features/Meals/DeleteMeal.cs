@@ -1,5 +1,6 @@
 using Api.Common;
 using Api.Common.Exceptions;
+using Api.Common.Extensions;
 using Api.Common.Interfaces;
 using Api.Domain;
 using Api.Domain.ManageableEntities;
@@ -93,15 +94,14 @@ public sealed class DeleteMealHandler
 
         if (authorizationResult.Succeeded)
         {
-            bool isCancellable = true;
             if (meal.Image != null)
             {
-                File.Delete(meal.Image.ImagePath);
-                isCancellable = false;
+                await _dbContext.SaveChangesDeleteImageAsync(meal.Image.ImagePath, cancellationToken);
+                return;
             }
 
             _dbContext.ManageableEntity.Remove(meal);
-            await _dbContext.SaveChangesAsync(isCancellable ? cancellationToken : CancellationToken.None);
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
         else if (_userContext.IsAuthenticated)
         {
