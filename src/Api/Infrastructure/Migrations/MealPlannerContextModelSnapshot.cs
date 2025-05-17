@@ -132,7 +132,6 @@ namespace Api.Infrastructure.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("Measurement")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 

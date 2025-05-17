@@ -74,7 +74,7 @@ public sealed class UpdateShoppingItemController : ApiControllerBase
 /// <param name="Quantity">The quantity of the shopping item.</param>
 /// <param name="IsChecked">If the shopping item is checked.</param>
 /// <param name="IsLocked">If the shopping item is locked.</param>
-public sealed record UpdateShoppingItemRequest(int Id, string Name, string Measurement, decimal? Price, int? Quantity, bool IsChecked, bool IsLocked);
+public sealed record UpdateShoppingItemRequest(int Id, string Name, string? Measurement, decimal? Price, int? Quantity, bool IsChecked, bool IsLocked);
 
 internal sealed class UpdateShoppingItemRequestValidator : AbstractValidator<UpdateShoppingItemRequest>
 {
@@ -85,8 +85,8 @@ internal sealed class UpdateShoppingItemRequestValidator : AbstractValidator<Upd
             .MaximumLength(20);
 
         RuleFor(request => request.Measurement)
-            .NotEmpty()
-            .MaximumLength(20);
+            .MaximumLength(20)
+            .When(si => si.Measurement != null);
 
         RuleFor(request => request.Price)
             .GreaterThanOrEqualTo(0)

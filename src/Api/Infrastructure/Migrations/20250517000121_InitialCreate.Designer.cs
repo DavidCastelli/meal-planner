@@ -14,7 +14,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Infrastructure.Migrations
 {
     [DbContext(typeof(MealPlannerContext))]
-    [Migration("20250506144600_InitialCreate")]
+    [Migration("20250517000121_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -135,7 +135,6 @@ namespace Api.Infrastructure.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("Measurement")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 

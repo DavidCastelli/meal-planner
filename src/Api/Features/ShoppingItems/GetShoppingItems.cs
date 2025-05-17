@@ -87,4 +87,4 @@ public sealed class GetShoppingItemsHandler
 /// <param name="IsChecked">If the shopping item is checked.</param>
 /// <param name="IsLocked">If the shopping item is locked.</param>
 /// <param name="IsGenerated">If the shopping item is generated.</param>
-public sealed record GetShoppingItemsDto(int Id, string Name, string Measurement, decimal? Price, int? Quantity, bool IsChecked, bool IsLocked, bool IsGenerated);
+public sealed record GetShoppingItemsDto(int Id, string Name, string? Measurement, decimal? Price, int? Quantity, bool IsChecked, bool IsLocked, bool IsGenerated);

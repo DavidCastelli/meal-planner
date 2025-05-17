@@ -119,4 +119,4 @@ public sealed class GetShoppingItemByIdHandler
 /// <param name="IsLocked">If the shopping item is locked.</param>
 /// <param name="IsGenerated">If the shopping item is generated.</param>
 /// <param name="ApplicationUserId">The application user id of the user who the shopping item belongs to.</param>
-public sealed record GetShoppingItemByIdDto(int Id, string Name, string Measurement, decimal? Price, int? Quantity, bool IsChecked, bool IsLocked, bool IsGenerated, int ApplicationUserId) : IAuthorizable;
+public sealed record GetShoppingItemByIdDto(int Id, string Name, string? Measurement, decimal? Price, int? Quantity, bool IsChecked, bool IsLocked, bool IsGenerated, int ApplicationUserId) : IAuthorizable;

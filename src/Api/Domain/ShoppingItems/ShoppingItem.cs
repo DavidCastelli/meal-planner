@@ -33,7 +33,7 @@ public sealed class ShoppingItem : IAuthorizable
     /// <value>
     /// A string specifying the measurement of a shopping item.
     /// </value>
-    public required string Measurement { get; set; }
+    public string? Measurement { get; set; }
 
     /// <summary>
     /// Gets or sets the price of a shopping item.

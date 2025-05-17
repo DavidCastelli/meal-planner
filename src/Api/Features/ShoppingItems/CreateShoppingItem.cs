@@ -58,7 +58,7 @@ public sealed class CreateShoppingItemController : ApiControllerBase
 /// <param name="Measurement">The measurement of the shopping item.</param>
 /// <param name="Price">The price of the shopping item.</param>
 /// <param name="Quantity">The quantity of the shopping item.</param>
-public sealed record CreateShoppingItemRequest(string Name, string Measurement, decimal? Price, int? Quantity);
+public sealed record CreateShoppingItemRequest(string Name, string? Measurement, decimal? Price, int? Quantity);
 
 internal sealed class CreateShoppingItemRequestValidator : AbstractValidator<CreateShoppingItemRequest>
 {
@@ -69,8 +69,8 @@ internal sealed class CreateShoppingItemRequestValidator : AbstractValidator<Cre
             .MaximumLength(20);
 
         RuleFor(request => request.Measurement)
-            .NotEmpty()
-            .MaximumLength(20);
+            .MaximumLength(20)
+            .When(si => si.Measurement != null);
 
         RuleFor(request => request.Price)
             .GreaterThanOrEqualTo(0)
