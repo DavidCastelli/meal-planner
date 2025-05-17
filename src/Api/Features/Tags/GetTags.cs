@@ -25,10 +25,10 @@ public sealed class GetTagsController : ApiControllerBase
     /// A task which represents the asynchronous read operation.
     /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2}"/> object.
     /// </returns>
-    [HttpGet("/api/manage/tags")]
+    [HttpGet("/api/tags")]
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(IEnumerable<GetTagsDto>), StatusCodes.Status200OK, MediaTypeNames.Application.Json)]
-    [Tags("Manage Tags")]
+    [Tags("Tags")]
     public async Task<Results<UnauthorizedHttpResult, Ok<IEnumerable<GetTagsDto>>>> GetAsync(GetTagsHandler handler, CancellationToken cancellationToken)
     {
         var getTagsDtos = await handler.HandleAsync(cancellationToken);
