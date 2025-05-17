@@ -1,3 +1,6 @@
+using System.Net.Mime;
+using System.Text.Json;
+
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -60,7 +63,8 @@ internal sealed class ExceptionHandler : IExceptionHandler
 
         httpContext.Response.StatusCode = problemDetails.Status!.Value;
 
-        await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
+        await httpContext.Response.WriteAsJsonAsync(problemDetails, JsonSerializerOptions.Default,
+            MediaTypeNames.Application.ProblemJson, cancellationToken);
 
         return true;
     }
