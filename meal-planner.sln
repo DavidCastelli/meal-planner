@@ -7,6 +7,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{2B770079-A1D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api", "src\Api\Api.csproj", "{0965B6A0-C552-4C41-9BF2-2D58F70421A3}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{60257FEA-E84C-400B-99CE-74F25C836143}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api.UnitTests", "tests\Api.UnitTests\Api.UnitTests.csproj", "{880708A3-2AF4-4A13-B881-9540AFEADC68}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api.IntegrationTests", "tests\Api.IntegrationTests\Api.IntegrationTests.csproj", "{0DC928B1-25E8-40DD-8BC4-705779FBE883}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,8 +26,18 @@ Global
 		{0965B6A0-C552-4C41-9BF2-2D58F70421A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0965B6A0-C552-4C41-9BF2-2D58F70421A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0965B6A0-C552-4C41-9BF2-2D58F70421A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{880708A3-2AF4-4A13-B881-9540AFEADC68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{880708A3-2AF4-4A13-B881-9540AFEADC68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{880708A3-2AF4-4A13-B881-9540AFEADC68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{880708A3-2AF4-4A13-B881-9540AFEADC68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0DC928B1-25E8-40DD-8BC4-705779FBE883}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DC928B1-25E8-40DD-8BC4-705779FBE883}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DC928B1-25E8-40DD-8BC4-705779FBE883}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DC928B1-25E8-40DD-8BC4-705779FBE883}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{0965B6A0-C552-4C41-9BF2-2D58F70421A3} = {2B770079-A1D5-4DF8-A16D-2483BB742FBE}
+		{880708A3-2AF4-4A13-B881-9540AFEADC68} = {60257FEA-E84C-400B-99CE-74F25C836143}
+		{0DC928B1-25E8-40DD-8BC4-705779FBE883} = {60257FEA-E84C-400B-99CE-74F25C836143}
 	EndGlobalSection
 EndGlobal
