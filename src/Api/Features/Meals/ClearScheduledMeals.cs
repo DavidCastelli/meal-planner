@@ -29,11 +29,11 @@ public sealed class ClearScheduledMealsController : ApiControllerBase
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <returns>
     /// A task which represents the asynchronous write operation.
-    /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3, TResult4}"/> object.
+    /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2}"/> object.
     /// </returns>
     [HttpPatch("/api/manage/meals/schedule")]
     [Consumes(MediaTypeNames.Application.JsonPatch)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized, MediaTypeNames.Application.ProblemJson)]
     [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
     [Tags("Manage Meals")]
     public async Task<Results<UnauthorizedHttpResult, Ok>> PatchAsync(

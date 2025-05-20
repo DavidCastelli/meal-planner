@@ -44,11 +44,12 @@ public sealed class CreateMealController : ApiControllerBase
     /// </returns>
     [HttpPost("/api/manage/meals")]
     [Consumes(MediaTypeNames.Multipart.FormData)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized, MediaTypeNames.Application.ProblemJson)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict, MediaTypeNames.Application.ProblemJson)]
     [ProducesResponseType(typeof(void), StatusCodes.Status201Created)]
     [Tags("Manage Meals")]
-    public async Task<Results<UnauthorizedHttpResult, ValidationProblem, BadRequest<ValidationProblemDetails>, Created>> CreateAsync(
+    public async Task<Results<UnauthorizedHttpResult, ValidationProblem, Conflict, Created>> CreateAsync(
         IValidator<CreateMealRequest> validator, CreateMealHandler handler, IFormFile data, IFormFile? image,
         IOptions<JsonOptions> jsonOptions, CancellationToken cancellationToken)
     {
@@ -60,16 +61,20 @@ public sealed class CreateMealController : ApiControllerBase
         }
         catch (JsonException)
         {
-            ModelState.AddModelError("Request.InvalidJson", "Failed to deserialize the request, the request JSON is invalid.");
-            var validationProblemDetails = new ValidationProblemDetails(ModelState);
-            return TypedResults.BadRequest(validationProblemDetails);
+            var errors = new Dictionary<string, string[]>
+            {
+                { "Request.InvalidJson", ["Failed to deserialize the request, the request JSON is invalid."] }
+            };
+            return TypedResults.ValidationProblem(errors);
         }
 
         if (request == null)
         {
-            ModelState.AddModelError("Request.InvalidData", "The request data cannot be null.");
-            var validationProblemDetails = new ValidationProblemDetails(ModelState);
-            return TypedResults.BadRequest(validationProblemDetails);
+            var errors = new Dictionary<string, string[]>
+            {
+                { "Request.InvalidData", ["The request data cannot be null."] }
+            };
+            return TypedResults.ValidationProblem(errors);
         }
 
         var result = validator.Validate(request);

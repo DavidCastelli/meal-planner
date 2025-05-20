@@ -26,14 +26,15 @@ public sealed class GetShoppingItemByIdController : ApiControllerBase
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <returns>
     /// A task which represents the asynchronous read operation.
-    /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3}"/> object.
+    /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3, TResult4}"/> object.
     /// </returns>
     [HttpGet("/api/shopping-items/{id:int}", Name = "GetShoppingItemById")]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden, MediaTypeNames.Application.ProblemJson)]
     [ProducesResponseType(typeof(GetShoppingItemByIdDto), StatusCodes.Status200OK, MediaTypeNames.Application.Json)]
     [Tags("Shopping Items")]
-    public async Task<Results<UnauthorizedHttpResult, NotFound, Ok<GetShoppingItemByIdDto>>> GetByIdAsync(int id,
+    public async Task<Results<UnauthorizedHttpResult, NotFound, ForbidHttpResult, Ok<GetShoppingItemByIdDto>>> GetByIdAsync(int id,
         GetShoppingItemByIdHandler handler, CancellationToken cancellationToken)
     {
         var getShoppingItemByIdDto = await handler.HandleAsync(id, cancellationToken);

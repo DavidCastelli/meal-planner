@@ -26,7 +26,7 @@ public sealed class GetTagsController : ApiControllerBase
     /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2}"/> object.
     /// </returns>
     [HttpGet("/api/tags")]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized, MediaTypeNames.Application.ProblemJson)]
     [ProducesResponseType(typeof(IEnumerable<GetTagsDto>), StatusCodes.Status200OK, MediaTypeNames.Application.Json)]
     [Tags("Tags")]
     public async Task<Results<UnauthorizedHttpResult, Ok<IEnumerable<GetTagsDto>>>> GetAsync(GetTagsHandler handler, CancellationToken cancellationToken)

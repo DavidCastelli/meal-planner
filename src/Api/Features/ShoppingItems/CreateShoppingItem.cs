@@ -30,7 +30,7 @@ public sealed class CreateShoppingItemController : ApiControllerBase
     /// </returns>
     [HttpPost("/api/shopping-items")]
     [Consumes(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized, MediaTypeNames.Application.ProblemJson)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
     [ProducesResponseType(typeof(void), StatusCodes.Status201Created)]
     [Tags("Shopping Items")]

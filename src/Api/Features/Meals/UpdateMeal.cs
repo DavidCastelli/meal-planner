@@ -42,16 +42,18 @@ public sealed class UpdateMealController : ApiControllerBase
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <returns>
     /// A task which represents the asynchronous write operation.
-    /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3, TResult4, TResult5}"/> object.
+    /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3, TResult4, TResult5, TResult6}"/> object.
     /// </returns>
     [HttpPut("/api/manage/meals/{id:int}")]
     [Consumes(MediaTypeNames.Multipart.FormData)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized, MediaTypeNames.Application.ProblemJson)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden, MediaTypeNames.Application.ProblemJson)]
     [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
     [Tags("Manage Meals")]
-    public async Task<Results<UnauthorizedHttpResult, BadRequest<ValidationProblemDetails>, ValidationProblem, NotFound, Ok>> UpdateAsync(
+    public async Task<Results<UnauthorizedHttpResult, ValidationProblem, NotFound, Conflict, ForbidHttpResult, Ok>> UpdateAsync(
         int id, IValidator<UpdateMealRequest> validator, IFormFile data, IFormFile? image, UpdateMealHandler handler,
         IOptions<JsonOptions> jsonOptions, CancellationToken cancellationToken)
     {
@@ -63,23 +65,29 @@ public sealed class UpdateMealController : ApiControllerBase
         }
         catch (JsonException)
         {
-            ModelState.AddModelError("Request.InvalidJson", "Failed to deserialize the request, the request JSON is invalid.");
-            var validationProblemDetails = new ValidationProblemDetails(ModelState);
-            return TypedResults.BadRequest(validationProblemDetails);
+            var errors = new Dictionary<string, string[]>
+            {
+                { "Request.InvalidJson", ["Failed to deserialize the request, the request JSON is invalid."] }
+            };
+            return TypedResults.ValidationProblem(errors);
         }
 
         if (request == null)
         {
-            ModelState.AddModelError("Request.InvalidData", "The request data cannot be null.");
-            var validationProblemDetails = new ValidationProblemDetails(ModelState);
-            return TypedResults.BadRequest(validationProblemDetails);
+            var errors = new Dictionary<string, string[]>
+            {
+                { "Request.InvalidData", ["The request data cannot be null."] }
+            };
+            return TypedResults.ValidationProblem(errors);
         }
 
         if (id != request.Id)
         {
-            ModelState.AddModelError("Request.InvalidId", "The request id must match the route id.");
-            var validationProblemDetails = new ValidationProblemDetails(ModelState);
-            return TypedResults.BadRequest(validationProblemDetails);
+            var errors = new Dictionary<string, string[]>
+            {
+                { "Request.InvalidId", ["The request id must match the route id."] }
+            };
+            return TypedResults.ValidationProblem(errors);
         }
 
         var result = validator.Validate(request);

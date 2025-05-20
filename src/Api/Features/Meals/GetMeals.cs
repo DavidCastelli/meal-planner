@@ -30,7 +30,7 @@ public sealed class GetMealsController : ApiControllerBase
     /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2}"/> object.
     /// </returns>
     [HttpGet("/api/manage/meals")]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized, MediaTypeNames.Application.ProblemJson)]
     [ProducesResponseType(typeof(IEnumerable<GetMealsDto>), StatusCodes.Status200OK, MediaTypeNames.Application.Json)]
     [Tags("Manage Meals")]
     public async Task<Results<UnauthorizedHttpResult, Ok<IEnumerable<GetMealsDto>>>> GetAsync(GetMealsHandler handler, CancellationToken cancellationToken, bool scheduled = false)

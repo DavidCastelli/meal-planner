@@ -1,3 +1,5 @@
+using System.Net.Mime;
+
 using Api.Common;
 using Api.Common.Exceptions;
 using Api.Common.Interfaces;
@@ -22,14 +24,15 @@ public sealed class DeleteShoppingItemController : ApiControllerBase
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <returns>
     /// A task which represents the asynchronous write operation.
-    /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3}"/> object.
+    /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3, TResult4}"/> object.
     /// </returns>
     [HttpDelete("/api/shopping-items/{id:int}")]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden, MediaTypeNames.Application.ProblemJson)]
     [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
     [Tags("Shopping Items")]
-    public async Task<Results<UnauthorizedHttpResult, NotFound, Ok>> DeleteAsync(
+    public async Task<Results<UnauthorizedHttpResult, NotFound, ForbidHttpResult, Ok>> DeleteAsync(
         int id, DeleteShoppingItemHandler handler, CancellationToken cancellationToken)
     {
         await handler.HandleAsync(id, cancellationToken);
@@ -79,16 +82,16 @@ public sealed class DeleteShoppingItemHandler
             throw new ShoppingItemNotFoundException(id);
         }
 
-        if (shoppingItem.IsLocked)
-        {
-            throw new ShoppingItemLockedException(shoppingItem.Id);
-        }
-
         var authorizationResult =
             await _authorizationService.AuthorizeAsync(_userContext.User, shoppingItem, "SameUserPolicy");
 
         if (authorizationResult.Succeeded)
         {
+            if (shoppingItem.IsLocked)
+            {
+                throw new ShoppingItemLockedException(shoppingItem.Id);
+            }
+
             _dbContext.ShoppingItem.Remove(shoppingItem);
             await _dbContext.SaveChangesAsync(cancellationToken);
         }

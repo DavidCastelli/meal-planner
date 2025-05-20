@@ -29,14 +29,15 @@ public sealed class GetMealByIdController : ApiControllerBase
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <returns>
     /// A task which represents the asynchronous read operation.
-    /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3}"/> object.
+    /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3, TResult4}"/> object.
     /// </returns>
     [HttpGet("/api/manage/meals/{id:int}", Name = "GetMealById")]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden, MediaTypeNames.Application.ProblemJson)]
     [ProducesResponseType(typeof(GetMealByIdDto), StatusCodes.Status200OK, MediaTypeNames.Application.Json)]
     [Tags("Manage Meals")]
-    public async Task<Results<UnauthorizedHttpResult, NotFound, Ok<GetMealByIdDto>>> GetByIdAsync(int id, GetMealByIdHandler handler, CancellationToken cancellationToken)
+    public async Task<Results<UnauthorizedHttpResult, NotFound, ForbidHttpResult, Ok<GetMealByIdDto>>> GetByIdAsync(int id, GetMealByIdHandler handler, CancellationToken cancellationToken)
     {
         var getMealDto = await handler.HandleAsync(id, cancellationToken);
 

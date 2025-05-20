@@ -1,4 +1,5 @@
 using System.Net.Mime;
+using System.Text;
 
 using Api.Common;
 using Api.Common.Exceptions;
@@ -33,28 +34,31 @@ public sealed class ScheduleMealByIdController : ApiControllerBase
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <returns>
     /// A task which represents the asynchronous write operation.
-    /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3, TResult4, TResult5}"/> object.
+    /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3, TResult4, TResult5, TResult6}"/> object.
     /// </returns>
     [HttpPatch("/api/manage/meals/{id:int}/schedule")]
     [Consumes(MediaTypeNames.Application.JsonPatch)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(string), StatusCodes.Status422UnprocessableEntity, MediaTypeNames.Text.Plain)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity, MediaTypeNames.Application.Json)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden, MediaTypeNames.Application.ProblemJson)]
     [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
     [Tags("Manage Meals")]
     public async
-        Task<Results<UnauthorizedHttpResult, UnprocessableEntity<string>, BadRequest<ValidationProblemDetails>, NotFound, Ok>> PatchAsync(
+        Task<Results<UnauthorizedHttpResult, UnprocessableEntity<ProblemDetails>, ValidationProblem, NotFound, ForbidHttpResult, Ok>> PatchAsync(
             int id, JsonPatchDocument<ScheduleMealByIdRequest> document, ScheduleMealByIdHandler handler, CancellationToken cancellationToken)
     {
         if (document.Operations.Count != 1)
         {
-            return TypedResults.UnprocessableEntity("Only one operation is allowed.");
+            var problemDetails = new ProblemDetails { Detail = "Only one operation is allowed" };
+            return TypedResults.UnprocessableEntity(problemDetails);
         }
 
         if (document.Operations[0].OperationType != OperationType.Add && document.Operations[0].OperationType != OperationType.Remove)
         {
-            return TypedResults.UnprocessableEntity("Only the add or remove operation is allowed.");
+            var problemDetails = new ProblemDetails { Detail = "Only the add or remove operation is allowed." };
+            return TypedResults.UnprocessableEntity(problemDetails);
         }
 
         var request = new ScheduleMealByIdRequest(Schedule.None);
@@ -63,7 +67,13 @@ public sealed class ScheduleMealByIdController : ApiControllerBase
         if (!ModelState.IsValid)
         {
             var validationProblemDetails = new ValidationProblemDetails(ModelState);
-            return TypedResults.BadRequest(validationProblemDetails);
+            return TypedResults.ValidationProblem(
+                validationProblemDetails.Errors,
+                validationProblemDetails.Detail,
+                validationProblemDetails.Instance,
+                validationProblemDetails.Title,
+                validationProblemDetails.Type,
+                validationProblemDetails.Extensions);
         }
 
         await handler.HandleAsync(id, request, cancellationToken);

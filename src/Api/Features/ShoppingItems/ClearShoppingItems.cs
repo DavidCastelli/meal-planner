@@ -26,16 +26,17 @@ public sealed class ClearShoppingItemsController : ApiControllerBase
     /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3}"/> object.
     /// </returns>
     [HttpDelete("/api/shopping-items")]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(string), StatusCodes.Status422UnprocessableEntity, MediaTypeNames.Text.Plain)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity, MediaTypeNames.Application.Json)]
     [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
     [Tags("Shopping Items")]
-    public async Task<Results<UnauthorizedHttpResult, UnprocessableEntity<string>, Ok>> DeleteAllAsync(ClearShoppingItemsHandler handler,
+    public async Task<Results<UnauthorizedHttpResult, UnprocessableEntity<ProblemDetails>, Ok>> DeleteAllAsync(ClearShoppingItemsHandler handler,
         CancellationToken cancellationToken, string clear = "all")
     {
         if (string.IsNullOrEmpty(clear) || (clear != "all" && clear != "checked"))
         {
-            return TypedResults.UnprocessableEntity("Query parameter clear must be set to one of the following values: all, checked.");
+            var problemDetails = new ProblemDetails { Detail = "Query parameter clear must be set to one of the following values: all, checked." };
+            return TypedResults.UnprocessableEntity(problemDetails);
         }
 
         await handler.HandleAsync(clear, cancellationToken);

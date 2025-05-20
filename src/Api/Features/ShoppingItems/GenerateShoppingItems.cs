@@ -1,3 +1,5 @@
+using System.Net.Mime;
+
 using Api.Common;
 using Api.Common.Exceptions;
 using Api.Common.Interfaces;
@@ -26,8 +28,8 @@ public sealed class GenerateShoppingItemsController : ApiControllerBase
     /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3}"/> object.
     /// </returns>
     [HttpPost("/api/shopping-items/generate")]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict, MediaTypeNames.Application.ProblemJson)]
     [ProducesResponseType(typeof(void), StatusCodes.Status201Created)]
     [Tags("Shopping Items")]
     public async Task<Results<UnauthorizedHttpResult, Conflict, Created>> GenerateAsync(

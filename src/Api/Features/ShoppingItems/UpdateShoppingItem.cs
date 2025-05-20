@@ -34,21 +34,24 @@ public sealed class UpdateShoppingItemController : ApiControllerBase
     /// </returns>
     [HttpPut("/api/shopping-items/{id:int}")]
     [Consumes(MediaTypeNames.Application.Json)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized, MediaTypeNames.Application.ProblemJson)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden, MediaTypeNames.Application.ProblemJson)]
     [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
     [Tags("Shopping Items")]
-    public async Task<Results<UnauthorizedHttpResult, ValidationProblem, BadRequest<ValidationProblemDetails>, NotFound, Conflict, Ok>> UpdateAsync(int id,
+    public async Task<Results<UnauthorizedHttpResult, ValidationProblem, NotFound, Conflict, ForbidHttpResult, Ok>> UpdateAsync(int id,
         IValidator<UpdateShoppingItemRequest> validator, UpdateShoppingItemRequest request, UpdateShoppingItemHandler handler,
         CancellationToken cancellationToken)
     {
         if (id != request.Id)
         {
-            ModelState.AddModelError("Request.InvalidId", "The request id must match the route id.");
-            var validationProblemDetails = new ValidationProblemDetails(ModelState);
-            return TypedResults.BadRequest(validationProblemDetails);
+            var errors = new Dictionary<string, string[]>
+            {
+                { "Request.InvalidId", ["The request id must match the route id."] }
+            };
+            return TypedResults.ValidationProblem(errors);
         }
 
         var result = validator.Validate(request);

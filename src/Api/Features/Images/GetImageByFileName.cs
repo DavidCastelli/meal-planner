@@ -26,14 +26,15 @@ public sealed class GetImageByFileNameController : ApiControllerBase
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <returns>
     /// A task which represents the asynchronous read operation.
-    /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3}"/> object.
+    /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3, TResult4}"/> object.
     /// </returns>
     [HttpGet("/api/images/{fileName}", Name = "GetImageByFileName")]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden, MediaTypeNames.Application.ProblemJson)]
     [ProducesResponseType(typeof(PhysicalFileHttpResult), StatusCodes.Status200OK, MediaTypeNames.Image.Jpeg)]
     [Tags("Images")]
-    public async Task<Results<UnauthorizedHttpResult, NotFound, PhysicalFileHttpResult>> GetByFileNameAsync(string fileName, GetImageByFileNameHandler handler, CancellationToken cancellationToken)
+    public async Task<Results<UnauthorizedHttpResult, NotFound, ForbidHttpResult, PhysicalFileHttpResult>> GetByFileNameAsync(string fileName, GetImageByFileNameHandler handler, CancellationToken cancellationToken)
     {
         var imagePath = await handler.HandleAsync(fileName, cancellationToken);
 

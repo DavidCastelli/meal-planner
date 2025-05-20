@@ -1,9 +1,9 @@
+using System.Net.Mime;
+
 using Api.Common;
 using Api.Common.Exceptions;
 using Api.Common.Extensions;
 using Api.Common.Interfaces;
-using Api.Domain;
-using Api.Domain.ManageableEntities;
 using Api.Infrastructure;
 
 using Microsoft.AspNetCore.Authorization;
@@ -26,14 +26,15 @@ public sealed class DeleteMealController : ApiControllerBase
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <returns>
     /// A task which represents the asynchronous write operation.
-    /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3}"/> object.
+    /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3, TResult4}"/> object.
     /// </returns>
     [HttpDelete("/api/manage/meals/{id:int}")]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden, MediaTypeNames.Application.ProblemJson)]
     [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
     [Tags("Manage Meals")]
-    public async Task<Results<UnauthorizedHttpResult, NotFound, Ok>> DeleteAsync(int id, DeleteMealHandler handler, CancellationToken cancellationToken)
+    public async Task<Results<UnauthorizedHttpResult, NotFound, ForbidHttpResult, Ok>> DeleteAsync(int id, DeleteMealHandler handler, CancellationToken cancellationToken)
     {
         await handler.HandleAsync(id, cancellationToken);
 
@@ -73,15 +74,9 @@ public sealed class DeleteMealHandler
     /// <exception cref="UnauthorizedException">Is thrown if the user lacks the necessary authentication credentials.</exception>
     public async Task HandleAsync(int id, CancellationToken cancellationToken)
     {
-        var meal = await _dbContext.ManageableEntity
+        var meal = await _dbContext.Meal
+            .Include(m => m.Image)
             .Where(m => m.Id == id)
-            .Select(m => new ManageableEntity
-            {
-                Id = m.Id,
-                Title = m.Title,
-                Image = m.Image,
-                ApplicationUserId = m.ApplicationUserId
-            })
             .AsNoTracking()
             .SingleOrDefaultAsync(cancellationToken);
 
@@ -94,13 +89,14 @@ public sealed class DeleteMealHandler
 
         if (authorizationResult.Succeeded)
         {
+            _dbContext.Meal.Remove(meal);
+
             if (meal.Image != null)
             {
                 await _dbContext.SaveChangesDeleteImageAsync(meal.Image.ImagePath, cancellationToken);
                 return;
             }
 
-            _dbContext.ManageableEntity.Remove(meal);
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
         else if (_userContext.IsAuthenticated)

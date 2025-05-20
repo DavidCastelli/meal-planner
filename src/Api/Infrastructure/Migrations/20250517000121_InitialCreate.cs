@@ -1,7 +1,10 @@
 ﻿using System;
+
 using Api.Domain.Meals;
 using Api.Domain.Tags;
+
 using Microsoft.EntityFrameworkCore.Migrations;
+
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable

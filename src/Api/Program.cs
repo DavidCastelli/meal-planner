@@ -68,6 +68,7 @@ builder.Services.AddSwaggerGen(options =>
 var app = builder.Build();
 
 app.UseExceptionHandler();
+app.UseStatusCodePages();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -109,3 +110,9 @@ app.MapPost("/api/logout", async (SignInManager<ApplicationUser> signInManager,
 app.MapControllers();
 
 app.Run();
+
+/// <summary>
+/// The application program.
+/// </summary>
+// This class definition is needed to expose the Program publicly to the test projects.
+public partial class Program { }

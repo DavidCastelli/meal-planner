@@ -1,8 +1,10 @@
+using System.Net.Mime;
+
 using Api.Common;
 using Api.Common.Exceptions;
 using Api.Common.Extensions;
 using Api.Common.Interfaces;
-using Api.Domain.ManageableEntities;
+using Api.Domain.Recipes;
 using Api.Infrastructure;
 
 using Microsoft.AspNetCore.Authorization;
@@ -25,15 +27,16 @@ public sealed class DeleteRecipeController : ApiControllerBase
     /// <param name="cancellationToken">The cancellation token for the request.</param>
     /// <returns>
     /// A task which represents the asynchronous write operation.
-    /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3}"/> object.
+    /// The result of the task upon completion returns a <see cref="Results{TResult1, TResult2, TResult3, TResult4, TResult5}"/> object.
     /// </returns>
     [HttpDelete("/api/manage/recipes/{id:int}")]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden, MediaTypeNames.Application.ProblemJson)]
     [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
     [Tags("Manage Recipes")]
-    public async Task<Results<UnauthorizedHttpResult, NotFound, Conflict, Ok>> DeleteAsync(int id, DeleteRecipeHandler handler, CancellationToken cancellationToken)
+    public async Task<Results<UnauthorizedHttpResult, NotFound, Conflict, ForbidHttpResult, Ok>> DeleteAsync(int id, DeleteRecipeHandler handler, CancellationToken cancellationToken)
     {
         await handler.HandleAsync(id, cancellationToken);
 
@@ -74,12 +77,14 @@ public sealed class DeleteRecipeHandler
     /// <exception cref="UnauthorizedException">Is thrown if the user lacks the necessary authentication credentials.</exception>
     public async Task HandleAsync(int id, CancellationToken cancellationToken)
     {
-        var recipe = await _dbContext.ManageableEntity
+        var recipe = await _dbContext.Recipe
             .Where(r => r.Id == id)
-            .Select(r => new ManageableEntity
+            .Select(r => new Recipe
             {
                 Id = r.Id,
                 Title = r.Title,
+                RecipeDetails = r.RecipeDetails,
+                RecipeNutrition = r.RecipeNutrition,
                 Image = r.Image,
                 ApplicationUserId = r.ApplicationUserId,
             })
@@ -108,13 +113,14 @@ public sealed class DeleteRecipeHandler
                 throw new LastMealRecipeException();
             }
 
+            _dbContext.Recipe.Remove(recipe);
+
             if (recipe.Image != null)
             {
                 await _dbContext.SaveChangesDeleteImageAsync(recipe.Image.ImagePath, cancellationToken);
                 return;
             }
 
-            _dbContext.ManageableEntity.Remove(recipe);
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
         else if (_userContext.IsAuthenticated)
