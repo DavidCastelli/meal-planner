@@ -1,0 +1,26 @@
+<div
+  class="schedule-container"
+  [@slide]="(isSidebarOpen$ | async) ? 'right' : 'left'"
+>
+  <div class="layout">
+    <section class="schedule">
+      <div class="schedule-heading">
+        <h1>Schedule</h1>
+        <button class="schedule-clear-button" type="button" (click)="clear()">
+          Clear
+        </button>
+      </div>
+      <div class="schedule-content-container">
+        @for (day of days; track $index) {
+          <app-day-of-week
+            [day]="Schedule[day]"
+            [mealData]="scheduledMeals[day - 1]"
+            (deleted)="remove($event)"
+            (schedule)="add($event)"
+          ></app-day-of-week>
+        }
+      </div>
+    </section>
+    <app-meal-select [schedulableMeals]="schedulableMeals"></app-meal-select>
+  </div>
+</div>

@@ -1,0 +1,27 @@
+<section class="day-of-week">
+  <div class="heading">
+    <h2>{{ day }}</h2>
+  </div>
+  <div class="content-container">
+    <app-day-of-week-slot
+      id="drop-list-{{ day }}"
+      [showPreview]="showPreview"
+      cdkDropList
+      (cdkDropListEntered)="entered()"
+      (cdkDropListExited)="exited()"
+      (cdkDropListDropped)="dropped($event)"
+      [cdkDropListEnterPredicate]="emptyPredicate"
+    >
+      @if (mealData) {
+        <app-scheduled-meal-card
+          [mealId]="mealData.id"
+          [title]="mealData.title"
+          [imageUrl]="mealData.imageUrl"
+          (deleted)="remove($event)"
+        ></app-scheduled-meal-card>
+      } @else {
+        <app-scheduled-meal-placeholder></app-scheduled-meal-placeholder>
+      }
+    </app-day-of-week-slot>
+  </div>
+</section>

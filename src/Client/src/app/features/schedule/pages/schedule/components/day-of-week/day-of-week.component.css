@@ -1,0 +1,30 @@
+:host {
+  display: block;
+}
+
+.day-of-week {
+  border: 3px solid rgb(19, 27, 35);
+  height: 100%;
+  padding-bottom: 3px;
+}
+
+.heading {
+  background-color: rgb(179, 181, 187);
+  border-bottom: 3px solid rgb(19, 27, 35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 15%;
+}
+
+h2 {
+  margin: 0;
+}
+
+.content-container {
+  background-color: rgb(61, 59, 142);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 85%;
+}

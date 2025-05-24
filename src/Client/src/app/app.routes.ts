@@ -23,6 +23,9 @@ import { recipesResolver } from './features/recipe/resolvers/recipes.resolver';
 import { mealResolver } from './features/meal/resolvers/meal.resolver';
 import { mealsResolver } from './features/meal/resolvers/meals.resolver';
 import { tagsResolver } from './features/meal/resolvers/tags.resolver';
+import { ScheduleComponent } from './features/schedule/pages/schedule/schedule.component';
+import { scheduleResolver } from './features/schedule/resolvers/schedule.resolver';
+import { mealSelectResolver } from './features/schedule/resolvers/meal-select.resolver';
 
 export const routes: Routes = [
   {
@@ -125,6 +128,15 @@ export const routes: Routes = [
             title: 'Edit Recipe',
             canDeactivate: [exitGuard],
             resolve: { recipe: recipeResolver },
+          },
+          {
+            path: 'schedule',
+            component: ScheduleComponent,
+            title: 'Schedule',
+            resolve: {
+              schedule: scheduleResolver,
+              meals: mealSelectResolver,
+            },
           },
         ],
         canActivateChild: [authGuard],

@@ -1,0 +1,22 @@
+<section class="scheduled-meal-card">
+  <div class="scheduled-meal-card-heading-container">
+    <h3>{{ title }}</h3>
+    <button
+      class="scheduled-meal-card-remove-button"
+      type="button"
+      (click)="remove()"
+    >
+      X
+    </button>
+  </div>
+  <div class="scheduled-meal-card-img-container">
+    <img
+      class="scheduled-meal-card-img"
+      ngSrc="{{ imageUrl }}"
+      alt="Meal image."
+      fill
+      priority
+      crossorigin="use-credentials"
+    />
+  </div>
+</section>

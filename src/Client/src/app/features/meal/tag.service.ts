@@ -11,7 +11,7 @@ export class TagService {
 
   getTags(): Observable<GetTagsDto[]> {
     return this.http
-      .get<GetTagsDto[]>('/manage/tags', {
+      .get<GetTagsDto[]>('/tags', {
         withCredentials: true,
         responseType: 'json',
       })

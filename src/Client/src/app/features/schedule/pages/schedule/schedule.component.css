@@ -1,0 +1,55 @@
+:host {
+  display: block;
+  background-color: rgb(23, 126, 137);
+  overflow: hidden;
+  min-height: 95svh;
+  padding: 0;
+}
+
+.schedule-container {
+  position: relative; /* Needed for animation */
+}
+
+.layout {
+  display: flex;
+  justify-content: center;
+}
+
+.schedule {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  padding: 15px;
+  width: 78%;
+}
+
+.schedule-heading > h1 {
+  display: inline-block;
+  color: rgb(250, 121, 33);
+  text-shadow: 1px 1px 1px rgb(19, 27, 35);
+  margin-right: 15px;
+}
+
+.schedule-content-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  grid-auto-rows: minmax(395px, 1fr);
+  gap: 15px 5px;
+  width: 100%;
+}
+
+.schedule-clear-button {
+  background-color: rgb(255, 15, 35);
+  border: 3px solid;
+  color: rgb(19, 27, 35);
+  border-radius: 15px;
+  font-size: 1.2em;
+  font-weight: bold;
+  padding: 10px 35px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.schedule-clear-button:hover {
+  background-color: rgb(255, 15, 35, 0.8);
+}

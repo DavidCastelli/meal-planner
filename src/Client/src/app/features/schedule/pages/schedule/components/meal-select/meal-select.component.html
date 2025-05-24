@@ -1,0 +1,28 @@
+<section class="meal-select">
+  <h2>Meal Select</h2>
+
+  <div
+    class="meal-select-content-container"
+    cdkDropList
+    cdkDropListSortingDisabled
+    [cdkDropListConnectedTo]="[
+      'drop-list-Monday',
+      'drop-list-Tuesday',
+      'drop-list-Wednesday',
+      'drop-list-Thursday',
+      'drop-list-Friday',
+      'drop-list-Saturday',
+      'drop-list-Sunday',
+    ]"
+    [cdkDropListEnterPredicate]="noReturnPredicate"
+  >
+    @for (meal of schedulableMeals; track meal.id) {
+      <app-meal-select-card
+        [title]="meal.title"
+        [imageUrl]="meal.imageUrl!"
+        cdkDrag
+        [cdkDragData]="meal"
+      ></app-meal-select-card>
+    }
+  </div>
+</section>
