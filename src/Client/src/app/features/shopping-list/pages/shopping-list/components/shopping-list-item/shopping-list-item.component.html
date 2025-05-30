@@ -1,0 +1,112 @@
+<form
+  class="shopping-list-item"
+  [style.background]="
+    shoppingItem.isChecked ? 'rgb(3, 252, 186)' : 'rgb(34, 116, 165)'
+  "
+  [style.border]="editMode ? '3px solid rgb(19, 27, 35)' : 'none'"
+  [formGroup]="shoppingItemForm"
+>
+  <div>
+    <input
+      class="text-input-edit-mode-off"
+      [class.text-input-edit-mode-on]="editMode"
+      type="text"
+      formControlName="name"
+      aria-label="Name"
+      required
+      maxlength="20"
+    />
+  </div>
+  <div>
+    @if (measurement) {
+      <div>
+        @if (editMode) {
+          <button class="remove-button" type="button" (click)="removeMeasurement()">-</button>
+        }
+        <input
+          class="text-input-edit-mode-off"
+          [class.text-input-edit-mode-on]="editMode"
+          type="text"
+          formControlName="measurement"
+          aria-label="Measurement"
+          required
+          maxlength="20"
+        />
+      </div>
+    } @else if (editMode) {
+      <button class="add-button" type="button" (click)="addMeasurement()">+</button>
+    }
+  </div>
+  <div>
+    @if (price) {
+      <div>
+        @if (editMode) {
+          <button class="remove-button" type="button" (click)="removePrice()">-</button>
+        }
+        <input
+          class="text-input-edit-mode-off"
+          [class.text-input-edit-mode-on]="editMode"
+          type="text"
+          inputmode="numeric"
+          formControlName="price"
+          aria-label="Price"
+          required
+          maxlength="13"
+          [pattern]="priceRegEx"
+        />
+      </div>
+    } @else if (editMode) {
+      <button class="add-button" type="button" (click)="addPrice()">+</button>
+    }
+  </div>
+  <div>
+    @if (quantity) {
+      <div>
+        @if (editMode) {
+          <button class="remove-button" type="button" (click)="removeQuantity()">-</button>
+        }
+        <input
+          class="number-input-edit-mode-off"
+          [class.number-input-edit-mode-on]="editMode"
+          type="number"
+          formControlName="quantity"
+          aria-label="Quantity"
+          min="1"
+          onKeyDown="return false"
+        />
+      </div>
+    } @else if (editMode) {
+      <button class="add-button" type="button" (click)="addQuantity()">+</button>
+    }
+  </div>
+  <div>
+    @if (shoppingItem.price) {
+      <span
+        >{{ shoppingItem.price * (shoppingItem.quantity ?? 1) }}</span
+      >
+    }
+  </div>
+  <div>
+    <input type="checkbox" formControlName="checked" aria-label="Checked" />
+  </div>
+  <div>
+    @if (!shoppingItem.isGenerated) {
+      <input type="checkbox" formControlName="locked" aria-label="Locked" />
+    }
+  </div>
+  <div>
+    <span>{{ saveMessage }}</span>
+  </div>
+  <div>
+    @if (!locked.value) {
+      <button
+        class="shopping-list-item-delete-button"
+        type="button"
+        (click)="delete()"
+        [disabled]="isSaving"
+      >
+        X
+      </button>
+    }
+  </div>
+</form>

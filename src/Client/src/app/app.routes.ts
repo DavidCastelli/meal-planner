@@ -26,6 +26,8 @@ import { tagsResolver } from './features/meal/resolvers/tags.resolver';
 import { ScheduleComponent } from './features/schedule/pages/schedule/schedule.component';
 import { scheduleResolver } from './features/schedule/resolvers/schedule.resolver';
 import { mealSelectResolver } from './features/schedule/resolvers/meal-select.resolver';
+import { ShoppingListComponent } from './features/shopping-list/pages/shopping-list/shopping-list.component';
+import { shoppingListResolver } from './features/shopping-list/resolvers/shopping-list.resolver';
 
 export const routes: Routes = [
   {
@@ -137,6 +139,12 @@ export const routes: Routes = [
               schedule: scheduleResolver,
               meals: mealSelectResolver,
             },
+          },
+          {
+            path: 'shopping-list',
+            component: ShoppingListComponent,
+            title: 'Shopping List',
+            resolve: { shoppingItems: shoppingListResolver },
           },
         ],
         canActivateChild: [authGuard],

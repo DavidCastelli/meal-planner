@@ -1,0 +1,57 @@
+<div
+  class="shopping-list-container"
+  [@slide]="(isSidebarOpen$ | async) ? 'right' : 'left'"
+>
+  <section class="shopping-list">
+    <h1>Shopping List</h1>
+    <div class="shopping-list-actions">
+      <button
+        class="shopping-list-generate-button"
+        type="button"
+        (click)="generate()"
+      >
+        Generate
+      </button>
+      <button class="shopping-list-create-button" type="button" (click)="startCreate()">Create</button>
+      <button
+        class="shopping-list-clear-checked-button"
+        type="button"
+        (click)="clear('checked')"
+      >
+        Clear Checked
+      </button>
+      <button
+        class="shopping-list-clear-all-button"
+        type="button"
+        (click)="clear('all')"
+      >
+        Clear All
+      </button>
+    </div>
+    <div class="shopping-list-content-container">
+      <div class="shopping-list-heading">
+        <span>Name</span>
+        <span>Measurement</span>
+        <span>Price</span>
+        <span>Quantity</span>
+        <span>Total</span>
+        <span>Checked</span>
+        <span>Locked</span>
+        <span>Total Cost: {{ total() }}</span>
+      </div>
+      @if (createMode) {
+        <app-create-shopping-list-item
+          (created)="created()"
+          (canceled)="cancelCreate()"
+        ></app-create-shopping-list-item>
+      }
+      @for (item of shoppingItems; track item.id) {
+        <app-shopping-list-item
+          [shoppingItem]="item"
+          (update)="update($event)"
+          (deleted)="delete($event)"
+        ></app-shopping-list-item>
+      }
+    </div>
+  </section>
+</div>

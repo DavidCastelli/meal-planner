@@ -1,0 +1,116 @@
+:host {
+  display: block;
+  background-color: rgb(23, 126, 137);
+  overflow: hidden;
+  min-height: 95svh;
+}
+
+.shopping-list-container {
+  position: relative;
+  height: 95svh;
+}
+
+.shopping-list {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  padding: 10px;
+  height: 100%;
+}
+
+.shopping-list > h1 {
+  color: rgb(250, 121, 33);
+  text-shadow: 1px 1px 1px rgb(19, 27, 35);
+  margin-top: 0;
+}
+
+.shopping-list-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-auto-rows: minmax(25px, auto);
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.shopping-list-content-container {
+  background-color: rgb(61, 59, 142);
+  border: 3px solid rgb(19, 27, 35);
+  height: 80svh;
+  overflow: auto;
+  overscroll-behavior-y: none;
+}
+
+.shopping-list-heading {
+  background-color: rgb(179, 181, 187);
+  border-bottom: 3px solid rgb(19, 27, 35);
+  display: grid;
+  grid-template-columns: 210px 250px 250px 100px 125px 75px 75px 150px;
+  grid-auto-rows: minmax(25px, 1fr);
+  gap: 10px;
+  padding: 10px;
+  text-align: center;
+}
+
+.shopping-list-generate-button {
+  background-color: rgb(3, 252, 186);
+  border: 3px solid;
+  color: rgb(19, 27, 35);
+  border-radius: 15px;
+  font-size: 1.2em;
+  font-weight: bold;
+  padding: 5px 15px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.shopping-list-generate-button:hover {
+  background-color: rgb(3, 252, 186, 0.8);
+}
+
+.shopping-list-create-button {
+  background-color: rgb(34, 116, 165);
+  border: 3px solid;
+  color: rgb(19, 27, 35);
+  border-radius: 15px;
+  font-size: 1.2em;
+  font-weight: bold;
+  padding: 5px 15px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.shopping-list-create-button:hover {
+  background-color: rgb(34, 116, 165, 0.6);
+}
+
+.shopping-list-clear-checked-button {
+  background-color: rgb(250, 121, 33);
+  border: 3px solid;
+  color: rgb(19, 27, 35);
+  border-radius: 15px;
+  font-size: 1.2em;
+  font-weight: bold;
+  padding: 5px 15px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.shopping-list-clear-checked-button:hover {
+  background-color: rgb(250, 121, 33, 0.8);
+}
+
+.shopping-list-clear-all-button {
+  background-color: rgb(255, 15, 35);
+  border: 3px solid;
+  color: rgb(19, 27, 35);
+  border-radius: 15px;
+  font-size: 1.2em;
+  font-weight: bold;
+  padding: 5px 25px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.shopping-list-clear-all-button:hover {
+  background-color: rgb(255, 15, 35, 0.8);
+}

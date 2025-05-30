@@ -153,6 +153,7 @@ public sealed class UpdateShoppingItemHandler
 
         if (authorizationResult.Succeeded)
         {
+            newShoppingItem.IsGenerated = oldShoppingItem.IsGenerated;
             _dbContext.Entry(oldShoppingItem).CurrentValues.SetValues(newShoppingItem);
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
