@@ -1,1 +1,19 @@
-<p>home works!</p>
+<div class="home-container" [@slide]="(isSidebarOpen$ | async) ? 'right' : 'left'">
+  <section class="home">
+    <h1>Home</h1>
+    <div class="home-content">
+      <div class="home-recipes" (click)="navigateRecipes()">
+        <h2>Recipes</h2>
+      </div>
+      <div class="home-meals" (click)="navigateMeals()">
+        <h2>Meals</h2>
+      </div>
+      <div class="home-schedule" (click)="navigateSchedule()">
+        <h2>Schedule</h2>
+      </div>
+      <div class="home-shopping-list" (click)="navigateShoppingList()">
+        <h2>Shopping List</h2>
+      </div>
+    </div>
+  </section>
+</div>
