@@ -14,7 +14,6 @@ import {
 import { CreateShoppingItemRequest } from '../../../../models/create-shopping-item-request.model';
 import { ShoppingListService } from '../../../../shopping-list.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { Subscription } from 'rxjs';
 
 interface CreateShoppingItemForm {
@@ -40,8 +39,8 @@ export class CreateShoppingListItemComponent {
   public isSubmitting = false;
   public readonly priceRegEx = new RegExp(/^[0-9]{1,10}(\.[0-9]{0,2})?$/);
 
-  @Output() canceled: EventEmitter<void> = new EventEmitter();
-  @Output() created: EventEmitter<void> = new EventEmitter();
+  @Output() canceled = new EventEmitter();
+  @Output() created = new EventEmitter();
 
   createShoppingItemForm: FormGroup<CreateShoppingItemForm> =
     this.formBuilder.nonNullable.group({

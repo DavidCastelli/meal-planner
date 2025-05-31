@@ -51,15 +51,15 @@ export class ShoppingListItemComponent implements OnInit {
 
   @Input({ required: true }) shoppingItem!: GetShoppingItemsDto;
 
-  @Output() update: EventEmitter<UpdateShoppingItemRequest> =
-    new EventEmitter();
-  @Output() deleted: EventEmitter<number> = new EventEmitter();
+  @Output() update = new EventEmitter();
+  @Output() deleted = new EventEmitter();
 
   @HostListener('click', ['$event'])
   selectShoppingItem(event: Event) {
     if (
       event.target instanceof HTMLButtonElement ||
-      event.target instanceof HTMLInputElement) {
+      event.target instanceof HTMLInputElement
+    ) {
       return;
     }
 

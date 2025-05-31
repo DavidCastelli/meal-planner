@@ -1,4 +1,8 @@
-<form class="create-shopping-list-item" [formGroup]="createShoppingItemForm" (ngSubmit)="submit()">
+<form
+  class="create-shopping-list-item"
+  [formGroup]="createShoppingItemForm"
+  (ngSubmit)="submit()"
+>
   <div>
     <input
       type="text"
@@ -11,7 +15,13 @@
   <div>
     @if (measurement) {
       <div>
-        <button class="remove-button" type="button" (click)="removeMeasurement()">-</button>
+        <button
+          class="remove-button"
+          type="button"
+          (click)="removeMeasurement()"
+        >
+          -
+        </button>
         <input
           type="text"
           formControlName="measurement"
@@ -21,13 +31,17 @@
         />
       </div>
     } @else {
-      <button class="add-button" type="button" (click)="addMeasurement()">+</button>
+      <button class="add-button" type="button" (click)="addMeasurement()">
+        +
+      </button>
     }
   </div>
   <div>
     @if (price) {
       <div>
-        <button class="remove-button" type="button" (click)="removePrice()">-</button>
+        <button class="remove-button" type="button" (click)="removePrice()">
+          -
+        </button>
         <input
           type="text"
           inputmode="numeric"
@@ -45,7 +59,9 @@
   <div>
     @if (quantity) {
       <div>
-        <button class="remove-button" type="button" (click)="removeQuantity()">-</button>
+        <button class="remove-button" type="button" (click)="removeQuantity()">
+          -
+        </button>
         <input
           type="number"
           formControlName="quantity"
@@ -55,11 +71,15 @@
         />
       </div>
     } @else {
-      <button class="add-button" type="button" (click)="addQuantity()">+</button>
+      <button class="add-button" type="button" (click)="addQuantity()">
+        +
+      </button>
     }
   </div>
   <div class="actions">
     <button class="create-button" type="submit">Create</button>
-    <button class="cancel-button" type="button" (click)="cancel()">Cancel</button>
+    <button class="cancel-button" type="button" (click)="cancel()">
+      Cancel
+    </button>
   </div>
 </form>

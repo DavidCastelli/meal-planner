@@ -1,19 +1,22 @@
-<div class="home-container" [@slide]="(isSidebarOpen$ | async) ? 'right' : 'left'">
+<div
+  class="home-container"
+  [@slide]="(isSidebarOpen$ | async) ? 'right' : 'left'"
+>
   <section class="home">
     <h1>Home</h1>
     <div class="home-content">
-      <div class="home-recipes" (click)="navigateRecipes()">
+      <a class="home-recipes" routerLink="/manage/recipes">
         <h2>Recipes</h2>
-      </div>
-      <div class="home-meals" (click)="navigateMeals()">
+      </a>
+      <a class="home-meals" routerLink="/manage/meals">
         <h2>Meals</h2>
-      </div>
-      <div class="home-schedule" (click)="navigateSchedule()">
+      </a>
+      <a class="home-schedule" routerLink="/schedule">
         <h2>Schedule</h2>
-      </div>
-      <div class="home-shopping-list" (click)="navigateShoppingList()">
+      </a>
+      <a class="home-shopping-list" routerLink="/shopping-list">
         <h2>Shopping List</h2>
-      </div>
+      </a>
     </div>
   </section>
 </div>

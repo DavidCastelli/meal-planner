@@ -21,7 +21,13 @@
     @if (measurement) {
       <div>
         @if (editMode) {
-          <button class="remove-button" type="button" (click)="removeMeasurement()">-</button>
+          <button
+            class="remove-button"
+            type="button"
+            (click)="removeMeasurement()"
+          >
+            -
+          </button>
         }
         <input
           class="text-input-edit-mode-off"
@@ -34,14 +40,18 @@
         />
       </div>
     } @else if (editMode) {
-      <button class="add-button" type="button" (click)="addMeasurement()">+</button>
+      <button class="add-button" type="button" (click)="addMeasurement()">
+        +
+      </button>
     }
   </div>
   <div>
     @if (price) {
       <div>
         @if (editMode) {
-          <button class="remove-button" type="button" (click)="removePrice()">-</button>
+          <button class="remove-button" type="button" (click)="removePrice()">
+            -
+          </button>
         }
         <input
           class="text-input-edit-mode-off"
@@ -63,7 +73,13 @@
     @if (quantity) {
       <div>
         @if (editMode) {
-          <button class="remove-button" type="button" (click)="removeQuantity()">-</button>
+          <button
+            class="remove-button"
+            type="button"
+            (click)="removeQuantity()"
+          >
+            -
+          </button>
         }
         <input
           class="number-input-edit-mode-off"
@@ -76,14 +92,14 @@
         />
       </div>
     } @else if (editMode) {
-      <button class="add-button" type="button" (click)="addQuantity()">+</button>
+      <button class="add-button" type="button" (click)="addQuantity()">
+        +
+      </button>
     }
   </div>
   <div>
     @if (shoppingItem.price) {
-      <span
-        >{{ shoppingItem.price * (shoppingItem.quantity ?? 1) }}</span
-      >
+      <span>{{ shoppingItem.price * (shoppingItem.quantity ?? 1) }}</span>
     }
   </div>
   <div>
